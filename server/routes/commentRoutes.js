@@ -1,5 +1,5 @@
 const express = require("express");
-const ctrl    = require("../controllers/comment.controller");
+const ctrl = require("../controllers/comment.controller");
 const { protect, optionalAuth } = require("../middlewares/auth");
 
 // ── Nested router ──────────────────────────────────────────────────────────────
@@ -14,9 +14,9 @@ nestedRouter.post("/",    protect,      ctrl.createComment);
 // Mounted at /comments
 const standaloneRouter = express.Router();
 
-standaloneRouter.patch( "/:id",        protect, ctrl.updateComment);
-standaloneRouter.delete("/:id",        protect, ctrl.deleteComment);
-standaloneRouter.post( "/:id/like",    protect, ctrl.likeComment);
-standaloneRouter.post( "/:id/report",  protect, ctrl.reportComment);
+standaloneRouter.patch( "/:id", protect, ctrl.updateComment);
+standaloneRouter.delete("/:id", protect, ctrl.deleteComment);
+standaloneRouter.post( "/:id/like", protect, ctrl.likeComment);
+standaloneRouter.post( "/:id/report", protect, ctrl.reportComment);
 
 module.exports = { nestedRouter, standaloneRouter };

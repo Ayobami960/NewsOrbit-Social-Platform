@@ -86,8 +86,8 @@ exports.getComments = async (req, res, next) => {
     // Build filter for every comment on this resource
     const filter = { isDeleted: false };
     if (req.params.articleId) filter.article = req.params.articleId;
-    if (req.params.blogId)    filter.blog     = req.params.blogId;
-    if (!isAdmin)             filter.status   = "approved";
+    if (req.params.blogId) filter.blog     = req.params.blogId;
+    if (!isAdmin) filter.status   = "approved";
 
     const { page = 1, limit = 30 } = req.query;
 

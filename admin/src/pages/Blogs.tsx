@@ -15,7 +15,7 @@ export default function Blogs() {
   const [page,   setPage]   = useState(1);
   const [search, setSearch] = useState("");
 
-  const { data, isLoading }                           = useAdminBlogs({ page, search });
+  const { data, isLoading } = useAdminBlogs({ page, search });
   const { mutate: deleteBlog, isPending: isDeleting } = useAdminDeleteBlog();
 
   const blogs      = data?.blogs      ?? [];
@@ -37,7 +37,7 @@ export default function Blogs() {
           </div>
           <h1 className="text-xl font-bold text-zinc-100 tracking-tight">Community Blogs</h1>
         </div>
-        <p className="text-sm text-zinc-500 ml-[52px]">
+        <p className="text-sm text-zinc-500 ml-13">
           Blogs publish instantly. Remove content that violates community guidelines.
         </p>
       </div>
@@ -116,7 +116,7 @@ export default function Blogs() {
                       className="group transition-colors hover:bg-zinc-800/25"
                     >
                       {/* Post */}
-                      <td className="px-4 py-4 max-w-[280px]">
+                      <td className="px-4 py-4 max-w-70">
                         <div className="flex items-start gap-3">
                           {b.featuredImage?.url ? (
                             <img
@@ -152,7 +152,7 @@ export default function Blogs() {
 
                       {/* Tags */}
                       <td className="px-4 py-4">
-                        <div className="flex flex-wrap gap-1 max-w-[120px]">
+                        <div className="flex flex-wrap gap-1 max-w-30">
                           {(b.tags ?? []).slice(0, 3).map(t => (
                             <span
                               key={t}
@@ -192,7 +192,7 @@ export default function Blogs() {
                       </td>
 
                       {/* Delete */}
-                      <td className="px-4 py-4">
+                      {/* <td className="px-4 py-4">
                         <button
                           disabled={isDeleting}
                           onClick={() => handleDelete(b._id, b.title)}
@@ -201,7 +201,7 @@ export default function Blogs() {
                           <Trash2 size={11} />
                           Delete
                         </button>
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
@@ -263,14 +263,14 @@ export default function Blogs() {
                           <span className="text-[10px] text-zinc-600">{b.readTime}m read</span>
                         </div>
 
-                        <button
+                        {/* <button
                           disabled={isDeleting}
                           onClick={() => handleDelete(b._id, b.title)}
                           className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-red-400 border border-red-500/20 bg-red-500/8 hover:bg-red-500/20 hover:text-red-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           <Trash2 size={10} />
                           Delete
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   </div>

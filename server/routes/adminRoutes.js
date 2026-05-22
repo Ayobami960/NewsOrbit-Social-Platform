@@ -31,6 +31,8 @@ router.get("/imagekit-auth", restrictTo("admin", "super_admin"), admin.getImageK
 router.get("/overview",  protect, admin.getOverview);
 router.get("/top-articles",  protect, admin.getTopArticles);
 router.get("/articles-by-day", protect, admin.getArticlesByDay);
+// router.get ("/my-stats",  protect, restrictTo("super_admin","admin","writer"),  getMyArticleStats);
+
 
 // These two are super_admin-only — no role-based scoping inside the controller
 router.get("/activity-logs",   restrictTo("super_admin"), admin.getActivityLogs);

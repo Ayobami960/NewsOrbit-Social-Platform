@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useBroadcastPush } from "@/hooks/useBlogs";
-import Layout from "@/components/layout/Layout";
-import { Card, StatCard, FormGroup, Input, Textarea, Btn, SectionHead } from "@/components/ui";
-import type { PushBroadcastPayload } from "@/types";
+import { useBroadcastPush } from "../hooks/useBlogs";
+import Layout from "../components/layout/Layout";
+import { Card, StatCard, FormGroup, Input, Textarea, Btn, SectionHead } from "../components/ui";
+import type { PushBroadcastPayload } from "../types";
 import { Bell, Send, Smartphone, CheckCircle2 } from "lucide-react";
 
 const HISTORY = [

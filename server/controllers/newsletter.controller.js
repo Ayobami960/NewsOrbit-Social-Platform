@@ -61,3 +61,6 @@ exports.sendBroadcast = async (req, res, next) => {
     return sendSuccess(res, { sent:emails.length }, `Sent to ${emails.length} subscribers.`);
   } catch (err) { next(err); }
 };
+
+// Backwards-compatible alias: some routes call `sendNewsletterBroadcast`
+exports.sendNewsletterBroadcast = exports.sendBroadcast;

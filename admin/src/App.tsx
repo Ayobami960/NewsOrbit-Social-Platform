@@ -12,6 +12,8 @@ import Users from "./pages/Users";
 import Comments from "./pages/Comments";
 import Blogs from "./pages/Blogs";
 import Newsletter from "./pages/Newsletter";
+import Push from "./pages/Push";
+import ActivityLog from "./pages/ActivityLog";
 
 const ALL_ROLES:  Role[] = ["super_admin", "admin", "writer"];
 const ALL_WRITER: Role[] = ["admin","writer"];
@@ -55,12 +57,12 @@ export default function AppRouter() {
       <Route path="/blogs"      element={<ProtectedRoute roles={ADMIN_UP}><Blogs /></ProtectedRoute>} />
       <Route path="/comments"   element={<ProtectedRoute roles={ADMIN_UP}><Comments /></ProtectedRoute>} />
       <Route path="/newsletter" element={<ProtectedRoute roles={ALL_WRITER}><Newsletter /></ProtectedRoute>} />
-      {/* <Route path="/push"       element={<ProtectedRoute roles={ADMIN_UP}><Push /></ProtectedRoute>} /> */}
+      <Route path="/push"       element={<ProtectedRoute roles={ALL_WRITER}><Push /></ProtectedRoute>} />
       {/* <Route path="/settings"   element={<ProtectedRoute roles={ADMIN_UP}><Settings /></ProtectedRoute>} /> */}
      
 
       {/* ── Super Admin only ─────────────────────────────────────────────── */}
-      {/* <Route path="/activity" element={<ProtectedRoute roles={["super_admin"]}><ActivityLog /></ProtectedRoute>} /> */}
+      <Route path="/activity" element={<ProtectedRoute roles={["super_admin"]}><ActivityLog /></ProtectedRoute>} />
 
       {/* ── Fallback ─────────────────────────────────────────────────────── */}
       <Route path="*" element={<Navigate to="/" replace />} />

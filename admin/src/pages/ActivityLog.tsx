@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useActivityLogs } from "@/hooks/useAnalytics";
-import Layout from "@/components/layout/Layout";
-import { Card, Table, Th, Td, Badge, Select, Spinner, Empty, Pagination, Avatar } from "@/components/ui";
-import type { ActivityFilters, ActivitySeverity, ActivityAction } from "@/types";
-import { formatDate } from "@/lib/utils";
+import { useActivityLogs } from "../hooks/useAnalytics";
+import Layout from "../components/layout/Layout";
+import { Card, Table, Th, Td, Badge, Select, Spinner, Empty, Pagination, Avatar } from "../components/ui";
+import type { ActivityFilters, ActivitySeverity, ActivityAction } from "../types";
+import { formatDate } from "../lib/utils";
 import { Shield, AlertTriangle } from "lucide-react";
 
 const SEVERITY_OPTIONS: ActivitySeverity[] = ["info", "warning", "critical"];
@@ -31,12 +31,12 @@ export default function ActivityLog() {
           <span className="text-sm text-zinc-500 flex-1">
             {total.toLocaleString()} total entries
           </span>
-          <Select className="w-[140px]" value={filters.severity ?? ""}
+          <Select className="w-35" value={filters.severity ?? ""}
             onChange={e => setFilters(f => ({ ...f, severity: e.target.value as ActivitySeverity | "", page: 1 }))}>
             <option value="">All Severity</option>
             {SEVERITY_OPTIONS.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
           </Select>
-          <Select className="w-[170px]" value={String(filters.isSuspicious ?? "")}
+          <Select className="w-42.5" value={String(filters.isSuspicious ?? "")}
             onChange={e => {
               const v = e.target.value;
               setFilters(f => ({ ...f, isSuspicious: v === "" ? "" : v === "true", page: 1 }));
@@ -45,7 +45,7 @@ export default function ActivityLog() {
             <option value="true">Suspicious Only</option>
             <option value="false">Normal Only</option>
           </Select>
-          <Select className="w-[200px]" value={filters.action ?? ""}
+          <Select className="w-50" value={filters.action ?? ""}
             onChange={e => setFilters(f => ({ ...f, action: e.target.value as ActivityAction | "", page: 1 }))}>
             <option value="">All Actions</option>
             {ACTION_OPTIONS.map(a => <option key={a} value={a}>{a.replace(/_/g, " ")}</option>)}

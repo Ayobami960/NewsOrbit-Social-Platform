@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const { protect } = require("../middlewares/auth");
+const { protect, restrictTo } = require("../middlewares/auth");
 
 const {
   createArticle,
@@ -45,12 +45,12 @@ const uploadForUpdate = multer(baseOptions).fields([
 // ─── Public ───────────────────────────────────────────────────────────────────
 router.get("/", getArticles);
 router.get("/breaking", getBreakingNews);
-router.get("/slug/:slug", getArticle);
+router.get("/:slug", getArticle);
 
 // ─── Protected ────────────────────────────────────────────────────────────────
 router.use(protect);
 
-router.get("/my/stats", getMyArticleStats);
+router.get("/my-stats", protect, restrictTo("super_admin","admin","writer"), getMyArticleStats);
 router.get("/:id", getArticleById);
 
 // validate() was previously passed the controller function as its argument —

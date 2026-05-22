@@ -263,8 +263,8 @@ function SuperAdminAnalytics() {
       {/* Stats row 2 */}
       <div className="grid grid-cols-2 lg:grid-cols-4  gap-4">
         <StatCard label="Newsletter Subs"   value={ov?.newsletter.subscribers ?? 0}  accent="bg-cyan-500" />
-        <StatCard label="Pending Comments"  value={ov?.comments.pending ?? 0}         accent="bg-amber-500"
-          sub={`${ov?.comments.total ?? 0} total`} />
+        {/* <StatCard label="Pending Comments"  value={ov?.comments.pending ?? 0}         accent="bg-amber-500"
+          sub={`${ov?.comments.total ?? 0} total`} /> */}
         <StatCard label="Suspicious (30d)"  value={ov?.security.suspiciousLast30Days ?? 0}
           accent="bg-rose-600" subColor="text-rose-400"
           sub={ov?.security.suspiciousLast30Days ?? 0 > 20 ? "⚠ High activity" : "Normal"} />

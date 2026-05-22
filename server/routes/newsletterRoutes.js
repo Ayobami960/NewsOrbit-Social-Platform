@@ -6,6 +6,10 @@ const { protect, restrictTo } = require("../middlewares/auth");
 router.post("/subscribe",  ctrl.subscribe);
 router.get ("/unsubscribe", ctrl.unsubscribe);
 
-// Admin
+// Write access required
+router.get ("/subscribers", protect, restrictTo("writer"), ctrl.getSubscribers);
+router.post("/send", protect, restrictTo("writer"), ctrl.sendBroadcast);
+
+
 
 module.exports = router;

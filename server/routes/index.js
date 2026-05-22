@@ -6,6 +6,12 @@ const adminRoutes    = require("./adminRoutes");
 const blogRoutes     = require("./blogRoutes");
 const articleRoutes  = require("./articleRoutes");
 const categoryRoutes = require("./categoryRoutes");
+const newsletterRoutes = require("./newsletterRoutes");
+const pushRoutes = require("./pushRoutes");
+const followRoutes = require("./followRoutes");
+const notificationRoutes = require("./notificationRoutes");
+
+
 
 const { nestedRouter, standaloneRouter } = require("./commentRoutes");
 
@@ -18,6 +24,11 @@ router.use("/admin",      adminRoutes);
 router.use("/blog",      blogRoutes);
 router.use("/articles",   articleRoutes);
 router.use("/categories", categoryRoutes);
+router.use("/newsletter", newsletterRoutes);
+router.use("/push", pushRoutes);
+router.use("/follow", followRoutes);
+router.use("/notifications", notificationRoutes);
+
 
 // ── Comment routes ─────────────────────────────────────────────────────────────
 // Nested  → /api/v1/articles/:articleId/comments

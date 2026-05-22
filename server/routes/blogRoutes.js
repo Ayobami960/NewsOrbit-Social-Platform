@@ -2,7 +2,7 @@ const express = require("express");
 const router  = express.Router();
 const multer  = require("multer");
 
-const { protect, optionalAuth } = require("../middlewares/auth");
+const { protect, restrictTo, optionalAuth } = require("../middlewares/auth");
 const {
   getBlogs,
   getBlogBySlug,
@@ -46,7 +46,7 @@ router.patch(
   updateBlog
 );
 
-router.delete("/:id",      protect, deleteBlog);
+router.delete("/:id",      protect, restrictTo("user"), deleteBlog);
 router.post("/:id/like",   protect, likeBlog);
 
 module.exports = router;
