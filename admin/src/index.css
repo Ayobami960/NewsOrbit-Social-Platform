@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: halloween --default;
+}
+
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #52525b;
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap:focus {
+  outline: none;
+}
+
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+}
+
+.tiptap iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 8px;
+  border: 1px solid #27272a;
+}
+
+.tiptap mark {
+  background: #713f12;
+  color: #fef08a;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.tiptap pre {
+  background: #18181b;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.tiptap pre code {
+  background: none;
+  color: #f4f4f5;
+  font-size: 0.875rem;
+}
+
+.tiptap blockquote {
+  border-left: 3px solid #dc2626;
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.tiptap hr {
+  border-color: #3f3f46;
+  margin: 1.5rem 0;
+}
+
+.tiptap a {
+  color: #f87171;
+  text-decoration: none;
+}
+
+.tiptap a:hover {
+  text-decoration: underline;
+}
+
+.tiptap h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #f4f4f5;
+  margin: 1.5rem 0 .75rem;
+}
+
+.tiptap h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f4f4f5;
+  margin: 1.25rem 0 .5rem;
+}
+
+.tiptap h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f4f4f5;
+  margin: 1rem 0 .5rem;
+}
+
+.tiptap p {
+  color: #d4d4d8;
+  line-height: 1.75;
+  margin: .5rem 0;
+}
+
+.tiptap ul,
+.tiptap ol {
+  color: #d4d4d8;
+  padding-left: 1.5rem;
+}
+
+.tiptap li {
+  margin: .25rem 0;
+}
+
+.tiptap code {
+  background: #27272a;
+  color: #fca5a5;
+  padding: .1em .3em;
+  border-radius: 3px;
+  font-size: .875em;
+}
+
+.sidebar::-webkit-scrollbar,
+aside.overflow-y-auto::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+aside.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+aside.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 0px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+aside.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* Firefox */
+.sidebar,
+aside.overflow-y-auto {
+  scrollbar-width: none;
+  scrollbar-color: #27272a transparent;
+}
