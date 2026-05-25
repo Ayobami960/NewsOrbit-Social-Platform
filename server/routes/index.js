@@ -21,22 +21,25 @@ const router = express.Router();
 router.use("/auth",       authRoutes);
 router.use("/users",      userRoutes);
 router.use("/admin",      adminRoutes);
-router.use("/blog",      blogRoutes);
-router.use("/articles",   articleRoutes);
-router.use("/categories", categoryRoutes);
-router.use("/newsletter", newsletterRoutes);
-router.use("/push", pushRoutes);
-router.use("/follow", followRoutes);
-router.use("/notifications", notificationRoutes);
-
 
 // ── Comment routes ─────────────────────────────────────────────────────────────
 // Nested  → /api/v1/articles/:articleId/comments
 //         → /api/v1/blogs/:blogId/comments
+//         → /api/v1/blog/:blogId/comments
 // Standalone → /api/v1/comments/:id  (edit / delete / like / report)
 router.use("/articles/:articleId/comments", nestedRouter);
 router.use("/blogs/:blogId/comments",       nestedRouter);
+router.use("/blog/:blogId/comments",        nestedRouter);
 router.use("/comments",                     standaloneRouter);
+
+router.use("/blog",      blogRoutes);
+router.use("/blogs",      blogRoutes);
+router.use("/articles",   articleRoutes);
+router.use("/categories", categoryRoutes);
+router.use("/newsletter", newsletterRoutes);
+router.use("/push", pushRoutes);
+router.use("/user/follow", followRoutes);
+router.use("/notifications", notificationRoutes);
 
 // ── 404 fallback ───────────────────────────────────────────────────────────────
 router.use((req, res) => {

@@ -19,16 +19,45 @@ exports.getMe = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+// ── GET /api/v1/users/writers ─────────────────────────────────────────────────
+exports.getWriters = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 24, search } = req.query;
+    const filter = { role: "writer", isActive: true };
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { bio:  { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+    const [users, total] = await Promise.all([
+      User.find(filter)
+        .select("name avatar bio role socialLinks stats followersCount followingCount isVerified createdAt")
+        .sort("-createdAt")
+        .skip(skip)
+        .limit(parseInt(limit, 10))
+        .lean(),
+      User.countDocuments(filter),
+    ]);
+
+    return sendSuccess(res, {
+      users,
+      pagination: { page: +page, limit: +limit, total },
+    });
+  } catch (err) { next(err); }
+};
+
 // ── GET /api/v1/users/public/:id ─────────────────────────────────────────────
 exports.getPublicProfile = async (req, res, next) => {
   try {
-    // Include isActive in the query so we can check it, but exclude from response
     const user = await User.findById(req.params.id)
       .select("name avatar bio role socialLinks stats followersCount followingCount createdAt isVerified isActive");
 
     if (!user || !user.isActive) return sendNotFound(res, "User not found.");
 
-    // Strip isActive from what we send — it's internal
     const userObj = user.toObject();
     delete userObj.isActive;
 
@@ -37,7 +66,7 @@ exports.getPublicProfile = async (req, res, next) => {
 };
 
 // ── PATCH /api/v1/users/me ───────────────────────────────────────────────────
- exports.updateProfile = async (req, res, next) => {
+exports.updateProfile = async (req, res, next) => {
   try {
     const { name, bio, socialLinks } = req.body;
 
@@ -62,17 +91,14 @@ exports.getPublicProfile = async (req, res, next) => {
       }
     }
 
-    // Handle avatar upload
     if (req.files?.avatar?.[0]) {
       const file = req.files.avatar[0];
 
-      // Delete old avatar from ImageKit before uploading new one
       const existing = await User.findById(req.user._id).select("avatar");
       if (existing?.avatar?.fileId) {
         await deleteFromImageKit(existing.avatar.fileId).catch(() => {});
       }
 
-      // ✅ Pass the full file object, options as second argument
       const uploaded = await uploadToImageKit(file, {
         folder: "/avatars",
         fileNamePrefix: sanitiseFilename(file.originalname.replace(/\.[^/.]+$/, "")),

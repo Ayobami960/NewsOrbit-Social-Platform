@@ -5,10 +5,12 @@ const multer = require("multer");
 const { protect } = require("../middlewares/auth");
 const {
   getMe, // ← New: Full profile for logged-in user
+  getWriters,
   getPublicProfile,
   updateProfile,
   // getUser,
 } = require("../controllers/user.controller");
+const { getFollowStatus } = require("../controllers/follow.controller");
 
 // Multer Setup
 const upload = multer({
@@ -28,8 +30,12 @@ const upload = multer({
 // Full profile - for logged in user (after login, dashboard, etc.)
 router.get("/profile", protect, getMe);
 
+// Public writers listing - no auth required
+router.get("/writers", getWriters);
+
 // Public profile - no auth needed (for footer, author cards, profile page)
 router.get("/public/:id", getPublicProfile);
+router.get("/:id/follow-status", protect, getFollowStatus);
 // router.get("/profile", protect, getUser);
 // Update own profile
 router.patch(

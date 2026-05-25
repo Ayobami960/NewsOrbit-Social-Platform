@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { authFetch } from "../lib/apiFetch";
+import { queryKeys } from "../lib/queryKeys";
 import { useActivityLogs } from "../hooks/useAnalytics";
 import Layout from "../components/layout/Layout";
 import { Card, Table, Th, Td, Badge, Select, Spinner, Empty, Pagination, Avatar } from "../components/ui";
@@ -22,12 +25,35 @@ export default function ActivityLog() {
   const logs  = data?.logs  ?? [];
   const total = data?.total ?? 0;
 
+  const qc = useQueryClient();
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({
+    action: ACTION_OPTIONS[0], user: "", resource: "", resourceType: "", severity: SEVERITY_OPTIONS[0], isSuspicious: false, meta: "",
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (payload: any) => authFetch("/admin/activity-logs", { method: "POST", body: payload }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.analytics.activity(filters) as unknown as any });
+      setShowForm(false);
+      setForm({ action: ACTION_OPTIONS[0], user: "", resource: "", resourceType: "", severity: SEVERITY_OPTIONS[0], isSuspicious: false, meta: "" });
+    },
+    onError: (err: any) => alert(err?.message || "Failed to create log"),
+  });
+
   return (
     <Layout title="Activity Log">
       <Card>
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-zinc-800">
           <Shield size={15} className="text-zinc-600" />
+            <div className="ml-2">
+              <button
+                className="bg-zinc-700 text-xs px-2 py-1 rounded"
+                onClick={() => setShowForm(s => !s)}>
+                {showForm ? "Cancel" : "New Log"}
+              </button>
+            </div>
           <span className="text-sm text-zinc-500 flex-1">
             {total.toLocaleString()} total entries
           </span>
@@ -51,6 +77,59 @@ export default function ActivityLog() {
             {ACTION_OPTIONS.map(a => <option key={a} value={a}>{a.replace(/_/g, " ")}</option>)}
           </Select>
         </div>
+
+        {showForm && (
+          <div className="px-4 py-3 border-b border-zinc-800">
+            <div className="flex flex-wrap gap-2 items-center">
+              <Select value={form.action}
+                onChange={e => setForm(f => ({ ...f, action: e.target.value as ActivityAction }))}>
+                {ACTION_OPTIONS.map(a => <option key={a} value={a}>{a.replace(/_/g, " ")}</option>)}
+              </Select>
+
+              <input className="input" placeholder="User ID (optional)" value={form.user}
+                onChange={e => setForm(f => ({ ...f, user: e.target.value }))} />
+
+              <input className="input" placeholder="Resource ID" value={form.resource}
+                onChange={e => setForm(f => ({ ...f, resource: e.target.value }))} />
+
+              <Select value={form.severity}
+                onChange={e => setForm(f => ({ ...f, severity: e.target.value as ActivitySeverity }))}>
+                {SEVERITY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+              </Select>
+
+              <label className="inline-flex items-center gap-2 text-xs">
+                <input type="checkbox" checked={form.isSuspicious}
+                  onChange={e => setForm(f => ({ ...f, isSuspicious: e.target.checked }))} />
+                Suspicious
+              </label>
+
+              <textarea className="w-full mt-2 textarea" rows={3} placeholder='Meta as JSON, e.g. {"info":"x"}'
+                value={form.meta} onChange={e => setForm(f => ({ ...f, meta: e.target.value }))} />
+
+              <div>
+                <button className="btn-primary" disabled={createMutation.isPending}
+                  onClick={() => {
+                    let parsedMeta: any = undefined;
+                    if (form.meta) {
+                      try { parsedMeta = JSON.parse(form.meta); } catch { alert("Meta must be valid JSON"); return; }
+                    }
+                    const payload: any = {
+                      action: form.action,
+                      user: form.user || undefined,
+                      resource: form.resource || undefined,
+                      resourceType: form.resourceType || undefined,
+                      severity: form.severity,
+                      isSuspicious: form.isSuspicious,
+                      meta: parsedMeta,
+                    };
+                    createMutation.mutate(payload);
+                  }}>
+                  {createMutation.isPending ? "Logging..." : "Create Log"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {isLoading ? <Spinner /> : logs.length === 0 ? (
           <Empty message="No activity logs found" />

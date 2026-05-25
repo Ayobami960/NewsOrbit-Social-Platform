@@ -25,7 +25,10 @@ const createArticle = Joi.object({
   contentDelta: Joi.object().optional(),
   excerpt:      Joi.string().max(500).trim().allow("").optional(),
 
-  category: objectId.required(),
+  category: Joi.alternatives().try(
+    objectId,
+    Joi.string().trim().min(2).max(60)
+  ).required(),
 
   tags: Joi.array()
     .items(tagSchema)

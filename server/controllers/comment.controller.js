@@ -75,6 +75,18 @@ const buildTree = (flatComments) => {
   return roots;
 };
 
+/**
+ * Enrich comments with userLiked field for easier frontend handling.
+ * Recursively processes nested replies.
+ */
+const enrichCommentsWithUserLiked = (comments, userId) => {
+  return comments.map((comment) => ({
+    ...comment,
+    userLiked: userId ? comment.likedBy?.some(id => id.toString() === userId.toString()) : false,
+    replies: comment.replies ? enrichCommentsWithUserLiked(comment.replies, userId) : [],
+  }));
+};
+
 // ── Controllers ────────────────────────────────────────────────────────────────
 
 // GET /api/v1/articles/:articleId/comments
@@ -87,7 +99,17 @@ exports.getComments = async (req, res, next) => {
     const filter = { isDeleted: false };
     if (req.params.articleId) filter.article = req.params.articleId;
     if (req.params.blogId) filter.blog     = req.params.blogId;
-    if (!isAdmin) filter.status   = "approved";
+
+    if (!isAdmin) {
+      if (req.user) {
+        filter.$or = [
+          { status: "approved" },
+          { author: req.user._id },
+        ];
+      } else {
+        filter.status = "approved";
+      }
+    }
 
     const { page = 1, limit = 30 } = req.query;
 
@@ -99,7 +121,10 @@ exports.getComments = async (req, res, next) => {
       .lean();
 
     // Build the full nested tree
-    const roots = buildTree(allComments);
+    let roots = buildTree(allComments);
+
+    // Enrich comments with userLiked field
+    roots = enrichCommentsWithUserLiked(roots, req.user?._id);
 
     // Paginate at the root level only (replies travel with their parent)
     const total     = roots.length;
@@ -125,6 +150,14 @@ exports.createComment = async (req, res, next) => {
       parentComment = await Comment.findById(parent);
       if (!parentComment || parentComment.isDeleted)
         return sendError(res, "Parent comment not found.", 400);
+
+      if (type === "article") {
+        if (!parentComment.article || parentComment.article.toString() !== req.params.articleId)
+          return sendError(res, "Parent comment does not belong to this article.", 400);
+      } else if (type === "blog") {
+        if (!parentComment.blog || parentComment.blog.toString() !== req.params.blogId)
+          return sendError(res, "Parent comment does not belong to this post.", 400);
+      }
 
       const depth = await getReplyDepth(parentComment);
       if (depth >= MAX_REPLY_DEPTH)
@@ -186,8 +219,8 @@ exports.updateComment = async (req, res, next) => {
 // DELETE /api/v1/comments/:id
 exports.deleteComment = async (req, res, next) => {
   try {
-    const comment = await Comment.findByIdAndDelete(req.params.id);
-    if (!comment) return sendNotFound(res, "Comment not found.");
+    const comment = await Comment.findById(req.params.id);
+    if (!comment || comment.isDeleted) return sendNotFound(res, "Comment not found.");
 
     const isOwner = comment.author.toString() === req.user._id.toString();
     const isAdmin = ["admin", "super_admin"].includes(req.user.role);
@@ -208,9 +241,11 @@ exports.likeComment = async (req, res, next) => {
     const comment = await Comment.findById(req.params.id);
     if (!comment || comment.isDeleted) return sendNotFound(res, "Comment not found.");
 
-    const liked = comment.likedBy.includes(req.user._id);
+    const userIdStr = req.user._id.toString();
+    const liked = comment.likedBy.some(id => id.toString() === userIdStr);
+
     if (liked) {
-      comment.likedBy.pull(req.user._id);
+      comment.likedBy = comment.likedBy.filter(id => id.toString() !== userIdStr);
       comment.likes = Math.max(0, comment.likes - 1);
     } else {
       comment.likedBy.push(req.user._id);
@@ -218,7 +253,7 @@ exports.likeComment = async (req, res, next) => {
     }
 
     await comment.save();
-    return sendSuccess(res, { likes: comment.likes, liked: !liked });
+    return sendSuccess(res, { likes: comment.likes, userLiked: !liked });
   } catch (err) { next(err); }
 };
 

@@ -1,4 +1,5 @@
 const Article = require("../models/Article");
+const Category = require("../models/Category");
 const Tag = require("../models/Tags");
 const User = require("../models/User");
 
@@ -9,6 +10,24 @@ const { generateUniqueSlug, toSlug } = require("../utils/slug");
 const { sendSuccess, sendCreated, sendError, sendNotFound } = require("../utils/apiResponse");
 const { log } = require("../models/ActivityLog");
 const { notifyFollowersNewArticle, broadcastBreakingNews } = require("../utils/notification");
+
+const isObjectId = (value) => typeof value === "string" && /^[a-f\d]{24}$/i.test(value);
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const resolveCategoryId = async (categoryInput) => {
+  if (!categoryInput) return null;
+  if (isObjectId(categoryInput)) return categoryInput;
+
+  const normalized = categoryInput.trim().toLowerCase();
+  const category = await Category.findOne({
+    $or: [
+      { slug: normalized },
+      { name: { $regex: new RegExp(`^${escapeRegex(categoryInput)}$`, "i") } },
+    ],
+  }).select("_id").lean();
+
+  return category ? category._id : null;
+};
 
 // ====================== HELPER FUNCTIONS ======================
 
@@ -113,7 +132,16 @@ const getArticles = async (req, res, next) => {
     }
 
     if (status) filter.status = status;
-    if (category) filter.category = category;
+    if (category) {
+      const categoryId = await resolveCategoryId(category);
+      if (!categoryId) {
+        return sendSuccess(res, {
+          articles: [],
+          pagination: { page: +page, limit: +limit, total: 0, pages: 0 },
+        });
+      }
+      filter.category = categoryId;
+    }
     if (tag) filter.tags = tag;
     if (author) filter.author = author;
     if (search) filter.$text = { $search: search };
@@ -236,6 +264,12 @@ const createArticle = async (req, res, next) => {
 
     const body = { ...value };
     if (body.content) body.content = sanitiseRichText(body.content);
+
+    if (body.category) {
+      const categoryId = await resolveCategoryId(body.category);
+      if (!categoryId) return sendError(res, "Invalid category.", 400);
+      body.category = categoryId;
+    }
 
     const slug = await generateUniqueSlug(Article, body.title);
 
@@ -365,6 +399,12 @@ const updateArticle = async (req, res, next) => {
 
     const body = { ...value };
     if (body.content) body.content = sanitiseRichText(body.content);
+
+    if (body.category !== undefined) {
+      const categoryId = await resolveCategoryId(body.category);
+      if (!categoryId) return sendError(res, "Invalid category.", 400);
+      body.category = categoryId;
+    }
 
     // Process tags → ObjectIds
     let tagIds = undefined;
@@ -585,6 +625,21 @@ const deleteArticle = async (req, res, next) => {
 };
 
 
+// ====================== LIKE ARTICLE ======================
+const likeArticle = async (req, res, next) => {
+  try {
+    const article = await Article.findById(req.params.id);
+    if (!article) return sendNotFound(res, "Article not found.");
+
+    article.likes = (article.likes || 0) + 1;
+    await article.save();
+
+    return sendSuccess(res, { likes: article.likes }, "Article liked.");
+  } catch (err) {
+    next(err);
+  }
+};
+
 // ====================== REACT TO ARTICLE ======================
 const reactToArticle = async (req, res, next) => {
   try {
@@ -598,8 +653,6 @@ const reactToArticle = async (req, res, next) => {
 
     const current = article.reactions.get(reaction) || 0;
     article.reactions.set(reaction, current + 1);
-
-    if (reaction === "like") article.likes = (article.likes || 0) + 1;
 
     await article.save();
 
@@ -622,4 +675,5 @@ module.exports = {
   updateArticle,
   deleteArticle,
   reactToArticle,
+  likeArticle,
 };

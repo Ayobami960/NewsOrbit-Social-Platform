@@ -7,10 +7,10 @@ const { protect, optionalAuth } = require("../middlewares/auth");
 // mergeParams lets us read :articleId / :blogId inside the controller
 const nestedRouter = express.Router({ mergeParams: true });
 
-nestedRouter.get( "/",    optionalAuth, ctrl.getComments);
-nestedRouter.post("/",    protect,      ctrl.createComment);
+nestedRouter.get( "/", optionalAuth, ctrl.getComments);
+nestedRouter.post("/", protect,      ctrl.createComment);
 
-// ── Standalone router ──────────────────────────────────────────────────────────
+// ── Standalone router ──────────────────────────────────────────
 // Mounted at /comments
 const standaloneRouter = express.Router();
 

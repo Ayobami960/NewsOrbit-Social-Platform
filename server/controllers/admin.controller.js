@@ -444,3 +444,25 @@ exports.getUsersByRole = async (req, res, next) => {
 
 
 // Activitylog
+// Create an activity log entry (admin / super_admin)
+exports.createActivityLog = async (req, res, next) => {
+  try {
+    const { user, action, resource, resourceType, meta, severity, isSuspicious } = req.body;
+
+    if (!action) return sendError(res, "Action is required.", 400);
+
+    const entry = await ActivityLog.create({
+      user: user || req.user?._id,
+      action,
+      resource,
+      resourceType,
+      meta,
+      severity,
+      isSuspicious,
+      ip: req.ip,
+      userAgent: req.get("User-Agent"),
+    });
+
+    return sendCreated(res, { id: entry._id }, "Activity logged.");
+  } catch (err) { next(err); }
+};

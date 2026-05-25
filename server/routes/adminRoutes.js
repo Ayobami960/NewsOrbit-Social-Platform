@@ -36,6 +36,8 @@ router.get("/articles-by-day", protect, admin.getArticlesByDay);
 
 // These two are super_admin-only — no role-based scoping inside the controller
 router.get("/activity-logs",   restrictTo("super_admin"), admin.getActivityLogs);
+// Allow admins and super_admins to create activity log entries via API
+router.post("/activity-logs",  restrictTo("super_admin", "admin"), admin.createActivityLog);
 router.get("/users-by-role",   restrictTo("super_admin"), admin.getUsersByRole);
 
 module.exports = router;
