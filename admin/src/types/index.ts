@@ -72,6 +72,31 @@ export interface Avatar {
   fileId?: string;
 }
 
+
+// IMAGE UPLOAD 
+export interface UploadedImage {
+  url:           string;
+  fileId:        string;
+  thumbnailUrl?: string;
+  width?:        number;
+  height?:       number;
+}
+
+export interface ImageKitAuthResponse {
+  token:       string;
+  expire:      number;
+  signature:   string;
+  publicKey:   string;
+  urlEndpoint: string;
+}
+
+export interface UseImageUploadOptions {
+  folder?:    string;
+  maxSizeMB?: number;
+  onSuccess?: (image: UploadedImage) => void;
+  onError?:   (error: string) => void;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // USER
 // ─────────────────────────────────────────────────────────────────────────────

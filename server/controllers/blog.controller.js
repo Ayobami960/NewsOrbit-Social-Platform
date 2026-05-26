@@ -4,14 +4,14 @@ const { uploadToImageKit, deleteFromImageKit } = require("../lib/upload");
 const { generateUniqueSlug } = require("../utils/slug");
 const { sanitiseRichText, stripHtml } = require("../utils/sanitise");
 const { sanitiseFilename } = require("../middlewares/upload");
-const { log }  = require("../models/ActivityLog");
+const { log } = require("../models/ActivityLog");
 const {
   sendSuccess, sendCreated,
-  sendNotFound, sendForbidden,
+  sendNotFound, sendForbidden, sendError,
 } = require("../utils/apiResponse");
 
 // ─────────────────────────────────────────────
-// GET /api/v1/blogs
+// GET /api/v1/blog
 // ─────────────────────────────────────────────
 exports.getBlogs = async (req, res, next) => {
   try {
@@ -29,24 +29,19 @@ exports.getBlogs = async (req, res, next) => {
         .skip(skip)
         .limit(parseInt(limit))
         .populate("author", "name avatar")
-        .select("-content -likedBy"), // don't leak likedBy array
+        .select("-content -likedBy"),
       Blog.countDocuments(filter),
     ]);
 
     return sendSuccess(res, {
       blogs,
-      pagination: {
-        page:  +page,
-        limit: +limit,
-        total,
-        pages: Math.ceil(total / +limit),
-      },
+      pagination: { page: +page, limit: +limit, total, pages: Math.ceil(total / +limit) },
     });
   } catch (err) { next(err); }
 };
 
 // ─────────────────────────────────────────────
-// GET /api/v1/blogs/:slug
+// GET /api/v1/blog/:slug
 // ─────────────────────────────────────────────
 exports.getBlogBySlug = async (req, res, next) => {
   try {
@@ -55,14 +50,13 @@ exports.getBlogBySlug = async (req, res, next) => {
 
     if (!blog) return sendNotFound(res, "Blog not found.");
 
-    // Background view increment — don't await
     Blog.findByIdAndUpdate(blog._id, { $inc: { views: 1 } }).exec();
 
-    // Attach isLiked for authenticated requests
     const blogObj = blog.toObject();
-    delete blogObj.likedBy; // don't expose who liked
+    const likedBy = blogObj.likedBy || [];
+    delete blogObj.likedBy;
     blogObj.isLiked = req.user
-      ? blog.likedBy.some(id => id.toString() === req.user._id.toString())
+      ? likedBy.some(id => id.toString() === req.user._id.toString())
       : false;
 
     return sendSuccess(res, { blog: blogObj });
@@ -70,7 +64,7 @@ exports.getBlogBySlug = async (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────
-// GET /api/v1/blogs/mine
+// GET /api/v1/blog/mine
 // ─────────────────────────────────────────────
 exports.getMyBlogs = async (req, res, next) => {
   try {
@@ -82,7 +76,31 @@ exports.getMyBlogs = async (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────
-// POST /api/v1/blogs
+// GET /api/v1/blog/:id/likers  (owner / admin only)
+// ─────────────────────────────────────────────
+exports.getBlogLikers = async (req, res, next) => {
+  try {
+    const blog = await Blog.findById(req.params.id)
+      .populate("likedBy", "name avatar email")
+      .select("likedBy likes author");
+
+    if (!blog || blog.isDeleted) return sendNotFound(res, "Blog not found.");
+
+    const isOwner = blog.author.toString() === req.user._id.toString();
+    const isAdmin = ["super_admin", "admin"].includes(req.user.role);
+
+    if (!isOwner && !isAdmin) return sendForbidden(res, "Access denied.");
+
+    return sendSuccess(res, {
+      likes:  blog.likes,
+      likers: blog.likedBy,
+      total:  blog.likedBy.length,
+    });
+  } catch (err) { next(err); }
+};
+
+// ─────────────────────────────────────────────
+// POST /api/v1/blog
 // ─────────────────────────────────────────────
 exports.createBlog = async (req, res, next) => {
   try {
@@ -94,7 +112,6 @@ exports.createBlog = async (req, res, next) => {
     let featuredImage = null;
     const imageFile   = req.files?.featuredImage?.[0];
     if (imageFile) {
-      // ✅ Pass full file object + options
       const u = await uploadToImageKit(imageFile, {
         folder: "/blogs",
         fileNamePrefix: sanitiseFilename(imageFile.originalname.replace(/\.[^/.]+$/, "")),
@@ -124,11 +141,12 @@ exports.createBlog = async (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────
-// PATCH /api/v1/blogs/:id
+// PATCH /api/v1/blog/:id
 // ─────────────────────────────────────────────
 exports.updateBlog = async (req, res, next) => {
   try {
-    const blog = await Blog.findByIdAndUpdate(req.params.id);
+    // ✅ Fixed: was findByIdAndUpdate — must be findById to mutate and save
+    const blog = await Blog.findById(req.params.id);
     if (!blog || blog.isDeleted) return sendNotFound(res, "Blog not found.");
     if (blog.author.toString() !== req.user._id.toString())
       return sendForbidden(res, "Not your blog.");
@@ -142,22 +160,17 @@ exports.updateBlog = async (req, res, next) => {
 
     const imageFile = req.files?.featuredImage?.[0];
     if (imageFile) {
-      // ✅ Delete old image from ImageKit first
       if (blog.featuredImage?.fileId) {
         await deleteFromImageKit(blog.featuredImage.fileId).catch(() => {});
       }
-
-      // ✅ Pass full file object + options
       const u = await uploadToImageKit(imageFile, {
         folder: "/blogs",
         fileNamePrefix: sanitiseFilename(imageFile.originalname.replace(/\.[^/.]+$/, "")),
       });
-
-      // ✅ Update featuredImage in the document (saves to DB on blog.save())
       blog.featuredImage = { url: u.url, fileId: u.fileId };
     }
 
-    await blog.save(); // ✅ featuredImage change persisted here
+    await blog.save();
 
     log({ user: req.user._id, action: "blog_update", resource: blog._id.toString(), ip: req.ip });
 
@@ -166,7 +179,7 @@ exports.updateBlog = async (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────
-// DELETE /api/v1/blogs/:id
+// DELETE /api/v1/blog/:id
 // ─────────────────────────────────────────────
 exports.deleteBlog = async (req, res, next) => {
   try {
@@ -177,12 +190,10 @@ exports.deleteBlog = async (req, res, next) => {
     const isAdmin = ["super_admin", "admin"].includes(req.user.role);
     if (!isOwner && !isAdmin) return sendForbidden(res, "Not allowed.");
 
-    // Delete image from ImageKit
     if (blog.featuredImage?.fileId) {
       await deleteFromImageKit(blog.featuredImage.fileId).catch(() => {});
     }
 
-    // Hard delete from DB
     await Blog.findByIdAndDelete(req.params.id);
 
     await User.findByIdAndUpdate(blog.author, { $inc: { "stats.totalBlogs": -1 } });
@@ -194,7 +205,7 @@ exports.deleteBlog = async (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────
-// POST /api/v1/blogs/:id/like
+// POST /api/v1/blog/:id/like
 // ─────────────────────────────────────────────
 exports.likeBlog = async (req, res, next) => {
   try {
@@ -202,7 +213,6 @@ exports.likeBlog = async (req, res, next) => {
     if (!blog || blog.isDeleted) return sendNotFound(res, "Blog not found.");
 
     const userId      = req.user._id;
-    // .includes() fails on ObjectId arrays — use .some() with toString()
     const alreadyLiked = blog.likedBy.some(id => id.toString() === userId.toString());
 
     if (alreadyLiked) {

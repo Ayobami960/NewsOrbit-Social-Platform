@@ -10,7 +10,7 @@ interface ApiFetchOptions {
   tags?: string[];
 }
 
-// ── Core ──────────────────────────────────────────────────────────────────────
+// ── Core Fetch ───────────────────────────────────────────────────────────────
 
 async function apiFetchInner<T>(
   path: string,
@@ -20,18 +20,22 @@ async function apiFetchInner<T>(
   const { method = "GET", body, headers: extra = {} } = opts;
   const isFormData = body instanceof FormData;
 
-  const headers: Record<string, string> = {};
-  if (!isFormData) headers["Content-Type"] = "application/json";
-  Object.assign(headers, extra);
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const headers: Record<string, string> = { ...extra };
+
+  // Only set Content-Type if NOT FormData
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  } else {
+    console.warn(`⚠️ authFetch called to ${path} without token`);
+  }
 
   let serialised: BodyInit | undefined;
   if (body !== undefined) {
-    serialised = isFormData
-      ? body
-      : typeof body === "string"
-      ? body
-      : JSON.stringify(body);
+    serialised = isFormData ? body : typeof body === "string" ? body : JSON.stringify(body);
   }
 
   const fetchOpts: RequestInit = {
@@ -40,35 +44,39 @@ async function apiFetchInner<T>(
     credentials: "include",
     body: serialised,
   };
+
   if (opts.cache) fetchOpts.cache = opts.cache;
-  if (opts.tags)  fetchOpts.next  = { tags: opts.tags } as NextFetchRequestConfig;
+  if (opts.tags) fetchOpts.next = { tags: opts.tags } as any;
 
   let response: Response;
   try {
     response = await fetch(`${base}${path}`, fetchOpts);
   } catch {
-    throw new Error("Network error. Please check your connection.");
+    throw new Error("Network error. Please check your internet connection.");
   }
 
-  const ct = response.headers.get("content-type");
-  let data: ApiResponse<T>;
+  const contentType = response.headers.get("content-type");
+  let data: any;
+
   try {
-    if (ct?.includes("application/json")) {
-      data = (await response.json()) as ApiResponse<T>;
+    if (contentType?.includes("application/json")) {
+      data = await response.json();
     } else {
-      throw new Error("Unexpected server response.");
+      data = { message: await response.text() };
     }
   } catch {
     throw new Error("Failed to parse server response.");
   }
 
   if (!response.ok) {
-    throw new Error(typeof data?.message === "string" ? data.message : response.statusText);
+    const message = data?.message || response.statusText || "Request failed";
+    throw new Error(message);
   }
-  return data;
+
+  return data as ApiResponse<T>;
 }
 
-// ── Public fetch (no token) ───────────────────────────────────────────────────
+// ── Public API (No Auth) ─────────────────────────────────────────────────────
 
 export async function apiFetch<T = unknown>(
   path: string,
@@ -77,63 +85,82 @@ export async function apiFetch<T = unknown>(
   return apiFetchInner<T>(path, opts, null);
 }
 
-// ── Auth fetch (attaches stored token) ────────────────────────────────────────
+// ── Authenticated API ────────────────────────────────────────────────────────
 
 export async function authFetch<T = unknown>(
   path: string,
   opts: ApiFetchOptions = {}
 ): Promise<ApiResponse<T>> {
-  const token = getStoredToken();
+  let token = getStoredToken();
+
   try {
     return await apiFetchInner<T>(path, opts, token);
-  } catch (err) {
-    if (err instanceof Error && err.message.toLowerCase().includes("unauthorized")) {
-      const fresh = await silentRefresh();
-      if (fresh) return apiFetchInner<T>(path, opts, fresh);
+  } catch (err: any) {
+    // Try silent refresh only on auth errors
+    if (
+      err.message?.toLowerCase().includes("token") ||
+      err.message?.toLowerCase().includes("unauthorized") ||
+      err.message?.toLowerCase().includes("no token")
+    ) {
+      const freshToken = await silentRefresh();
+      if (freshToken) {
+        return apiFetchInner<T>(path, opts, freshToken);
+      }
     }
     throw err;
   }
 }
 
-// ── Token helpers (client-side only) ─────────────────────────────────────────
+// ── Token Management ─────────────────────────────────────────────────────────
 
-export const getStoredToken  = (): string | null =>
-  typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+export const getStoredToken = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("accessToken");
+};
 
-export const setStoredToken  = (t: string): void => {
-  if (typeof window !== "undefined") localStorage.setItem("accessToken", t);
+export const setStoredToken = (token: string): void => {
+  if (typeof window !== "undefined") localStorage.setItem("accessToken", token);
 };
 
 export const clearStoredToken = (): void => {
   if (typeof window !== "undefined") localStorage.removeItem("accessToken");
 };
 
-// ── Silent refresh ────────────────────────────────────────────────────────────
+// ── Silent Token Refresh ─────────────────────────────────────────────────────
 
 let _refreshing: Promise<string | null> | null = null;
 
 async function silentRefresh(): Promise<string | null> {
-  if (!_refreshing) {
-    _refreshing = (async () => {
-      try {
-        const r = await fetch(`${base}/auth/refresh`, { method: "POST", credentials: "include" });
-        if (!r.ok) { clearStoredToken(); return null; }
-        const d = (await r.json()) as ApiResponse<{ accessToken: string }>;
-        const t = d?.data?.accessToken;
-        if (!t) { clearStoredToken(); return null; }
-        setStoredToken(t);
-        return t;
-      } catch {
+  if (_refreshing) return _refreshing;
+
+  _refreshing = (async () => {
+    try {
+      const res = await fetch(`${base}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
         clearStoredToken();
         return null;
       }
-    })().finally(() => { _refreshing = null; });
-  }
-  return _refreshing;
-}
 
-// Next.js extended fetch type
-interface NextFetchRequestConfig {
-  revalidate?: number | false;
-  tags?: string[];
+      const data = (await res.json()) as ApiResponse<{ accessToken: string }>;
+      const newToken = data?.data?.accessToken;
+
+      if (newToken) {
+        setStoredToken(newToken);
+        return newToken;
+      }
+    } catch (err) {
+      console.error("Silent refresh failed:", err);
+    }
+
+    clearStoredToken();
+    return null;
+  })().finally(() => {
+    _refreshing = null;
+  });
+
+  return _refreshing;
 }

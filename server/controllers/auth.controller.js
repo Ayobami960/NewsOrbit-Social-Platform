@@ -242,33 +242,113 @@ exports.forgotPassword = async (req, res, next) => {
 // POST /api/v1/auth/reset-password   body: { email, code, password }
 // ─────────────────────────────────────────────────────────────────────────────
 
+// exports.resetPassword = async (req, res, next) => {
+//   try {
+//     const { email, code, password } = req.body;
+//     if (!email || !code || !password)
+//       return sendError(res, "Email, code and new password are required.", 400);
+
+//     const user = await User.findOne({ email })
+//       .select("+password +passwordResetCode +passwordResetExpires");
+
+//     if (!user) return sendError(res, "User not found.", 404);
+
+//     if (!user.passwordResetCode || user.passwordResetExpires < Date.now())
+//       return sendError(res, "Reset code has expired. Please request a new one.", 400);
+
+//     if (user.passwordResetCode !== code.toString())
+//       return sendError(res, "Invalid reset code.", 400);
+
+//     user.password             = password;
+//     user.passwordResetCode    = undefined;
+//     user.passwordResetExpires = undefined;
+//     user.refreshToken         = undefined;
+//     await user.save();
+
+//     res.clearCookie("refreshToken");
+//     return sendSuccess(res, {}, "Password reset. Please login.");
+//   } catch (err) { next(err); }
+// };
+
+// POST /api/v1/auth/verify-reset-code
+// Verifies the code only (before showing password form)
+exports.verifyResetCode = async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return sendError(res, "Email and code are required.", 400);
+    }
+
+    const user = await User.findOne({ email })
+      .select("+passwordResetCode +passwordResetExpires");
+
+    if (!user) {
+      return sendError(res, "User not found.", 404);
+    }
+
+    if (!user.passwordResetCode || user.passwordResetExpires < Date.now()) {
+      return sendError(res, "Reset code has expired. Please request a new one.", 400);
+    }
+
+    if (user.passwordResetCode !== code.toString()) {
+      return sendError(res, "Invalid verification code.", 400);
+    }
+
+    return sendSuccess(res, { 
+      message: "Code verified successfully",
+      email: user.email 
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// POST /api/v1/auth/reset-password
 exports.resetPassword = async (req, res, next) => {
   try {
     const { email, code, password } = req.body;
-    if (!email || !code || !password)
+
+    if (!email || !code || !password) {
       return sendError(res, "Email, code and new password are required.", 400);
+    }
+
+    if (password.length < 8) {
+      return sendError(res, "Password must be at least 8 characters long.", 400);
+    }
 
     const user = await User.findOne({ email })
-      .select("+password +passwordResetCode +passwordResetExpires");
+      .select("+passwordResetCode +passwordResetExpires");
 
-    if (!user) return sendError(res, "User not found.", 404);
+    if (!user) {
+      return sendNotFound(res, "User not found.");
+    }
 
-    if (!user.passwordResetCode || user.passwordResetExpires < Date.now())
+    // Final security check (even if frontend already verified)
+    if (!user.passwordResetCode || user.passwordResetExpires < Date.now()) {
       return sendError(res, "Reset code has expired. Please request a new one.", 400);
+    }
 
-    if (user.passwordResetCode !== code.toString())
+    if (user.passwordResetCode !== code.toString()) {
       return sendError(res, "Invalid reset code.", 400);
+    }
 
-    user.password             = password;
-    user.passwordResetCode    = undefined;
+    // Update password and clean up
+    user.password = password;
+    user.passwordResetCode = undefined;
     user.passwordResetExpires = undefined;
-    user.refreshToken         = undefined;
+    user.refreshToken = undefined;        // Invalidate all sessions
+
     await user.save();
 
     res.clearCookie("refreshToken");
-    return sendSuccess(res, {}, "Password reset. Please login.");
-  } catch (err) { next(err); }
+
+    return sendSuccess(res, {}, "Password has been reset successfully. You can now login.");
+  } catch (err) {
+    next(err);
+  }
 };
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/v1/auth/refresh

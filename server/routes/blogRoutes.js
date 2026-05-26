@@ -7,6 +7,7 @@ const {
   getBlogs,
   getBlogBySlug,
   getMyBlogs,
+  getBlogLikers,
   createBlog,
   updateBlog,
   deleteBlog,
@@ -16,21 +17,18 @@ const {
 // ── Multer ──────────────────────────────────────────────
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only images allowed"), false);
-    }
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("Only images allowed"), false);
   },
 });
 
 // ── Routes ───────────────────────────────────────────────
-// ⚠️ /mine MUST come before /:slug — otherwise "mine" is treated as a slug
-router.get("/mine",  protect,       getMyBlogs);
-router.get("/",      optionalAuth,  getBlogs);
-router.get("/:slug", optionalAuth,  getBlogBySlug);
+// ⚠️ Specific paths before parameterised ones
+router.get("/mine",       protect,      getMyBlogs);
+router.get("/",           optionalAuth, getBlogs);
+router.get("/:slug",      optionalAuth, getBlogBySlug);
 
 router.post(
   "/",
@@ -46,7 +44,8 @@ router.patch(
   updateBlog
 );
 
-router.delete("/:id",      protect, restrictTo("user"), deleteBlog);
-router.post("/:id/like",   protect, likeBlog);
+router.delete("/:id",    protect, deleteBlog);
+router.post("/:id/like",  protect, likeBlog);
+router.get("/:id/likers",  protect, restrictTo("super_admin", "admin", "writer", "user"), getBlogLikers);
 
 module.exports = router;

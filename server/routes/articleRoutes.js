@@ -1,7 +1,7 @@
 const express = require("express");
 const router  = express.Router();
 const multer  = require("multer");
-const { protect, restrictTo } = require("../middlewares/auth");
+const { protect, restrictTo, optionalAuth } = require("../middlewares/auth");
 
 const {
   createArticle,
@@ -13,6 +13,7 @@ const {
   deleteArticle,
   reactToArticle,
   getMyArticleStats,
+  getArticleLikers,
   likeArticle,
 } = require("../controllers/article.controller");
 
@@ -34,23 +35,26 @@ const uploadForCreate = multer(baseOptions).fields([
 ]);
 
 const uploadForUpdate = multer(baseOptions).fields([
-  { name: "gallery", maxCount: 10 },
+  { name: "featuredImage", maxCount: 1 },
+  { name: "gallery",       maxCount: 10 },
 ]);
 
 // ─── Public ───────────────────────────────────────────────────────────────────
-router.get("/",        getArticles);
 router.get("/breaking", getBreakingNews);
-router.get("/:slug", getArticle);   // Public route to get article by slug - must come before protect middleware
+router.get("/",         optionalAuth, getArticles);
+router.get("/:slug",      optionalAuth, getArticle);
+
 
 // ─── Protected ────────────────────────────────────────────────────────────────
 router.use(protect);
 
-router.get("/my-stats", restrictTo("super_admin", "admin", "writer"), getMyArticleStats);
-router.get("/:id", getArticleById);  // Protected route to get article by ID (for editors/admins)
-router.post(  "/",  uploadForCreate, createArticle);
-router.patch( "/:id", uploadForUpdate, updateArticle);
-router.delete("/:id", deleteArticle);
-router.post(  "/:id/react", reactToArticle);
-router.post(  "/:id/like", likeArticle);
+router.get("/my-stats",   restrictTo("super_admin", "admin", "writer"), getMyArticleStats);
+router.get("/edit/:id",   getArticleById);
+router.get("/:id/likers", restrictTo("super_admin", "admin", "writer"), getArticleLikers);
 
+router.post("/",          uploadForCreate, createArticle);
+router.patch("/:id",      uploadForUpdate, updateArticle);
+router.delete("/:id",     deleteArticle);
+router.post("/:id/react", reactToArticle);
+router.post("/:id/like",  likeArticle);
 module.exports = router;

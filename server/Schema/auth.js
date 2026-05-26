@@ -54,12 +54,26 @@ exports.forgotPasswordSchema = Joi.object({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Reset Password
+// Verify Reset Code  (step 2)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.verifyResetCodeSchema = Joi.object({
+  email: Joi.string().email().lowercase().trim().required(),
+  code:  Joi.string().length(6).pattern(/^\d{6}$/).required().messages({
+    "string.length":       "Code must be exactly 6 digits",
+    "string.pattern.base": "Code must be numeric",
+    "any.required":        "Code is required",
+  }),
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reset Password  (step 3 — email + code re-verified server-side)
 // ─────────────────────────────────────────────────────────────────────────────
 exports.resetPasswordSchema = Joi.object({
   email: Joi.string().email().lowercase().trim().required(),
-  code:  Joi.string().length(6).required().messages({
-    "string.length": "Reset code must be 6 digits",
+  code:  Joi.string().length(6).pattern(/^\d{6}$/).required().messages({
+    "string.length":       "Code must be exactly 6 digits",
+    "string.pattern.base": "Code must be numeric",
+    "any.required":        "Code is required",
   }),
   password: Joi.string()
     .min(8)
@@ -70,11 +84,9 @@ exports.resetPasswordSchema = Joi.object({
       "string.pattern.base":
         "Password must contain uppercase, lowercase, number and special character.",
     }),
-  confirmPassword: Joi.string()
-    .valid(Joi.ref("password"))
-    .required()
-    .messages({ "any.only": "Passwords do not match" }),
+  
 });
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Accept Invite (old single-step — kept for backwards compat if needed)

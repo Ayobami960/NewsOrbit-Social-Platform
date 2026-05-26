@@ -1,4 +1,4 @@
-export type Role = "super_admin" | "admin" | "writer" | "user";
+export type Role = "user";
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -47,6 +47,29 @@ export interface MediaItem {
   alt?: string;
   width?: number;
   height?: number;
+}
+// IMAGE UPLOAD 
+export interface UploadedImage {
+  url: string;
+  fileId: string;
+  thumbnailUrl?: string;
+  width?:  number;
+  height?: number;
+}
+
+export interface ImageKitAuthResponse {
+  token:  string;
+  expire: number;
+  signature: string;
+  publicKey: string;
+  urlEndpoint: string;
+}
+
+export interface UseImageUploadOptions {
+  folder?:    string;
+  maxSizeMB?: number;
+  onSuccess?: (image: UploadedImage) => void;
+  onError?:   (error: string) => void;
 }
 
 export interface Article {

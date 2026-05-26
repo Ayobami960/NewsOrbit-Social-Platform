@@ -3,7 +3,7 @@
 // hooks/useImageUpload.ts
 import { useState, useCallback } from "react";
 import { authFetch } from "../lib/apiFetch";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

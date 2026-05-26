@@ -31,19 +31,15 @@ const resolveCategoryId = async (categoryInput) => {
 
 // ====================== HELPER FUNCTIONS ======================
 
-// Delete old image when replaced or removed
 const deleteOldMedia = async (oldMedia) => {
   if (oldMedia?.fileId) {
     await deleteFromImageKit(oldMedia.fileId);
   }
 };
 
-// Delete old gallery images that are no longer used
 const deleteOldGallery = async (oldGallery, newGallery = []) => {
   if (!oldGallery?.length) return;
-
   const newFileIds = new Set(newGallery.map(img => img?.fileId).filter(Boolean));
-
   for (const img of oldGallery) {
     if (img?.fileId && !newFileIds.has(img.fileId)) {
       await deleteFromImageKit(img.fileId);
@@ -81,57 +77,23 @@ const getMyArticleStats = async (req, res, next) => {
 };
 
 // ====================== GET ALL ARTICLES ======================
-// const getArticles = async (req, res, next) => {
-//   try {
-//     const { page = 1, limit = 20, category, tag, status = "published", author, search, sort = "-publishedAt", isBreaking } = req.query;
-
-//     const filter = { isDeleted: false };
-//     const isPrivileged = req.user && ["super_admin", "admin", "writer"].includes(req.user.role);
-
-//     if (!isPrivileged) filter.status = "published";
-//     else if (status) filter.status = status;
-
-//     if (category) filter.category = category;
-//     if (tag) filter.tags = tag;
-//     if (author) filter.author = author;
-//     if (isBreaking === "true") filter.isBreaking = true;
-//     if (search) filter.$text = { $search: search };
-
-//     const skip = (parseInt(page) - 1) * parseInt(limit);
-
-//     const [articles, total] = await Promise.all([
-//       Article.find(filter)
-//         .sort(sort)
-//         .skip(skip)
-//         .limit(parseInt(limit))
-//         .populate("author", "name avatar stats.totalArticles")
-//         .populate("category", "name slug color")
-//         .select("-content -contentDelta"),
-//       Article.countDocuments(filter),
-//     ]);
-
-//     return sendSuccess(res, {
-//       articles,
-//       pagination: { page: +page, limit: +limit, total, pages: Math.ceil(total / +limit) },
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
 const getArticles = async (req, res, next) => {
   try {
-    const { page = 1, limit = 20, category, tag, status = "published", author, search, sort = "-publishedAt" } = req.query;
+    const {
+      page = 1, limit = 20, category, tag,
+      status = "published", author, search,
+      sort = "-publishedAt",
+    } = req.query;
 
     const filter = { isDeleted: false };
     const userRole = req.user?.role;
 
-    // Writers should only see their own articles by default
     if (userRole === "writer") {
       filter.author = req.user._id;
     }
 
     if (status) filter.status = status;
+
     if (category) {
       const categoryId = await resolveCategoryId(category);
       if (!categoryId) {
@@ -142,9 +104,10 @@ const getArticles = async (req, res, next) => {
       }
       filter.category = categoryId;
     }
-    if (tag) filter.tags = tag;
+
+    if (tag)    filter.tags   = tag;
     if (author) filter.author = author;
-    if (search) filter.$text = { $search: search };
+    if (search) filter.$text  = { $search: search };
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -181,9 +144,18 @@ const getArticle = async (req, res, next) => {
 
     if (!article) return sendNotFound(res, "Article not found.");
 
+    // Background view increment
     Article.findByIdAndUpdate(article._id, { $inc: { views: 1 } }).exec();
 
-    return sendSuccess(res, { article });
+    const articleObj = article.toObject();
+    // Strip likedBy from public response but attach isLiked
+    const likedBy = articleObj.likedBy || [];
+    delete articleObj.likedBy;
+    articleObj.isLiked = req.user
+      ? likedBy.some(id => id.toString() === req.user._id.toString())
+      : false;
+
+    return sendSuccess(res, { article: articleObj });
   } catch (err) {
     next(err);
   }
@@ -210,29 +182,6 @@ const getBreakingNews = async (req, res, next) => {
 };
 
 // ====================== GET ARTICLE BY ID (For Editor) ======================
-// const getArticleById = async (req, res, next) => {
-//   try {
-//     const article = await Article.findOne({ _id: req.params.id})
-//       .populate("author", "name avatar bio socialLinks stats followersCount")
-//       .populate("category", "name slug color")
-//       .populate("tags", "name slug");
-
-//     if (!article) return sendNotFound(res, "Article not found.");
-
-//     if (req.user?.role === "writer" && article.author._id.toString() !== req.user._id.toString()) {
-//       return sendError(res, "You can only view your own articles.", 403);
-//     }
-
-//     if (article.status === "published") {
-//       Article.findByIdAndUpdate(article._id, { $inc: { views: 1 } }).exec();
-//     }
-
-//     return sendSuccess(res, { article });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
 const getArticleById = async (req, res, next) => {
   try {
     const article = await Article.findById(req.params.id)
@@ -245,12 +194,37 @@ const getArticleById = async (req, res, next) => {
     const isOwner = article.author._id.toString() === req.user._id.toString();
     const isAdmin = ["super_admin", "admin"].includes(req.user.role);
 
-    // Writers can only view/edit their own articles
     if (req.user.role === "writer" && !isOwner && !isAdmin) {
       return sendError(res, "You can only access your own articles.", 403);
     }
 
     return sendSuccess(res, { article });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ====================== GET ARTICLE LIKERS (Owner / Admin only) ======================
+const getArticleLikers = async (req, res, next) => {
+  try {
+    const article = await Article.findById(req.params.id)
+      .populate("likedBy", "name avatar email")
+      .select("likedBy likes author");
+
+    if (!article) return sendNotFound(res, "Article not found.");
+
+    const isOwner = article.author.toString() === req.user._id.toString();
+    const isAdmin = ["super_admin", "admin"].includes(req.user.role);
+
+    if (!isOwner && !isAdmin) {
+      return sendError(res, "Access denied.", 403);
+    }
+
+    return sendSuccess(res, {
+      likes: article.likes,
+      likers: article.likedBy,
+      total: article.likedBy.length,
+    });
   } catch (err) {
     next(err);
   }
@@ -273,7 +247,6 @@ const createArticle = async (req, res, next) => {
 
     const slug = await generateUniqueSlug(Article, body.title);
 
-    // Handle Tags
     let tagIds = [];
     if (body.tags?.length) {
       tagIds = await Promise.all(
@@ -286,17 +259,9 @@ const createArticle = async (req, res, next) => {
       );
     }
 
-    // ====================== FEATURED IMAGE HANDLING ======================
-    //
-    // Two paths:
-    //   A) req.files?.featuredImage  → server received the file, upload it to ImageKit now
-    //   B) req.body.featuredImageUrl → frontend already uploaded to ImageKit CDN directly;
-    //      just build the mediaSchema object from the URL + fileId the frontend sent
-    //
     let featuredImage = null;
 
     if (req.files?.featuredImage?.[0]) {
-      // Path A: file was sent to the server — upload to ImageKit
       featuredImage = await uploadToImageKit(req.files.featuredImage[0], {
         folder: "/articles/featured",
         fileNamePrefix: `article-${slug}`,
@@ -304,13 +269,12 @@ const createArticle = async (req, res, next) => {
         caption: body.excerpt || "",
       });
     } else if (body.featuredImageUrl) {
-      // Path B: frontend already uploaded to ImageKit; store the URL + fileId as-is
       featuredImage = {
-        url:    body.featuredImageUrl,
-        fileId: body.featuredImageFileId || "",
+        url:      body.featuredImageUrl,
+        fileId:   body.featuredImageFileId || "",
         fileType: "image",
-        alt:    body.title,
-        caption: body.excerpt || "",
+        alt:      body.title,
+        caption:  body.excerpt || "",
       };
     }
 
@@ -337,7 +301,6 @@ const createArticle = async (req, res, next) => {
       publishedAt: isPublishing ? new Date() : undefined,
     });
 
-    // Update counters
     if (tagIds.length) await Tag.updateMany({ _id: { $in: tagIds } }, { $inc: { usageCount: 1 } });
     await User.findByIdAndUpdate(req.user._id, { $inc: { "stats.totalArticles": 1 } });
 
@@ -361,7 +324,6 @@ const createArticle = async (req, res, next) => {
   }
 };
 
-
 // ====================== UPDATE ARTICLE ======================
 const updateArticle = async (req, res, next) => {
   try {
@@ -371,16 +333,12 @@ const updateArticle = async (req, res, next) => {
     const isOwner = article.author.toString() === req.user._id.toString();
     const isAdmin = ["super_admin", "admin"].includes(req.user.role);
 
-    // Permission Check
     if (req.user.role === "writer") {
-      if (!isOwner) {
-        return sendError(res, "You can only edit your own articles.", 403);
-      }
+      if (!isOwner) return sendError(res, "You can only edit your own articles.", 403);
     } else if (!isAdmin) {
       return sendError(res, "Access denied.", 403);
     }
 
-    // 1. Prepare and Sanitize Array Fields from FormData
     const rawBody = { ...req.body };
     const arrayFields = ["tags", "gallery", "categories"];
 
@@ -406,7 +364,6 @@ const updateArticle = async (req, res, next) => {
       body.category = categoryId;
     }
 
-    // Process tags → ObjectIds
     let tagIds = undefined;
     if (body.tags !== undefined) {
       tagIds = [];
@@ -422,33 +379,19 @@ const updateArticle = async (req, res, next) => {
       }
     }
 
-    // ====================== FEATURED IMAGE HANDLING ======================
-    //
-    // Three cases on update:
-    //   A) req.files?.featuredImage  → new file sent to server; delete old, upload new
-    //   B) body.featuredImageUrl set → frontend re-uploaded or kept existing CDN image;
-    //      if the fileId differs from what's stored, delete the old one
-    //   C) body.featuredImageUrl is "" / not present → user removed the image; delete old
-    //
-    let featuredImage = undefined; // undefined = "don't touch the field"
+    let featuredImage = undefined;
 
     if (req.files?.featuredImage?.[0]) {
-      // Path A: new file sent to server
       if (article.featuredImage?.fileId) await deleteOldMedia(article.featuredImage);
       featuredImage = await uploadToImageKit(req.files.featuredImage[0], {
         folder: "/articles/featured",
         fileNamePrefix: `article-${article.slug}`,
       });
-
     } else if (body.featuredImageUrl) {
-      // Path B: frontend has a CDN URL (either newly uploaded or unchanged existing)
       const incomingFileId = body.featuredImageFileId || "";
-
       if (article.featuredImage?.fileId && article.featuredImage.fileId !== incomingFileId) {
-        // A *different* image was uploaded — delete the old one from ImageKit
         await deleteOldMedia(article.featuredImage);
       }
-
       featuredImage = {
         url:      body.featuredImageUrl,
         fileId:   incomingFileId,
@@ -456,16 +399,11 @@ const updateArticle = async (req, res, next) => {
         alt:      article.featuredImage?.alt || "",
         caption:  article.featuredImage?.caption || "",
       };
-
     } else if (body.featuredImageUrl === "" || body.featuredImageUrl === null) {
-      // Path C: image was explicitly cleared by the user
       if (article.featuredImage?.fileId) await deleteOldMedia(article.featuredImage);
       featuredImage = null;
     }
-    // If body.featuredImageUrl is simply absent (undefined), featuredImage stays
-    // undefined and we don't overwrite what's already stored.
 
-    // Gallery (server-upload path only — unchanged from original)
     let gallery = value.gallery;
     if (req.files?.gallery?.length) {
       await deleteOldGallery(article.gallery, value.gallery || []);
@@ -477,7 +415,6 @@ const updateArticle = async (req, res, next) => {
       gallery = [...(gallery || []), ...newGalleryUploads];
     }
 
-    // Update slug if title changed
     if (body.title && body.title !== article.title) {
       body.slug = await generateUniqueSlug(Article, body.title, article._id);
     }
@@ -485,11 +422,10 @@ const updateArticle = async (req, res, next) => {
     const becomesPublished = body.status === "published" && article.status !== "published";
     if (becomesPublished) body.publishedAt = new Date();
 
-    // Build final update payload
     const updateData = { ...body };
     if (featuredImage !== undefined) updateData.featuredImage = featuredImage;
-    if (gallery !== undefined)       updateData.gallery = gallery;
-    if (tagIds !== undefined)        updateData.tags = tagIds;
+    if (gallery !== undefined)       updateData.gallery       = gallery;
+    if (tagIds !== undefined)        updateData.tags          = tagIds;
 
     const updated = await Article.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
@@ -520,66 +456,6 @@ const updateArticle = async (req, res, next) => {
 };
 
 // ====================== DELETE ARTICLE ======================
-
-
-// const deleteArticle = async (req, res, next) => {
-//   try {
-//     // ✅ Use findOne with setOptions to bypass the pre-find isDeleted filter
-//     const article = await Article.findByIdAndDelete(req.params.id)
-//       // .setOptions({ includeDeleted: true });
-
-//     if (!article) return sendNotFound(res, "Article not found.");
-
-//     const isOwner = article.author.toString() === req.user._id.toString();
-//     const isAdmin = ["super_admin", "admin"].includes(req.user.role);
-
-//     if (req.user.role === "writer") {
-//       if (!isOwner) {
-//         return sendError(res, "You can only delete your own articles.", 403);
-//       }
-//     } else if (!isAdmin) {
-//       return sendError(res, "Access denied.", 403);
-//     }
-
-
-//     // ✅ Cleanup images from ImageKit BEFORE marking deleted
-//     if (article.featuredImage?.fileId) {
-//       await deleteFromImageKit(article.featuredImage.fileId);
-//     }
-//     if (article.gallery?.length) {
-//       for (const img of article.gallery) {
-//         if (img?.fileId) await deleteFromImageKit(img.fileId);
-//       }
-//     }
-
-//     await Article.findByIdAndDelete(req.params.id);
-
-//     // ✅ Decrement user's article count
-//     await User.findByIdAndUpdate(req.user._id, {
-//       $inc: { "stats.totalArticles": -1 },
-//     });
-
-//     // ✅ Decrement tag usage counts
-//     if (article.tags?.length) {
-//       await Tag.updateMany(
-//         { _id: { $in: article.tags } },
-//         { $inc: { usageCount: -1 } }
-//       );
-//     }
-
-//     log({
-//       user: req.user._id,
-//       action: "article_delete",
-//       resource: article._id.toString(),
-//       ip: req.ip,
-//     });
-
-//     return sendSuccess(res, {}, "Article deleted successfully.");
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
 const deleteArticle = async (req, res, next) => {
   try {
     const article = await Article.findById(req.params.id);
@@ -589,14 +465,11 @@ const deleteArticle = async (req, res, next) => {
     const isAdmin = ["super_admin", "admin"].includes(req.user.role);
 
     if (req.user.role === "writer") {
-      if (!isOwner) {
-        return sendError(res, "You can only delete your own articles.", 403);
-      }
+      if (!isOwner) return sendError(res, "You can only delete your own articles.", 403);
     } else if (!isAdmin) {
       return sendError(res, "Access denied.", 403);
     }
 
-    // Cleanup media
     if (article.featuredImage?.fileId) await deleteFromImageKit(article.featuredImage.fileId);
     if (article.gallery?.length) {
       for (const img of article.gallery) {
@@ -624,45 +497,60 @@ const deleteArticle = async (req, res, next) => {
   }
 };
 
+// ====================== LIKE / UNLIKE ARTICLE ======================
 
-// ====================== LIKE ARTICLE ======================
 const likeArticle = async (req, res, next) => {
   try {
-    const article = await Article.findById(req.params.id);
+    const article = await Article.findById(req.params.id).select(
+      "likedBy likes"
+    );
     if (!article) return sendNotFound(res, "Article not found.");
-
-    article.likes = (article.likes || 0) + 1;
+ 
+    const userId      = req.user._id;
+    const alreadyLiked = article.likedBy.some(
+      (id) => id.toString() === userId.toString()
+    );
+ 
+    if (alreadyLiked) {
+      article.likedBy.pull(userId);
+      article.likes = Math.max(0, article.likes - 1);
+    } else {
+      article.likedBy.push(userId);
+      article.likes += 1;
+    }
+ 
     await article.save();
-
-    return sendSuccess(res, { likes: article.likes }, "Article liked.");
+ 
+    return sendSuccess(
+      res,
+      { likes: article.likes, isLiked: !alreadyLiked },
+      alreadyLiked ? "Article unliked." : "Article liked."
+    );
   } catch (err) {
     next(err);
   }
 };
-
-// ====================== REACT TO ARTICLE ======================
+ 
+// ─── Reactions ─────────────────────────────────────────────────────────────────
+ 
 const reactToArticle = async (req, res, next) => {
   try {
     const { reaction } = req.body;
-    if (!reaction) return sendError(res, "Reaction is required", 400);
-
+    if (!reaction) return sendError(res, "Reaction is required.", 400);
+ 
     const article = await Article.findById(req.params.id);
     if (!article) return sendNotFound(res, "Article not found.");
-
+ 
     if (!article.reactions) article.reactions = new Map();
-
-    const current = article.reactions.get(reaction) || 0;
-    article.reactions.set(reaction, current + 1);
-
+    article.reactions.set(reaction, (article.reactions.get(reaction) ?? 0) + 1);
     await article.save();
-
-    return sendSuccess(res, {
-      reactions: Object.fromEntries(article.reactions),
-    });
+ 
+    return sendSuccess(res, { reactions: Object.fromEntries(article.reactions) });
   } catch (err) {
     next(err);
   }
 };
+ 
 
 // ====================== EXPORTS ======================
 module.exports = {
@@ -671,6 +559,7 @@ module.exports = {
   getArticle,
   getBreakingNews,
   getArticleById,
+  getArticleLikers,
   createArticle,
   updateArticle,
   deleteArticle,

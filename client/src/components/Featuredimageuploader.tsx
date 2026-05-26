@@ -7,15 +7,15 @@ import { useImageUpload, type UploadedImage } from "../hooks/useImageUpload";
 export type { UploadedImage };
 
 interface Props {
-  value: string;                                    // current saved image URL ("" = none)
-  onChange: (image: UploadedImage | null) => void;  // ← no File arg; CDN upload is done here
+  value: string;                                    
+  onChange: (image: UploadedImage | null) => void;  
   folder?: string;
 }
 
 export default function FeaturedImageUploader({
   value,
   onChange,
-  folder = "/articles/featured",
+  folder = "/blogs/featured",
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
 

@@ -122,7 +122,12 @@ export default function Navbar() {
 
               {/* Writers — only visible when logged in */}
               {isLoggedIn && (
+                <>
                 <Link href="/writers" className={navLink("/writers")}>Writers</Link>
+                <Link href="/blogs/create" className={navLink("/blogs/create")}>Create post</Link>
+                </>
+
+                
               )}
             </nav>
 
