@@ -20,11 +20,11 @@ function NewsContent() {
   const searchParams = useSearchParams();
   const router       = useRouter();
 
-  const [page,        setPage]        = useState(1);
-  const [sort,        setSort]        = useState("-publishedAt");
-  const [inputVal,    setInputVal]    = useState(searchParams.get("search") ?? "");
-  const [search,      setSearch]      = useState(searchParams.get("search") ?? "");
-  const [category,    setCategory]    = useState(searchParams.get("category") ?? "");
+  const [page, setPage] = useState(1);
+  const [sort, setSort]  = useState("-publishedAt");
+  const [inputVal, setInputVal] = useState(searchParams.get("search") ?? "");
+  const [search, setSearch] = useState(searchParams.get("search") ?? "");
+  const [category, setCategory]    = useState(searchParams.get("category") ?? "");
   const [showFilters, setShowFilters] = useState(false);
 
   const { data: categories = [] } = useCategories();
@@ -84,7 +84,7 @@ function NewsContent() {
             onChange={e => setInputVal(e.target.value)}
             onKeyDown={e => e.key === "Enter" && updateParams(inputVal, category)}
             placeholder="Search news, topics, writers…"
-            className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[var(--color-border)] bg-white text-ink-900 font-sans text-sm outline-none focus:ring-2 focus:ring-ember-600/25 focus:border-ember-600 transition-all"
+            className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-(--color-border) bg-white text-ink-900 font-sans text-sm outline-none focus:ring-2 focus:ring-ember-600/25 focus:border-ember-600 transition-all"
           />
           {inputVal && (
             <button onClick={() => { setInputVal(""); updateParams("", category); }}
@@ -100,7 +100,7 @@ function NewsContent() {
         </button>
 
         <select value={sort} onChange={e => { setSort(e.target.value); setPage(1); }}
-          className="px-3 py-2.5 rounded-xl border border-[var(--color-border)] bg-white text-ink-700 font-sans text-sm outline-none focus:border-ember-600 cursor-pointer">
+          className="px-3 py-2.5 rounded-xl border border-(--color-border) bg-white text-ink-700 font-sans text-sm outline-none focus:border-ember-600 cursor-pointer">
           {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
 
@@ -109,7 +109,7 @@ function NewsContent() {
             "flex items-center gap-2 px-4 py-2.5 rounded-xl border font-sans text-sm transition-colors",
             showFilters
               ? "bg-ember-50 border-ember-200 text-ember-700"
-              : "border-[var(--color-border)] text-ink-700 hover:bg-ink-50"
+              : "border-(--color-border) text-ink-700 hover:bg-ink-50"
           )}>
           <SlidersHorizontal size={14} /> Topics
         </button>
@@ -140,12 +140,12 @@ function NewsContent() {
 
       {/* Category chips */}
       {showFilters && (
-        <div className="flex flex-wrap gap-2 mb-6 p-4 bg-white border border-[var(--color-border)] rounded-xl">
+        <div className="flex flex-wrap gap-2 mb-6 p-4 bg-white border border-(--color-border) rounded-xl">
           <button
             onClick={() => updateParams(search, "")}
             className={cn(
               "px-3 py-1.5 rounded-full text-sm font-sans font-medium border transition-colors",
-              !category ? "bg-ink-900 text-white border-ink-900" : "border-[var(--color-border)] text-ink-600 hover:border-ink-400"
+              !category ? "bg-ink-900 text-white border-ink-900" : "border-(--color-border) text-ink-600 hover:border-ink-400"
             )}>
             All Topics
           </button>
@@ -154,7 +154,7 @@ function NewsContent() {
               onClick={() => updateParams(search, cat.slug)}
               className={cn(
                 "px-3 py-1.5 rounded-full text-sm font-sans font-medium border transition-colors",
-                category === cat.slug ? "text-white border-transparent" : "border-[var(--color-border)] text-ink-600 hover:border-ink-400"
+                category === cat.slug ? "text-white border-transparent" : "border-(--color-border) text-ink-600 hover:border-ink-400"
               )}
               style={category === cat.slug ? { background: cat.color, borderColor: cat.color } : {}}>
               {cat.name}

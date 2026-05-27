@@ -18,10 +18,10 @@ const TiptapEditor = dynamic(() => import("@/components/ui/Tiptapeditor"), {
   ssr: false,
   loading: () => (
     <div
-      className="border border-(--color-border) rounded-xl bg-white"
+      className="border bor(--color-border)rounded-xl bg-white"
       style={{ minHeight: 400 }}
     >
-      <div className="h-12 border-b border-(--color-border) bg-ink-50 skeleton" />
+      <div className="h-12 border-b bor(--color-border)bg-ink-50 skeleton" />
       <div className="p-4 space-y-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <div
@@ -113,7 +113,7 @@ export default function CreateBlogPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--color-bg)]">
+    <div className="min-h-screen flex flex-col bg-(--color-bg)">
       <Navbar />
       <main className="flex-1">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
@@ -136,7 +136,7 @@ export default function CreateBlogPage() {
                   "flex items-center gap-2 px-4 py-2 rounded-xl border font-sans font-semibold text-sm transition-all",
                   preview
                     ? "bg-ink-900 text-white border-ink-900"
-                    : "border-[var(--color-border)] text-ink-600 hover:bg-ink-50"
+                    : "border-(--color-border) text-ink-600 hover:bg-ink-50"
                 )}
               >
                 <Eye size={14} /> {preview ? "Edit" : "Preview"}
@@ -171,7 +171,7 @@ export default function CreateBlogPage() {
 
           {/* ── Preview mode ── */}
           {preview ? (
-            <div className="bg-white border border-[var(--color-border)] rounded-2xl overflow-hidden">
+            <div className="bg-white border border-(--color-border) rounded-2xl overflow-hidden">
               {coverPreview && (
                 <img
                   src={coverPreview}
@@ -216,7 +216,7 @@ export default function CreateBlogPage() {
                   "relative rounded-2xl overflow-hidden border-2 border-dashed transition-all cursor-pointer group",
                   coverPreview
                     ? "border-transparent"
-                    : "border-[var(--color-border)] hover:border-ember-400 bg-white"
+                    : "border-(--color-border) hover:border-ember-400 bg-white"
                 )}
                 onClick={() => fileRef.current?.click()}
               >
@@ -284,7 +284,7 @@ export default function CreateBlogPage() {
                   style={{ lineHeight: 1.2 }}
                 />
                 <div className="flex items-center justify-between mt-1">
-                  <div className="flex-1 h-px bg-[var(--color-border)]" />
+                  <div className="flex-1 h-px bg-(--color-border)" />
                   <span className="ml-3 text-[11px] font-sans text-ink-400">
                     {title.length}/200
                   </span>
@@ -301,7 +301,7 @@ export default function CreateBlogPage() {
                   onChange={(e) => setExcerpt(e.target.value.slice(0, 400))}
                   placeholder="A brief summary shown in listings…"
                   rows={2}
-                  className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] bg-white text-ink-900 font-body text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 resize-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-(--color-border) bg-white text-ink-900 font-body text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 resize-none transition-all"
                 />
                 <p className="text-right text-[11px] font-sans text-ink-400 mt-1">
                   {excerpt.length}/400
@@ -353,14 +353,14 @@ export default function CreateBlogPage() {
                       placeholder="e.g. osun, politics"
                       maxLength={30}
                       disabled={tags.length >= 5}
-                      className="w-full pl-8 pr-3 py-2 rounded-xl border border-[var(--color-border)] bg-white text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all disabled:opacity-50"
+                      className="w-full pl-8 pr-3 py-2 rounded-xl border border-(--color-border) bg-white text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all disabled:opacity-50"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={addTag}
                     disabled={!tagInput.trim() || tags.length >= 5}
-                    className="px-4 py-2 border border-[var(--color-border)] rounded-xl text-sm font-sans font-medium text-ink-700 hover:bg-ink-50 disabled:opacity-40 transition-colors"
+                    className="px-4 py-2 border border-(--color-border) rounded-xl text-sm font-sans font-medium text-ink-700 hover:bg-ink-50 disabled:opacity-40 transition-colors"
                   >
                     Add
                   </button>
@@ -384,7 +384,7 @@ export default function CreateBlogPage() {
               </div>
 
               {/* Bottom publish bar */}
-              <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]">
+              <div className="flex items-center justify-between pt-2 border-t border-(--color-border)">
                 <p className="text-xs font-sans text-ink-400">
                   {isValid ? (
                     <span className="text-emerald-600 font-medium">

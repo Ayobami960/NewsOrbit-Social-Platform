@@ -5,6 +5,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Providers } from "@/lib/providers";
 import "./globals.css";
 import { Bounce, ToastContainer } from "react-toastify";
+import PrivacyConsentBanner from "@/components/PrivacyConsentBanner";
+import { CookieConsent } from "@/components/Cookieconsent";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -47,6 +49,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <AuthProvider>
             {children}
+            {/* <PrivacyConsentBanner/>  */}
+            <CookieConsent/>
             <ToastContainer
               position="top-right"
               autoClose={5000}

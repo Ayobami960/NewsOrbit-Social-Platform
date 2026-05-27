@@ -116,7 +116,7 @@ const getArticles = async (req, res, next) => {
         .sort(sort)
         .skip(skip)
         .limit(parseInt(limit))
-        .populate("author", "name avatar")
+        .populate("author", "_id name avatar")
         .populate("category", "name slug color"),
       Article.countDocuments(filter),
     ]);
@@ -138,7 +138,7 @@ const getArticle = async (req, res, next) => {
       status: "published",
       isDeleted: false,
     })
-      .populate("author", "name avatar bio socialLinks stats followersCount")
+      .populate("author", "_id name avatar bio socialLinks stats followersCount")
       .populate("category", "name slug color")
       .populate("tags", "name slug");
 
@@ -185,7 +185,7 @@ const getBreakingNews = async (req, res, next) => {
 const getArticleById = async (req, res, next) => {
   try {
     const article = await Article.findById(req.params.id)
-      .populate("author", "name avatar bio socialLinks stats")
+      .populate("author", "_id name avatar bio socialLinks stats")
       .populate("category", "name slug color")
       .populate("tags", "name slug");
 

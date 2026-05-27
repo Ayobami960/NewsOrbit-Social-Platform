@@ -33,7 +33,7 @@ export default function Footer() {
             <input
               type="email" required value={email} onChange={e => setEmail(e.target.value)}
               placeholder="Your email address"
-              className="flex-1 md:w-72 px-4 py-2.5 rounded-lg text-ink-900 font-sans text-sm outline-none focus:ring-2 focus:ring-white/40"
+              className="flex-1 md:w-72 px-4 py-2.5 rounded-lg text-ink-900 font-sans text-sm outline-none bg-gray-100 focus:ring-2 focus:ring-white/40"
             />
             <button type="submit" disabled={subscribeMut.isPending}
               className="flex items-center gap-2 px-5 py-2.5 bg-ink-950 hover:bg-ink-900 text-white font-sans font-semibold text-sm rounded-lg transition-colors disabled:opacity-60">

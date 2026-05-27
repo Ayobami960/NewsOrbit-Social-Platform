@@ -141,7 +141,7 @@ export default function HomePage() {
 
         {/* Community blogs */}
         {blogs.length > 0 && (
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+          <section className="max-w-7xl mx-auto px-4  py-10">
             <SectionHeader
               title="Community Voices"
               subtitle="Stories and perspectives written by Osun people"
@@ -177,7 +177,7 @@ export default function HomePage() {
         )}
 
       </main>
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 }

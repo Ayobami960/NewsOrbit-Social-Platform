@@ -28,7 +28,7 @@ exports.getBlogs = async (req, res, next) => {
         .sort(sort)
         .skip(skip)
         .limit(parseInt(limit))
-        .populate("author", "name avatar")
+        .populate("author", "_id name avatar")
         .select("-content -likedBy"),
       Blog.countDocuments(filter),
     ]);
@@ -46,7 +46,7 @@ exports.getBlogs = async (req, res, next) => {
 exports.getBlogBySlug = async (req, res, next) => {
   try {
     const blog = await Blog.findOne({ slug: req.params.slug, isDeleted: false })
-      .populate("author", "name avatar bio socialLinks");
+      .populate("author", "_id name avatar bio socialLinks");
 
     if (!blog) return sendNotFound(res, "Blog not found.");
 
@@ -73,6 +73,28 @@ exports.getMyBlogs = async (req, res, next) => {
       .select("-likedBy");
     return sendSuccess(res, { blogs });
   } catch (err) { next(err); }
+};
+
+
+exports.getBlogById = async (req, res, next) => {
+  try {
+    const blog = await Blog.findById(req.params.id)
+      .populate("author", "_id name avatar bio socialLinks")
+      .populate("tags", "name slug");
+
+    if (!blog) return sendNotFound(res, "Blog not found.");
+
+    const isOwner = blog.author._id.toString() === req.user._id.toString();
+    const isAdmin = ["super_admin", "admin", "writer"].includes(req.user.role);
+
+    if (!isOwner && !isAdmin) {
+      return sendError(res, "You can only access your own blogs.", 403);
+    }
+
+    return sendSuccess(res, { blog });
+  } catch (err) {
+    next(err);
+  }
 };
 
 // ─────────────────────────────────────────────

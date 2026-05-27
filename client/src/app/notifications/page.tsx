@@ -36,8 +36,8 @@ export default function NotificationsPage() {
   const router                         = useRouter();
 
   const { data, isLoading }    = useNotifications();
-  const markRead               = useMarkNotificationRead();
-  const markAllRead            = useMarkAllRead();
+  const markRead  = useMarkNotificationRead();
+  const markAllRead   = useMarkAllRead();
 
   // Redirect if not logged in
   useEffect(() => {
@@ -90,7 +90,7 @@ export default function NotificationsPage() {
               <button
                 onClick={() => markAllRead.mutate()}
                 disabled={markAllRead.isPending}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--color-border)] text-ink-600 hover:bg-ink-50 font-sans font-medium text-sm transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-(--color-border) text-ink-600 hover:bg-ink-50 font-sans font-medium text-sm transition-colors disabled:opacity-50"
               >
                 <CheckCheck size={14} /> Mark all read
               </button>
@@ -123,7 +123,7 @@ export default function NotificationsPage() {
                     className={cn(
                       "w-full flex items-start gap-4 p-4 rounded-xl border transition-all text-left",
                       n.isRead
-                        ? "border-[var(--color-border)] bg-white hover:bg-ink-50"
+                        ? "border-(--color-border) bg-white hover:bg-ink-50"
                         : "border-ember-200 bg-ember-50 hover:bg-ember-100"
                     )}
                   >

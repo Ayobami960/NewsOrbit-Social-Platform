@@ -33,29 +33,34 @@
  * Centralised React Query key factory.
  * Every key lives here so invalidation is consistent across the app.
  */
-
 import type { ArticleFilters, BlogFilters } from "@/types";
 
 export const queryKeys = {
   // ── Articles (staff-written news) ──────────────────────────────────────────
   articles: {
-    all:      () => ["articles"] as const,
-    lists:    () => ["articles", "list"] as const,
-     list:     (f: ArticleFilters) => ["articles", "list", f] as const,
-    detail:   (slug: string)    => ["articles", "detail", slug] as const,
-    breaking: ()                => ["articles", "breaking"] as const,
-    featured: ()                => ["articles", "featured"] as const,
+    all:      ()                    => ["articles"] as const,
+    lists:    ()                    => ["articles", "list"] as const,
+    list:     (f: ArticleFilters)   => ["articles", "list", f] as const,
+    detail:   (slug: string)        => ["articles", "detail", slug] as const,
+    breaking: ()                    => ["articles", "breaking"] as const,
+    featured: ()                    => ["articles", "featured"] as const,
   },
 
   // ── Blogs (user-generated content) ─────────────────────────────────────────
   blogs: {
-    all:    ()                => ["blogs"] as const,
-    /** Matches ALL list variants — use for broad invalidation */
-    lists:  ()                => ["blogs", "list"] as const,
-    list:   (f: BlogFilters) => ["blogs", "list", f] as const,
-    detail: (slugOrId: string)=> ["blogs", "detail", slugOrId] as const,
-    /** The current user's own blogs (/blog/mine) */
-    mine:   ()                => ["blogs", "mine"] as const,
+    all:    ()                  => ["blogs"] as const,
+    /** Matches ALL list variants — broad invalidation */
+    lists:  ()                  => ["blogs", "list"] as const,
+    list:   (filters: object)   => ["blogs", "list", filters] as const,
+    /** Lookup by mongo _id — used by the edit page */
+    detail: (id: string)        => ["blogs", "detail", id] as const,
+    /** Lookup by slug — used by the public detail/reader page */
+    bySlug: (slug: string)      => ["blogs", "slug", slug] as const,
+    /** All blogs belonging to a specific user — used by user profile page */
+    byUser: (userId: string, page: number) =>
+      ["blogs", "byUser", userId, page] as const,
+    /** Current authenticated user's own blogs */
+    mine:   ()                  => ["blogs", "mine"] as const,
   },
 
   // ── Categories ─────────────────────────────────────────────────────────────
@@ -73,9 +78,9 @@ export const queryKeys = {
 
   // ── Users ──────────────────────────────────────────────────────────────────
   users: {
-    all:          ()           => ["users"] as const,
-    public:       (id: string) => ["users", "public", id] as const,
-    followStatus: (id: string) => ["users", "followStatus", id] as const,
+    all:          ()               => ["users"] as const,
+    public:       (id: string)     => ["users", "public", id] as const,
+    followStatus: (id: string)     => ["users", "followStatus", id] as const,
     writers:      (search: string) => ["writers", "list", search] as const,
   },
 
@@ -84,4 +89,4 @@ export const queryKeys = {
     all:  () => ["notifications"] as const,
     list: () => ["notifications", "list"] as const,
   },
-};
+} as const;

@@ -98,8 +98,8 @@ export default function WriterProfilePage() {
           </Link>
 
           {/* Profile card */}
-          <div className="bg-white border border-[var(--color-border)] rounded-2xl overflow-hidden mb-8">
-            <div className="h-28 bg-gradient-to-r from-ember-900 via-ink-900 to-ink-800" />
+          <div className="bg-white border border-(--color-border) rounded-2xl overflow-hidden mb-8">
+            <div className="h-28 bg-linear-to-r from-ember-900 via-ink-900 to-ink-800" />
             <div className="px-6 pb-6">
               <div className="flex items-end justify-between -mt-10 mb-4">
                 <div className="relative">
@@ -110,7 +110,7 @@ export default function WriterProfilePage() {
                       className="w-20 h-20 rounded-full object-cover ring-4 ring-white"
                     />
                   ) : (
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-ember-500 to-ember-700 flex items-center justify-center text-white text-2xl font-bold ring-4 ring-white">
+                    <div className="w-20 h-20 rounded-full bg-linear-to-br from-ember-500 to-ember-700 flex items-center justify-center text-white text-2xl font-bold ring-4 ring-white">
                       {getInitials(writer.name)}
                     </div>
                   )}
@@ -231,7 +231,7 @@ export default function WriterProfilePage() {
                   <button
                     disabled={page === 1}
                     onClick={() => setPage(p => p - 1)}
-                    className="px-4 py-2 text-sm font-sans border border-[var(--color-border)] rounded-xl text-ink-700 hover:bg-ink-50 disabled:opacity-40 transition-colors"
+                    className="px-4 py-2 text-sm font-sans border border-(--color-border) rounded-xl text-ink-700 hover:bg-ink-50 disabled:opacity-40 transition-colors"
                   >
                     ← Previous
                   </button>
@@ -241,7 +241,7 @@ export default function WriterProfilePage() {
                   <button
                     disabled={page === pagination.pages}
                     onClick={() => setPage(p => p + 1)}
-                    className="px-4 py-2 text-sm font-sans border border-[var(--color-border)] rounded-xl text-ink-700 hover:bg-ink-50 disabled:opacity-40 transition-colors"
+                    className="px-4 py-2 text-sm font-sans border border-(--color-border) rounded-xl text-ink-700 hover:bg-ink-50 disabled:opacity-40 transition-colors"
                   >
                     Next →
                   </button>

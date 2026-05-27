@@ -40,7 +40,7 @@ export default function BlogsPage() {
               <input type="text" value={inputVal} onChange={e => setInputVal(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && setSearch(inputVal)}
                 placeholder="Search community blogs…"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-white font-sans text-sm text-ink-900 outline-none focus:ring-2 focus:ring-ember-600/25 focus:border-ember-600" />
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-(--color-border) bg-white font-sans text-sm text-ink-900 outline-none focus:ring-2 focus:ring-ember-600/25 focus:border-ember-600" />
             </div>
             <button onClick={() => { setSearch(inputVal); setPage(1); }}
               className="px-5 py-2.5 bg-ember-600 hover:bg-ember-700 text-white font-sans font-semibold text-sm rounded-xl transition-colors">

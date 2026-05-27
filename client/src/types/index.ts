@@ -19,6 +19,8 @@ export interface User {
     totalBlogs: number;
     totalViews: number;
     totalFollowers: number;
+    totalLikes: number;
+    
   };
   followersCount?: number;
   followingCount?: number;

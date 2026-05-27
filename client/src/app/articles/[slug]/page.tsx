@@ -99,7 +99,7 @@ export default function ArticleDetailPage() {
         <main className="flex-1 max-w-4xl mx-auto px-6 py-12 w-full">
           <div className="skeleton h-8 w-2/3 mb-4 rounded" />
           <div className="skeleton h-5 w-1/2 mb-8 rounded" />
-          <div className="skeleton aspect-[16/7] rounded-2xl mb-8" />
+          <div className="skeleton aspect-16/7 rounded-2xl mb-8" />
           <div className="space-y-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
@@ -178,26 +178,43 @@ export default function ArticleDetailPage() {
               )}
 
               {/* Author + meta row */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-6 mb-6 border-b border-[var(--color-border)]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-6 mb-6 border-b border-(--color-border)">
                 <div className="flex items-center gap-3">
-                  <AuthorAvatar author={article.author} size="md" />
-                  <div>
-                    <Link
-                      href={`/writers/${article.author._id}`}
-                      className="font-sans font-semibold text-ink-900 hover:text-ember-600 transition-colors text-sm block"
-                    >
-                      {article.author.name}
-                    </Link>
-                    <div className="flex items-center gap-2 text-xs text-ink-500 font-sans">
-                      {article.publishedAt && (
-                        <span>{formatDate(article.publishedAt, "MMMM dd, yyyy")}</span>
-                      )}
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <Clock size={11} /> {article.readTime} min read
-                      </span>
+                  {article.author ? (
+                    <>
+                      <AuthorAvatar author={article.author} size="md" />
+                      <div>
+                        <Link
+                          href={`/writers/${article.author._id}`}
+                          className="font-sans font-semibold text-ink-900 hover:text-ember-600 transition-colors text-sm block"
+                        >
+                          {article.author.name}
+                        </Link>
+                        <div className="flex items-center gap-2 text-xs text-ink-500 font-sans">
+                          {article.publishedAt && (
+                            <span>{formatDate(article.publishedAt, "MMMM dd, yyyy")}</span>
+                          )}
+                          <span>·</span>
+                          <span className="flex items-center gap-1">
+                            <Clock size={11} /> {article.readTime} min read
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <p className="font-sans font-semibold text-ink-900 text-sm block">Unknown Author</p>
+                      <div className="flex items-center gap-2 text-xs text-ink-500 font-sans">
+                        {article.publishedAt && (
+                          <span>{formatDate(article.publishedAt, "MMMM dd, yyyy")}</span>
+                        )}
+                        <span>·</span>
+                        <span className="flex items-center gap-1">
+                          <Clock size={11} /> {article.readTime} min read
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-3 text-xs text-ink-500 font-sans">
                   <span className="flex items-center gap-1">
@@ -215,7 +232,7 @@ export default function ArticleDetailPage() {
                   <img
                     src={article.featuredImage.url}
                     alt={article.featuredImage.alt || article.title}
-                    className="w-full object-cover max-h-[500px]"
+                    className="w-full object-cover max-h-125"
                   />
                   {article.featuredImage.caption && (
                     <p className="text-xs text-ink-400 font-body italic text-center mt-2">
@@ -233,7 +250,7 @@ export default function ArticleDetailPage() {
 
               {/* Tags */}
               {article.tags && article.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-8 pt-8 border-t border-[var(--color-border)]">
+                <div className="flex flex-wrap gap-2 mt-8 pt-8 border-t border-(--color-border)">
                   <span className="text-xs font-sans font-semibold text-ink-500 uppercase tracking-widest">
                     Tags:
                   </span>
@@ -250,7 +267,7 @@ export default function ArticleDetailPage() {
               )}
 
               {/* ── Action bar ── */}
-              <div className="flex items-center gap-3 mt-6 py-4 border-t border-b border-[var(--color-border)]">
+              <div className="flex items-center gap-3 mt-6 py-4 border-t border-b border-(--color-border)">
 
                 {/* Like button — driven entirely by article.isLiked from cache */}
                 <button
@@ -261,7 +278,7 @@ export default function ArticleDetailPage() {
                     "flex items-center gap-2 px-4 py-2 rounded-xl border font-sans font-semibold text-sm transition-all disabled:opacity-60",
                     article.isLiked
                       ? "bg-ember-50 border-ember-200 text-ember-700"
-                      : "border-[var(--color-border)] text-ink-600 hover:border-ink-400"
+                      : "border-(--color-border) text-ink-600 hover:border-ink-400"
                   )}
                 >
                   <Heart
@@ -281,7 +298,7 @@ export default function ArticleDetailPage() {
                       .getElementById("comments")
                       ?.scrollIntoView({ behavior: "smooth" })
                   }
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--color-border)] text-ink-600 hover:border-ink-400 font-sans font-semibold text-sm transition-all"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-(--color-border) text-ink-600 hover:border-ink-400 font-sans font-semibold text-sm transition-all"
                 >
                   <MessageCircle size={15} /> {comments.length}
                 </button>
@@ -289,14 +306,14 @@ export default function ArticleDetailPage() {
                 {/* Share */}
                 <button
                   onClick={handleShare}
-                  className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--color-border)] text-ink-600 hover:border-ink-400 font-sans font-semibold text-sm transition-all"
+                  className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl border border-(--color-border) text-ink-600 hover:border-ink-400 font-sans font-semibold text-sm transition-all"
                 >
                   <Share2 size={15} /> Share
                 </button>
               </div>
 
               {/* Author bio card */}
-              <div className="mt-8 p-5 bg-ink-50 rounded-2xl border border-[var(--color-border)]">
+              <div className="mt-8 p-5 bg-ink-50 rounded-2xl border border-(--color-border)">
                 <div className="flex items-center justify-between">
                   <div className="flex items-start gap-4">
                     <AuthorAvatar author={article.author} size="lg" />
@@ -345,7 +362,7 @@ export default function ArticleDetailPage() {
                           onChange={(e) => setCommentText(e.target.value)}
                           placeholder="Share your thoughts…"
                           rows={3}
-                          className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] bg-white text-ink-900 font-body text-sm outline-none focus:ring-2 focus:ring-ember-600/25 focus:border-ember-600 resize-none transition-all"
+                          className="w-full px-4 py-3 rounded-xl border border-(--color-border) bg-white text-ink-900 font-body text-sm outline-none focus:ring-2 focus:ring-ember-600/25 focus:border-ember-600 resize-none transition-all"
                         />
                         <div className="flex justify-end mt-2">
                           <button
@@ -359,7 +376,7 @@ export default function ArticleDetailPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="mb-8 p-4 bg-ink-50 rounded-xl border border-[var(--color-border)] text-center">
+                    <div className="mb-8 p-4 bg-ink-50 rounded-xl border border-(--color-border) text-center">
                       <p className="text-sm text-ink-600 font-body mb-3">
                         Sign in to join the conversation
                       </p>
@@ -403,7 +420,7 @@ export default function ArticleDetailPage() {
               <div className="sticky top-20 space-y-5">
 
                 {/* Writer card */}
-                <div className="border border-[var(--color-border)] rounded-xl p-4 bg-white">
+                <div className="border border-(--color-border) rounded-xl p-4 bg-white">
                   <p className="text-[11px] font-sans font-bold uppercase tracking-widest text-ink-400 mb-3">
                     About the Writer
                   </p>
@@ -517,7 +534,7 @@ function CommentThread({
 
       <div className="flex-1">
         {/* Bubble */}
-        <div className="bg-white border border-[var(--color-border)] rounded-xl px-4 py-3">
+        <div className="bg-white border border-(--color-border) rounded-xl px-4 py-3">
           <div className="flex items-center justify-between mb-2">
             <span className="font-sans font-semibold text-ink-900 text-sm">
               {comment.author?.name}
@@ -555,7 +572,7 @@ function CommentThread({
               onChange={(e) => onReplyTextChange(e.target.value)}
               placeholder="Write a reply…"
               rows={2}
-              className="flex-1 px-3 py-2 rounded-xl border border-[var(--color-border)] bg-white text-ink-900 font-body text-sm outline-none focus:ring-2 focus:ring-ember-600/25 focus:border-ember-600 resize-none"
+              className="flex-1 px-3 py-2 rounded-xl border border-(--color-border) bg-white text-ink-900 font-body text-sm outline-none focus:ring-2 focus:ring-ember-600/25 focus:border-ember-600 resize-none"
             />
             <button
               onClick={() => onSubmitReply(comment._id)}
@@ -569,14 +586,14 @@ function CommentThread({
 
         {/* Nested replies */}
         {comment.replies && comment.replies.length > 0 && (
-          <div className="mt-4 pl-4 border-l-2 border-[var(--color-border)] space-y-4">
+          <div className="mt-4 pl-4 border-l-2 border-(--color-border) space-y-4">
             {comment.replies.map((reply) => (
               <div key={reply._id} className="flex gap-3">
                 <div className="w-7 h-7 rounded-full bg-ink-200 flex items-center justify-center text-ink-600 text-[10px] font-bold shrink-0">
                   {getInitials(reply.author?.name ?? "?")}
                 </div>
                 <div className="flex-1">
-                  <div className="bg-ink-50 border border-[var(--color-border)] rounded-xl px-3 py-2.5">
+                  <div className="bg-ink-50 border border-(--color-border) rounded-xl px-3 py-2.5">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-sans font-semibold text-ink-900 text-xs">
                         {reply.author?.name}
@@ -625,13 +642,13 @@ function RelatedArticles({
   if (!related.length) return null;
 
   return (
-    <div className="border border-[var(--color-border)] rounded-xl overflow-hidden bg-white">
-      <div className="px-4 py-3 border-b border-[var(--color-border)]">
+    <div className="border border-(--color-border) rounded-xl overflow-hidden bg-white">
+      <div className="px-4 py-3 border-b border-(--color-border)">
         <p className="text-[11px] font-sans font-bold uppercase tracking-widest text-ink-400">
           Related Stories
         </p>
       </div>
-      <div className="divide-y divide-[var(--color-border)]">
+      <div className="divide-y divide-(--color-border)">
         {related.map((a) => (
           <Link
             key={a._id}

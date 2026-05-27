@@ -39,7 +39,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-(--color-bg) px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 justify-center mb-4">
@@ -54,7 +54,7 @@ export default function RegisterPage() {
           <p className="text-sm text-ink-500 font-sans">Join the OsunGist community</p>
         </div>
 
-        <div className="bg-white border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
+        <div className="bg-white border border-(--color-border) rounded-2xl p-6 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
             {[
               { key: "name",  label: "Full Name", type: "text",  placeholder: "Your full name" },
@@ -70,7 +70,7 @@ export default function RegisterPage() {
                   value={form[key as keyof typeof form]}
                   onChange={update(key as keyof typeof form)}
                   placeholder={placeholder}
-                  className="w-full px-3 py-2.5 rounded-xl border border-(--color-border) bg-(--color-bg)] text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all"
+                  className="w-full px-3 py-2.5 rounded-xl border bor(--color-border(--color-bg) text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all"
                 />
               </div>
             ))}
@@ -86,7 +86,7 @@ export default function RegisterPage() {
                   value={form.password}
                   onChange={update("password")}
                   placeholder="Min 8 chars, 1 uppercase, 1 number, 1 special"
-                  className="w-full px-3 py-2.5 pr-10 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all"
+                  className="w-full px-3 py-2.5 pr-10 rounded-xl border border-(--color-border) bg-(--color-bg) text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all"
                 />
                 <button
                   type="button"
@@ -108,7 +108,7 @@ export default function RegisterPage() {
                 value={form.confirmPassword}
                 onChange={update("confirmPassword")}
                 placeholder="••••••••"
-                className="w-full px-3 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all"
+                className="w-full px-3 py-2.5 rounded-xl border border-(--color-border) bg-(--color-bg) text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all"
               />
             </div>
 

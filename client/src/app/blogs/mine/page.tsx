@@ -29,7 +29,7 @@ function DeleteModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-ink-950/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl border border-[var(--color-border)] shadow-2xl max-w-md w-full p-6">
+      <div className="bg-white rounded-2xl border border-(--color-border) shadow-2xl max-w-md w-full p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
             <AlertTriangle size={18} className="text-red-600" />
@@ -49,7 +49,7 @@ function DeleteModal({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="flex-1 py-2.5 border border-[var(--color-border)] rounded-xl text-sm font-sans font-semibold text-ink-700 hover:bg-ink-50 transition-colors disabled:opacity-50"
+            className="flex-1 py-2.5 border border-(--color-border) rounded-xl text-sm font-sans font-semibold text-ink-700 hover:bg-ink-50 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
@@ -86,7 +86,7 @@ function BlogRow({
   onDelete: (id: string, title: string) => void;
 }) {
   return (
-    <div className="group bg-white border border-[var(--color-border)] rounded-2xl overflow-hidden hover:shadow-md transition-all duration-200">
+    <div className="group bg-white border border-(--color-border) rounded-2xl overflow-hidden hover:shadow-md transition-all duration-200">
       <div className="flex items-stretch gap-0">
         {/* Cover thumbnail */}
         {blog.featuredImage?.url ? (
@@ -98,7 +98,7 @@ function BlogRow({
             />
           </div>
         ) : (
-          <div className="shrink-0 w-28 sm:w-36 bg-gradient-to-br from-ink-100 to-ink-200 flex items-center justify-center">
+          <div className="shrink-0 w-28 sm:w-36 bg-linear-to-br from-ink-100 to-ink-200 flex items-center justify-center">
             <BookOpen size={24} className="text-ink-300" />
           </div>
         )}

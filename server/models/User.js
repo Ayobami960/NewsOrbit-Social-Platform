@@ -50,6 +50,7 @@ const userSchema = new mongoose.Schema(
       totalArticles: { type: Number, default: 0 },
       totalBlogs: { type: Number, default: 0 },
       totalViews: { type: Number, default: 0 },
+      totalLikes: { type: Number, default: 0 },
       totalComments: { type: Number, default: 0 },
       totalFollowers: { type: Number, default: 0 },
     },

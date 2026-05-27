@@ -77,7 +77,7 @@ export default function SubscribePage() {
                       </label>
                       <input type="text" value={name} onChange={e => setName(e.target.value)}
                         placeholder="Adebayo Ojo"
-                        className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] bg-white text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all" />
+                        className="w-full px-4 py-3 rounded-xl border border-(--color-border) bg-white text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all" />
                     </div>
                     <div>
                       <label className="block text-[11px] font-sans font-bold text-ink-500 uppercase tracking-widest mb-1.5">
@@ -85,7 +85,7 @@ export default function SubscribePage() {
                       </label>
                       <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
                         placeholder="you@example.com"
-                        className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] bg-white text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all" />
+                        className="w-full px-4 py-3 rounded-xl border border-(--color-border) bg-white text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all" />
                     </div>
                     <button type="submit" disabled={subscribeMut.isPending}
                       className="w-full py-3 bg-ember-600 hover:bg-ember-700 text-white font-sans font-semibold rounded-xl text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
@@ -145,7 +145,7 @@ export default function SubscribePage() {
               ))}
 
               {/* Social proof */}
-              <div className="mt-8 pt-8 border-t border-[var(--color-border)]">
+              <div className="mt-8 pt-8 border-t border-(--color-border)">
                 <p className="text-[11px] font-sans font-bold uppercase tracking-widest text-ink-400 mb-4">
                   Trusted by readers across Osun
                 </p>

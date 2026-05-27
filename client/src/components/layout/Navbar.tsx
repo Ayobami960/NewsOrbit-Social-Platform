@@ -15,11 +15,11 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [scrolled,    setScrolled] = useState(false);
-  const [mobileOpen,  setMobileOpen] = useState(false);
-  const [searchOpen,  setSearchOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [userMenu, setUserMenu]  = useState(false);
+  const [userMenu, setUserMenu] = useState(false);
 
   const unread = notifData?.unreadCount ?? 0;
 
@@ -95,40 +95,30 @@ export default function Navbar() {
 
             {/* Desktop nav */}
             <nav className="hidden lg:flex items-center gap-1">
-              <Link href="/"     className={navLink("/")}>Home</Link>
+              <Link href="/" className={navLink("/")}>Home</Link>
               <Link href="/news" className={navLink("/news")}>News</Link>
 
-              {/* Categories dropdown */}
-              {/* <div className="relative group">
-                <button className="flex items-center gap-1 px-3 py-1.5 rounded text-sm font-sans font-medium text-ink-700 hover:text-ink-900 transition-colors">
-                  Categories
-                  <ChevronDown size={13} className="group-hover:rotate-180 transition-transform duration-200" />
-                </button>
-                <div className="absolute top-full left-0 mt-1 w-52 bg-white border border-(--color-border) rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 z-50">
-                  {categories.slice(0, 10).map(cat => (
-                    <Link
-                      key={cat._id}
-                      href={`/news?category=${cat.slug}`}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm font-sans text-ink-700 hover:bg-ink-50 hover:text-ink-900 transition-colors"
-                    >
-                      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: cat.color }} />
-                      {cat.name}
-                    </Link>
-                  ))}
-                </div>
-              </div> */}
+              <Link href="/blogs" className={navLink("/blogs")}>General Post</Link>
 
-              <Link href="/blogs" className={navLink("/blogs")}>Voices of the people</Link>
+              <Link href="/about" className={navLink("/about")}>About Us</Link>
+              <Link href="/contact" className={navLink("/contact")}>Contact</Link>
 
               {/* Writers — only visible when logged in */}
               {isLoggedIn && (
                 <>
-                <Link href="/writers" className={navLink("/writers")}>Writers</Link>
-                <Link href="/blogs/create" className={navLink("/blogs/create")}>Create post</Link>
+                  <Link href="/writers" className={navLink("/writers")}>Writers</Link>
+                  <Link href="/blogs/create"
+                    className="flex-1 text-center p-2 text-sm font-sans font-semibold text-white bg-ember-600 rounded-lg hover:bg-ember-700 transition-colors">
+                    Create post
+                  </Link>
+
                 </>
 
-                
+
               )}
+
+
+
             </nav>
 
             {/* Right actions */}
@@ -198,10 +188,6 @@ export default function Navbar() {
                 </>
               ) : (
                 <div className="hidden sm:flex items-center gap-2">
-                  <Link href="/login"
-                    className="px-4 py-1.5 text-sm font-sans font-medium text-ink-700 hover:text-ink-900 transition-colors">
-                    Sign in
-                  </Link>
                   <Link href="/register"
                     className="px-4 py-1.5 bg-ember-600 hover:bg-ember-700 text-white text-sm font-sans font-semibold rounded-lg transition-colors">
                     Join Free
@@ -242,9 +228,9 @@ export default function Navbar() {
           <div className="lg:hidden border-t border-(--color-border) bg-white py-4 px-4">
             <nav className="flex flex-col gap-1">
               {[
-                { href: "/",      label: "Home" },
-                { href: "/news",  label: "News" },
-                { href: "/blogs", label: "Community" },
+                { href: "/", label: "Home" },
+                { href: "/news", label: "News" },
+                { href: "/blogs", label: "General Blog" },
                 ...(isLoggedIn ? [{ href: "/writers", label: "Writers" }] : []),
               ].map(item => (
                 <Link
@@ -276,10 +262,10 @@ export default function Navbar() {
 
               {!isLoggedIn && (
                 <div className="flex gap-2 mt-3 border-t border-(--color-border) pt-3">
-                  <Link href="/login"
+                  {/* <Link href="/login"
                     className="flex-1 text-center py-2 text-sm font-sans font-medium text-ink-700 border border-(--color-border) rounded-lg hover:bg-ink-50 transition-colors">
                     Sign In
-                  </Link>
+                  </Link> */}
                   <Link href="/register"
                     className="flex-1 text-center py-2 text-sm font-sans font-semibold text-white bg-ember-600 rounded-lg hover:bg-ember-700 transition-colors">
                     Join Free

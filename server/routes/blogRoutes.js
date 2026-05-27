@@ -7,6 +7,7 @@ const {
   getBlogs,
   getBlogBySlug,
   getMyBlogs,
+  getBlogById,
   getBlogLikers,
   createBlog,
   updateBlog,
@@ -23,12 +24,19 @@ const upload = multer({
     else cb(new Error("Only images allowed"), false);
   },
 });
-
 // ── Routes ───────────────────────────────────────────────
 // ⚠️ Specific paths before parameterised ones
-router.get("/mine",       protect,      getMyBlogs);
-router.get("/",           optionalAuth, getBlogs);
-router.get("/:slug",      optionalAuth, getBlogBySlug);
+router.get("/mine", protect, getMyBlogs);
+router.get("/", optionalAuth, getBlogs);
+
+// ── Public: fetch by slug ─────────────────────────────────
+router.get("/slug/:slug", optionalAuth, getBlogBySlug);      // ✅ distinct prefix
+
+// ── Authenticated: fetch by ID (owner/admin edit view) ────
+router.get("/:id", protect, getBlogById);
+router.delete("/:id", protect, deleteBlog);
+router.post("/:id/like", protect, likeBlog);
+router.get("/:id/likers", protect, restrictTo("super_admin", "admin", "writer", "user"), getBlogLikers);
 
 router.post(
   "/",
@@ -44,8 +52,5 @@ router.patch(
   updateBlog
 );
 
-router.delete("/:id",    protect, deleteBlog);
-router.post("/:id/like",  protect, likeBlog);
-router.get("/:id/likers",  protect, restrictTo("super_admin", "admin", "writer", "user"), getBlogLikers);
-
+module.exports = router;
 module.exports = router;
