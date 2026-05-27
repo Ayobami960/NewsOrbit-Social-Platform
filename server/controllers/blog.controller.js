@@ -50,7 +50,14 @@ exports.getBlogBySlug = async (req, res, next) => {
 
     if (!blog) return sendNotFound(res, "Blog not found.");
 
+    // Increment blog views and also keep author's total views in sync
     Blog.findByIdAndUpdate(blog._id, { $inc: { views: 1 } }).exec();
+    try {
+      const authorId = blog.author?._id || blog.author;
+      User.findByIdAndUpdate(authorId, { $inc: { "stats.totalViews": 1 } }).exec();
+    } catch (e) {
+      // Non-fatal: continue even if updating user stats fails
+    }
 
     const blogObj = blog.toObject();
     const likedBy = blogObj.likedBy || [];
@@ -246,6 +253,13 @@ exports.likeBlog = async (req, res, next) => {
     }
 
     await blog.save();
+
+    // Update author's totalLikes stat
+    try {
+      await User.findByIdAndUpdate(blog.author, { $inc: { "stats.totalLikes": alreadyLiked ? -1 : 1 } }).exec();
+    } catch (e) {
+      // Non-fatal
+    }
 
     return sendSuccess(res, {
       likes:   blog.likes,

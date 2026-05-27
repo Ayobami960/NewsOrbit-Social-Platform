@@ -302,7 +302,7 @@ export default function UserProfilePage() {
                 <div className="flex items-center gap-1.5">
                   <Eye size={14} className="text-ink-400" />
                   <span className="font-display font-bold text-ink-900 text-sm">
-                    {formatNumber(profile.stats?.totalViews ?? 0)}
+                    {formatNumber(user?.stats?.totalViews ?? 0)}
                   </span>
                   <span className="text-xs font-sans text-ink-500">Views</span>
                 </div>
@@ -310,7 +310,7 @@ export default function UserProfilePage() {
                 <div className="flex items-center gap-1.5">
                   <Heart size={14} className="text-ink-400" />
                   <span className="font-display font-bold text-ink-900 text-sm">
-                    {formatNumber(profile.stats?.totalLikes ?? 0)}
+                    {formatNumber(user?.stats?.totalLikes ?? 0)}
                   </span>
                   <span className="text-xs font-sans text-ink-500">Likes</span>
                 </div>
