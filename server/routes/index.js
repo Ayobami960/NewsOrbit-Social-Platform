@@ -10,6 +10,9 @@ const newsletterRoutes = require("./newsletterRoutes");
 const pushRoutes = require("./pushRoutes");
 const followRoutes = require("./followRoutes");
 const notificationRoutes = require("./notificationRoutes");
+const schedulerRoutes = require('./schedulerRoute')
+
+
 
 
 
@@ -21,7 +24,7 @@ const router = express.Router();
 router.use("/auth",       authRoutes);
 router.use("/users",      userRoutes);
 router.use("/admin",      adminRoutes);
-
+router.use('/api', schedulerRoutes)
 // ── Comment routes ─────────────────────────────────────────────────────────────
 // Nested  → /api/v1/articles/:articleId/comments
 //         → /api/v1/blogs/:blogId/comments

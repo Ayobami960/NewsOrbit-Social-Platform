@@ -1,15 +1,16 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
+  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "server.js" }],
+  "functions": {
+    "server.js": {
+      "maxDuration": 30
     }
-  ],
-  "routes": [
+  },
+  "crons": [
     {
-      "src": "/(.*)",
-      "dest": "server.js"
+      "path": "/api/scheduler/run",
+      "schedule": "0 * * * *"
     }
   ]
 }

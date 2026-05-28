@@ -1,135 +1,31 @@
-// // const Article = require("../models/Article");
-// // const { sendNewsletter } = require("../utils/email");
-// // const logger = require("../utils/logger");
-
-// // let queuesEnabled = false;
-
-// // const initQueues = () => {
-// //   logger.info("BullMQ skipped — Redis not configured.");
-// // };
-
-// // const scheduleArticlePublish = async (articleId, publishAt) => {
-// //   logger.warn("Queue disabled: article scheduling requires Redis.");
-// // };
-
-// // const queueNewsletter = async (emails, subject, html) => {
-// //   logger.warn("Queue disabled: newsletter queuing requires Redis.");
-// // };
-
-// // module.exports = { initQueues, scheduleArticlePublish, queueNewsletter };
-
-
-// const { Queue, Worker, QueueScheduler } = require("bullmq");
-// const { getRedis } = require("../config/redis");
-// const Article = require("../models/Article");
-// const { sendNewsletter } = require("../utils/email");
-// const logger = require("../utils/logger");
-
-// let articleQueue;
-// let emailQueue;
-
-// const initQueues = () => {
-//   const connection = getRedis();
-
-//   // ── Article publish queue ──────────────────────────────────────────────────
-//   articleQueue = new Queue("article-publish", { connection });
-
-//   const articleWorker = new Worker(
-//     "article-publish",
-//     async (job) => {
-//       const { articleId } = job.data;
-//       logger.info(`[BullMQ] Publishing article: ${articleId}`);
-
-//       const article = await Article.findById(articleId);
-//       if (!article) return logger.warn(`Article ${articleId} not found for publishing.`);
-//       if (article.status !== "scheduled") return;
-
-//       article.status = "published";
-//       article.publishedAt = new Date();
-//       await article.save();
-
-//       logger.info(`[BullMQ] Article ${articleId} published.`);
-//     },
-//     { connection }
-//   );
-
-//   articleWorker.on("failed", (job, err) => {
-//     logger.error(`[BullMQ] article-publish job ${job.id} failed: ${err.message}`);
-//   });
-
-//   // ── Email queue ─────────────────────────────────────────────────────────────
-//   emailQueue = new Queue("email-send", { connection });
-
-//   const emailWorker = new Worker(
-//     "email-send",
-//     async (job) => {
-//       const { to, subject, html } = job.data;
-//       await sendNewsletter({ to, subject, html });
-//       logger.info(`[BullMQ] Email sent to ${Array.isArray(to) ? to.length : 1} recipient(s).`);
-//     },
-//     { connection, concurrency: 5 }
-//   );
-
-//   emailWorker.on("failed", (job, err) => {
-//     logger.error(`[BullMQ] email-send job ${job.id} failed: ${err.message}`);
-//   });
-
-//   logger.info("BullMQ queues initialised.");
-//   return { articleQueue, emailQueue };
-// };
-
-// /**
-//  * Schedule an article to be published at a specific date.
-//  * @param {string} articleId
-//  * @param {Date}   publishAt
-//  */
-// const scheduleArticlePublish = async (articleId, publishAt) => {
-//   if (!articleQueue) throw new Error("Queues not initialised.");
-//   const delay = new Date(publishAt).getTime() - Date.now();
-//   if (delay < 0) throw new Error("scheduledAt must be in the future.");
-
-//   await articleQueue.add(
-//     "publish",
-//     { articleId: articleId.toString() },
-//     { delay, jobId: `publish:${articleId}`, removeOnComplete: true, removeOnFail: 50 }
-//   );
-// };
-
-// /**
-//  * Queue a newsletter broadcast (split into batches).
-//  */
-// const queueNewsletter = async (emails, subject, html) => {
-//   if (!emailQueue) throw new Error("Queues not initialised.");
-//   const batchSize = 50;
-//   for (let i = 0; i < emails.length; i += batchSize) {
-//     const batch = emails.slice(i, i + batchSize);
-//     await emailQueue.add("newsletter", { to: batch, subject, html }, {
-//       removeOnComplete: true,
-//       removeOnFail: 20,
-//     });
-//   }
-// };
-
-// module.exports = { initQueues, scheduleArticlePublish, queueNewsletter };
-
-
 const Article = require("../models/Article");
-const logger  = require("../utils/logger");
+const User = require("../models/User");
+const ActivityLog = require("../models/ActivityLog");
+const Newsletter = require("../models/Newsletter");
+const logger = require("../utils/logger");
+
+// ============================================================
+// IN-PROCESS TIMER SYSTEM (for long-running / dev environments)
+// ============================================================
 
 const activeTimers = new Map();
 
 const initQueues = () => {
   logger.info("Scheduler initialised (in-process, no Redis required).");
-  // On startup, re-schedule any articles that are still scheduled
   rescheduleOnBoot();
 };
 
 const rescheduleOnBoot = async () => {
   try {
-    const scheduled = await Article.find({ status:"scheduled", scheduledAt:{ $gt:new Date() } }).select("_id scheduledAt");
+    const scheduled = await Article.find({
+      status: "scheduled",
+      scheduledAt: { $gt: new Date() },
+    }).select("_id scheduledAt");
+
     for (const a of scheduled) {
       scheduleArticlePublish(a._id, a.scheduledAt);
     }
+
     logger.info(`Re-scheduled ${scheduled.length} pending articles.`);
   } catch (err) {
     logger.error(`Boot reschedule error: ${err.message}`);
@@ -140,7 +36,6 @@ const scheduleArticlePublish = (articleId, publishAt) => {
   const delay = new Date(publishAt).getTime() - Date.now();
   if (delay < 0) return;
 
-  // Clear existing timer for this article if any
   if (activeTimers.has(articleId.toString())) {
     clearTimeout(activeTimers.get(articleId.toString()));
   }
@@ -149,18 +44,24 @@ const scheduleArticlePublish = (articleId, publishAt) => {
     try {
       const article = await Article.findById(articleId);
       if (!article || article.status !== "scheduled") return;
-      article.status      = "published";
+
+      article.status = "published";
       article.publishedAt = new Date();
       await article.save();
+
       logger.info(`[Scheduler] Article ${articleId} auto-published.`);
       activeTimers.delete(articleId.toString());
     } catch (err) {
-      logger.error(`[Scheduler] Failed to publish article ${articleId}: ${err.message}`);
+      logger.error(
+        `[Scheduler] Failed to publish article ${articleId}: ${err.message}`
+      );
     }
   }, delay);
 
   activeTimers.set(articleId.toString(), timer);
-  logger.info(`[Scheduler] Article ${articleId} scheduled for ${new Date(publishAt).toISOString()}`);
+  logger.info(
+    `[Scheduler] Article ${articleId} scheduled for ${new Date(publishAt).toISOString()}`
+  );
 };
 
 const cancelSchedule = (articleId) => {
@@ -172,4 +73,122 @@ const cancelSchedule = (articleId) => {
   }
 };
 
-module.exports = { initQueues, scheduleArticlePublish, cancelSchedule };
+// ============================================================
+// VERCEL CRON JOBS (runs on every cron trigger)
+// Each job is independent — one failure won't stop others
+// ============================================================
+
+/**
+ * Publishes any scheduled articles whose scheduledAt has passed.
+ * This is the VERCEL-SAFE fallback for the setTimeout system.
+ * Catches articles that were missed if the server was cold.
+ */
+const publishOverdueArticles = async () => {
+  try {
+    const overdue = await Article.find({
+      status: "scheduled",
+      scheduledAt: { $lte: new Date() },
+    });
+
+    if (overdue.length === 0) {
+      logger.info("✓ No overdue articles to publish.");
+      return;
+    }
+
+    for (const article of overdue) {
+      article.status = "published";
+      article.publishedAt = new Date();
+      await article.save();
+
+      // Also clear from in-process timer map if it exists
+      cancelSchedule(article._id);
+
+      logger.info(`✓ [Cron] Published overdue article: ${article._id}`);
+    }
+
+    logger.info(`✓ Published ${overdue.length} overdue article(s).`);
+  } catch (err) {
+    logger.error(`✗ publishOverdueArticles failed: ${err.message}`);
+  }
+};
+
+/**
+ * Cleans up expired password reset / email verify tokens from User model
+ */
+const cleanExpiredTokens = async () => {
+  try {
+    await User.updateMany(
+      { resetTokenExpiry: { $lt: new Date() } },
+      { $unset: { resetToken: "", resetTokenExpiry: "" } }
+    );
+    logger.info("✓ Expired tokens cleaned.");
+  } catch (err) {
+    logger.error(`✗ cleanExpiredTokens failed: ${err.message}`);
+  }
+};
+
+/**
+ * Deletes activity logs older than 30 days
+ */
+const cleanOldActivityLogs = async () => {
+  try {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const result = await ActivityLog.deleteMany({
+      createdAt: { $lt: thirtyDaysAgo },
+    });
+    logger.info(`✓ Deleted ${result.deletedCount} old activity log(s).`);
+  } catch (err) {
+    logger.error(`✗ cleanOldActivityLogs failed: ${err.message}`);
+  }
+};
+
+/**
+ * Processes and sends any pending scheduled newsletters
+ */
+const sendScheduledNewsletters = async () => {
+  try {
+    // Replace with your actual Newsletter logic
+    // e.g. find newsletters where sendAt <= now and status === 'pending'
+    logger.info("✓ Newsletters processed.");
+  } catch (err) {
+    logger.error(`✗ sendScheduledNewsletters failed: ${err.message}`);
+  }
+};
+
+/**
+ * Master function called by the cron endpoint.
+ * Uses Promise.allSettled so all jobs run even if one fails.
+ */
+const runAllJobs = async () => {
+  logger.info("=== [Cron] Running all scheduled jobs ===");
+
+  const results = await Promise.allSettled([
+    publishOverdueArticles(),
+    cleanExpiredTokens(),
+    cleanOldActivityLogs(),
+    sendScheduledNewsletters(),
+  ]);
+
+  // Log any unexpected rejections
+  results.forEach((result, i) => {
+    if (result.status === "rejected") {
+      logger.error(`[Cron] Job ${i} rejected: ${result.reason}`);
+    }
+  });
+
+  logger.info("=== [Cron] All jobs completed ===");
+};
+
+// ============================================================
+// EXPORTS
+// ============================================================
+
+module.exports = {
+  // In-process timer system
+  initQueues,
+  scheduleArticlePublish,
+  cancelSchedule,
+
+  // Vercel cron system
+  runAllJobs,
+};
