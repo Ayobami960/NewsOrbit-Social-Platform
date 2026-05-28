@@ -29,8 +29,6 @@ async function apiFetchInner<T>(
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
-  } else {
-    console.warn(`⚠️ authFetch called to ${path} without token`);
   }
 
   let serialised: BodyInit | undefined;
@@ -92,6 +90,10 @@ export async function authFetch<T = unknown>(
   opts: ApiFetchOptions = {}
 ): Promise<ApiResponse<T>> {
   let token = getStoredToken();
+
+  if (!token) {
+    console.debug(`⚠️ authFetch called to ${path} without token`);
+  }
 
   try {
     return await apiFetchInner<T>(path, opts, token);

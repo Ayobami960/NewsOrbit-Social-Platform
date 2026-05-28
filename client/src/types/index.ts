@@ -122,6 +122,7 @@ export interface ArticleListItem {
   isPinned: boolean;
   views: number;
   likes: number;
+  isLiked?: boolean;
   readTime: number;
   createdAt: string;
 }

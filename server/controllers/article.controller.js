@@ -497,33 +497,47 @@ const deleteArticle = async (req, res, next) => {
   }
 };
 
-// ====================== LIKE / UNLIKE ARTICLE ======================
 
+// ====================== LIKE / UNLIKE ARTICLE ======================
 const likeArticle = async (req, res, next) => {
   try {
-    const article = await Article.findById(req.params.id).select(
-      "likedBy likes"
-    );
+    const userId = req.user._id;
+
+    // First check if already liked — atomic read
+    const article = await Article.findById(req.params.id)
+      .select("likedBy likes")
+      .lean();
+
     if (!article) return sendNotFound(res, "Article not found.");
- 
-    const userId      = req.user._id;
+
     const alreadyLiked = article.likedBy.some(
       (id) => id.toString() === userId.toString()
     );
- 
-    if (alreadyLiked) {
-      article.likedBy.pull(userId);
-      article.likes = Math.max(0, article.likes - 1);
-    } else {
-      article.likedBy.push(userId);
-      article.likes += 1;
+
+    // Atomic update — no race condition, no double increment
+    const updated = await Article.findByIdAndUpdate(
+      req.params.id,
+      alreadyLiked
+        ? {
+            $pull: { likedBy: userId },
+            $inc:  { likes: -1 },
+          }
+        : {
+            $addToSet: { likedBy: userId }, // addToSet prevents duplicate even if called twice
+            $inc:      { likes: 1 },
+          },
+      { new: true, select: "likes likedBy" }
+    );
+
+    // Clamp likes to 0 in case of any inconsistency
+    if (updated.likes < 0) {
+      await Article.findByIdAndUpdate(req.params.id, { $set: { likes: 0 } });
+      updated.likes = 0;
     }
- 
-    await article.save();
- 
+
     return sendSuccess(
       res,
-      { likes: article.likes, isLiked: !alreadyLiked },
+      { likes: updated.likes, isLiked: !alreadyLiked },
       alreadyLiked ? "Article unliked." : "Article liked."
     );
   } catch (err) {

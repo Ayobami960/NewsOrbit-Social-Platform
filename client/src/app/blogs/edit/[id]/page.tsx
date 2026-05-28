@@ -26,7 +26,7 @@ const TiptapEditor = dynamic(() => import("@/components/ui/Tiptapeditor"), {
           <div
             key={i}
             className="skeleton h-4 rounded"
-            style={{ width: `${60 + Math.random() * 40}%` }}
+            style={{ width: `${60 + (i % 4) * 10}%` }}
           />
         ))}
       </div>

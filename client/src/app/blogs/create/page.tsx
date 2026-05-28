@@ -16,6 +16,7 @@ import Link from "next/link";
 // Dynamically import the Tiptap editor to avoid SSR issues
 const TiptapEditor = dynamic(() => import("@/components/ui/Tiptapeditor"), {
   ssr: false,
+  // For loading fallback, a simple skeleton is provided.
   loading: () => (
     <div
       className="border bor(--color-border)rounded-xl bg-white"
@@ -27,7 +28,7 @@ const TiptapEditor = dynamic(() => import("@/components/ui/Tiptapeditor"), {
           <div
             key={i}
             className="skeleton h-4 rounded"
-            style={{ width: `${60 + Math.random() * 40}%` }}
+            style={{ width: `${60 + (i % 4) * 10}%` }}
           />
         ))}
       </div>
@@ -385,7 +386,7 @@ export default function CreateBlogPage() {
 
               {/* Bottom publish bar */}
               <div className="flex items-center justify-between pt-2 border-t border-(--color-border)">
-                <p className="text-xs font-sans text-ink-400">
+                <p className="hidden md:flex text-xs font-sans text-ink-400">
                   {isValid ? (
                     <span className="text-emerald-600 font-medium">
                       ✓ Ready to publish
@@ -407,7 +408,7 @@ export default function CreateBlogPage() {
                     </>
                   ) : (
                     <>
-                      <Send size={14} /> Publish Blog
+                      <Send size={14} /> Send
                     </>
                   )}
                 </button>

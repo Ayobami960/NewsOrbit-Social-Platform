@@ -64,27 +64,43 @@ export default function TiptapEditor({
 }: TiptapEditorProps) {
   const imgInputRef = useRef<HTMLInputElement>(null);
 
+  // Build extensions list and remove duplicates by name to avoid Tiptap's
+  // "Duplicate extension names" warnings (e.g. 'link', 'underline').
+  const rawExtensions = [
+    StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+    Underline,
+    Placeholder.configure({ placeholder, emptyEditorClass: "is-editor-empty" }),
+    Image.configure({
+      inline: false,
+      allowBase64: true,
+      HTMLAttributes: { class: "rounded-xl max-w-full my-4" },
+    }),
+    Link.configure({
+      openOnClick: false,
+      HTMLAttributes: {
+        class: "text-ember-600 underline underline-offset-2 hover:text-ember-700",
+        rel: "noopener noreferrer",
+        target: "_blank",
+      },
+    }),
+    TextAlign.configure({ types: ["heading", "paragraph"] }),
+    CharacterCount.configure({ limit: maxLength }),
+  ];
+
+  const extensions = (() => {
+    const seen = new Set<string>();
+    return rawExtensions.filter((ext) => {
+      // extensions created via configure() or imported directly should expose a `name` property
+      const name = (ext as any)?.name ?? (ext as any)?.constructor?.name;
+      if (!name) return true;
+      if (seen.has(name)) return false;
+      seen.add(name);
+      return true;
+    });
+  })();
+
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
-      Underline,
-      Placeholder.configure({ placeholder, emptyEditorClass: "is-editor-empty" }),
-      Image.configure({
-        inline: false,
-        allowBase64: true,
-        HTMLAttributes: { class: "rounded-xl max-w-full my-4" },
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: "text-ember-600 underline underline-offset-2 hover:text-ember-700",
-          rel: "noopener noreferrer",
-          target: "_blank",
-        },
-      }),
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      CharacterCount.configure({ limit: maxLength }),
-    ],
+    extensions,
     content,
     editorProps: {
       attributes: {

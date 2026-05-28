@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
@@ -35,6 +35,8 @@ export default function ArticleDetailPage() {
   const { slug }             = useParams<{ slug: string }>();
   const { user, isLoggedIn } = useAuth();
 
+  const likeInFlight = useRef(false);
+
   // ── Data ──────────────────────────────────────────────────────────────────
   const { data: article, isLoading } = useArticle(slug ?? "");
   const { data: commentData }        = useArticleComments(article?._id ?? "");
@@ -53,13 +55,15 @@ export default function ArticleDetailPage() {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
-  const handleLike = () => {
-    if (!isLoggedIn)      { toast.error("Sign in to like articles."); return; }
-    if (likeMut.isPending) return;
-    // Just fire — useLikeArticle handles the optimistic update,
-    // server reconciliation, and rollback entirely on its own.
-    likeMut.mutate(article!._id);
-  };
+ const handleLike = () => {
+  if (!isLoggedIn) { toast.error("Sign in to like articles."); return; }
+  if (likeInFlight.current) return;  
+  likeInFlight.current = true;
+  likeMut.mutate(article!._id, {
+    onSettled: () => { likeInFlight.current = false; },  // release after server responds
+  });
+};
+
 
   const handleShare = () => {
     if (typeof navigator === "undefined") return;
@@ -105,7 +109,7 @@ export default function ArticleDetailPage() {
               <div
                 key={i}
                 className="skeleton h-5 rounded"
-                style={{ width: `${75 + Math.random() * 25}%` }}
+                style={{ width: `${75 + (i % 3) * 8}%` }}
               />
             ))}
           </div>
@@ -316,7 +320,7 @@ export default function ArticleDetailPage() {
               <div className="mt-8 p-5 bg-ink-50 rounded-2xl border border-(--color-border)">
                 <div className="flex items-center justify-between">
                   <div className="flex items-start gap-4">
-                    <AuthorAvatar author={article.author} size="lg" />
+                    <AuthorAvatar author={article.author} size="md" />
                     <div>
                       <p className="text-[11px] font-sans font-bold uppercase tracking-widest text-ink-400 mb-1">
                         Written by
@@ -338,7 +342,7 @@ export default function ArticleDetailPage() {
                     href={`/writers/${article.author._id}`}
                     className="inline-block mt-3 px-4 py-1.5 bg-ember-600 hover:bg-ember-700 text-white text-xs font-sans font-semibold rounded-lg transition-colors"
                   >
-                    View all articles →
+                    View all →
                   </Link>
                 </div>
               </div>

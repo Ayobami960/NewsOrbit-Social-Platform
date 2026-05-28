@@ -463,7 +463,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, authFetch } from "@/lib/apiFetch";
+import { apiFetch, authFetch, getStoredToken } from "@/lib/apiFetch";
 import { queryKeys } from "@/lib/queryKeys";
 import type { Blog, Category, Comment, BlogFilters, User, ApiResponse } from "@/types";
 import { toast } from "react-toastify";
@@ -595,8 +595,11 @@ export function useDeleteBlog() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) =>
-      authFetch(`/blog/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => {
+      const token = getStoredToken();
+      if (!token) throw new Error("Not authenticated");
+      return authFetch(`/blog/${id}`, { method: "DELETE" });
+    },
 
     onSuccess: (_, id) => {
       // Remove from all list caches
@@ -769,8 +772,11 @@ export function useFollowStatus(userId: string, enabled: boolean) {
 export function useFollow() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) =>
-      authFetch(`/user/follow/${id}`, { method: "POST" }),
+    mutationFn: (id: string) => {
+      const token = getStoredToken();
+      if (!token) throw new Error("Not authenticated");
+      return authFetch(`/user/follow/${id}`, { method: "POST" });
+    },
     onSuccess: (_, id) => {
       qc.invalidateQueries({ queryKey: queryKeys.users.followStatus(id) });
       qc.invalidateQueries({ queryKey: queryKeys.users.public(id) });
@@ -783,8 +789,11 @@ export function useFollow() {
 export function useUnfollow() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) =>
-      authFetch(`/user/follow/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => {
+      const token = getStoredToken();
+      if (!token) throw new Error("Not authenticated");
+      return authFetch(`/user/follow/${id}`, { method: "DELETE" });
+    },
     onSuccess: (_, id) => {
       qc.invalidateQueries({ queryKey: queryKeys.users.followStatus(id) });
       qc.invalidateQueries({ queryKey: queryKeys.users.public(id) });
@@ -852,6 +861,8 @@ export function usePostComment() {
       const url = articleId
         ? `/articles/${articleId}/comments`
         : `/blog/${blogId}/comments`;
+      const token = getStoredToken();
+      if (!token) throw new Error("Not authenticated");
       return authFetch<{ comment: Comment }>(url, {
         method: "POST",
         body: { body, parent },
@@ -885,10 +896,13 @@ interface CommentQueryData {
 export function useLikeComment() {
   const qc = useQueryClient();
   return useMutation<ApiResponse<CommentLikeResponse>, Error, string>({
-    mutationFn: (commentId: string) =>
-      authFetch<CommentLikeResponse>(`/comments/${commentId}/like`, {
+    mutationFn: (commentId: string) => {
+      const token = getStoredToken();
+      if (!token) throw new Error("Not authenticated");
+      return authFetch<CommentLikeResponse>(`/comments/${commentId}/like`, {
         method: "POST",
-      }),
+      });
+    },
 
     onMutate: async (commentId: string) => {
       const commentCaches = qc
@@ -966,8 +980,11 @@ export function useNotifications() {
 export function useMarkNotificationRead() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) =>
-      authFetch(`/notifications/${id}/read`, { method: "PATCH" }),
+    mutationFn: (id: string) => {
+      const token = getStoredToken();
+      if (!token) throw new Error("Not authenticated");
+      return authFetch(`/notifications/${id}/read`, { method: "PATCH" });
+    },
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: queryKeys.notifications.list() }),
   });
@@ -976,8 +993,11 @@ export function useMarkNotificationRead() {
 export function useMarkAllRead() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () =>
-      authFetch("/notifications/read-all", { method: "PATCH" }),
+    mutationFn: () => {
+      const token = getStoredToken();
+      if (!token) throw new Error("Not authenticated");
+      return authFetch("/notifications/read-all", { method: "PATCH" });
+    },
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: queryKeys.notifications.list() }),
   });

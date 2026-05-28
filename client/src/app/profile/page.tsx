@@ -564,10 +564,10 @@ export default function ProfilePage() {
                   size={14}
                   className={activeTab === id ? "text-ember-600" : "text-ink-400 group-hover:text-ink-600"}
                 />
-                {label}
+                 <span className="hidden sm:inline">{label}</span>
                 {/* Badge for write tab */}
                 {id === "write" && (
-                  <span className="ml-1 w-4 h-4 rounded-full bg-ember-600 text-white text-[9px] font-bold flex items-center justify-center">
+                  <span className="hidden sm:flex ml-1 w-4 h-4 rounded-full bg-ember-600 text-white text-[9px] font-bold items-center justify-center">
                     +
                   </span>
                 )}

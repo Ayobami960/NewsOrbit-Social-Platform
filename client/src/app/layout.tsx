@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${playfair.variable} ${sourceSerif.variable} ${dmSans.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${playfair.variable} ${sourceSerif.variable} ${dmSans.variable}`}>
       <body suppressHydrationWarning>
         <Providers>
           <AuthProvider>

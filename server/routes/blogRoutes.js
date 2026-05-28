@@ -34,7 +34,7 @@ router.get("/slug/:slug", optionalAuth, getBlogBySlug);      // ✅ distinct pre
 
 // ── Authenticated: fetch by ID (owner/admin edit view) ────
 router.get("/:id", protect, getBlogById);
-router.delete("/:id", protect, deleteBlog);
+router.delete("/:id", protect, restrictTo("super_admin", "admin", "user"), deleteBlog);
 router.post("/:id/like", protect, likeBlog);
 router.get("/:id/likers", protect, restrictTo("super_admin", "admin", "writer", "user"), getBlogLikers);
 
