@@ -94,7 +94,7 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-1 uppercase">
               <Link href="/" className={navLink("/")}>Home</Link>
               <Link href="/news" className={navLink("/news")}>News</Link>
 
@@ -231,13 +231,16 @@ export default function Navbar() {
                 { href: "/", label: "Home" },
                 { href: "/news", label: "News" },
                 { href: "/blogs", label: "General Blog" },
+                { href: "/about", label: "About Us" },
+                { href: "/contact", label: "Contact" },
+
                 ...(isLoggedIn ? [{ href: "/writers", label: "Writers" }] : []),
               ].map(item => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "px-4 py-2.5 rounded-lg text-sm font-sans font-medium transition-colors",
+                    "px-4 py-2.5 rounded-lg uppercase text-sm font-sans font-medium transition-colors",
                     pathname === item.href ? "bg-ember-50 text-ember-600" : "text-ink-700 hover:bg-ink-50"
                   )}
                 >

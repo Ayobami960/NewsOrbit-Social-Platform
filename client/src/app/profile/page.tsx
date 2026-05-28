@@ -284,6 +284,8 @@ function SettingsTab({
   savingProfile: boolean;
   onSave: (e: React.FormEvent) => void;
 }) {
+  const blogCount = user.stats?.totalBlogs ?? user.stats?.totalArticles ?? 0;
+
   const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -381,7 +383,7 @@ function SettingsTab({
           </div>
           <div className="grid grid-cols-2 gap-3 mb-4">
             {[
-              { label: "Blogs",         value: String(user.stats?.totalArticles ?? 0), icon: BookOpen },
+              { label: "Blogs",         value: String(blogCount), icon: BookOpen },
               { label: "Total Views",   value: String(user.stats?.totalViews ?? 0),    icon: Eye },
               { label: "Followers",     value: String(user.followersCount ?? 0),        icon: Users },
               // { label: "Likes",         value: String(user.stats?.totalLikes ?? 0),    icon: Heart },
@@ -436,6 +438,8 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState({
     name: "", bio: "", twitter: "", facebook: "", instagram: "",
   });
+
+  const blogCount = user?.stats?.totalBlogs ?? user?.stats?.totalArticles ?? 0;
 
   useEffect(() => {
     if (!authLoading && !user) { router.push("/login"); return; }
@@ -535,7 +539,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-4 text-[12px] font-sans text-ink-500">
                 <span className="flex items-center gap-1">
                   <BookOpen size={12} className="text-ink-400" />
-                  {user.stats?.totalArticles ?? 0} blogs
+                  {blogCount} blogs
                 </span>
                 <span className="flex items-center gap-1">
                   <Users size={12} className="text-ink-400" />

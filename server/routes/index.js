@@ -32,6 +32,7 @@ router.use("/blogs/:blogId/comments",       nestedRouter);
 router.use("/blog/:blogId/comments",        nestedRouter);
 router.use("/comments",                     standaloneRouter);
 
+
 router.use("/blog",      blogRoutes);
 // router.use("/blogs",      blogRoutes);
 router.use("/articles",   articleRoutes);

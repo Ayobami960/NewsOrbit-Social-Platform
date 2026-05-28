@@ -7,8 +7,8 @@ router.post("/subscribe",  ctrl.subscribe);
 router.get ("/unsubscribe", ctrl.unsubscribe);
 
 // Write access required
-router.get ("/subscribers", protect, restrictTo("writer"), ctrl.getSubscribers);
-router.post("/send", protect, restrictTo("writer"), ctrl.sendBroadcast);
+router.get ("/subscribers", protect, restrictTo("admin", "writer"), ctrl.getSubscribers);
+router.post("/send", protect, restrictTo("admin","writer"), ctrl.sendBroadcast);
 
 
 

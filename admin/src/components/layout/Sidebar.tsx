@@ -27,7 +27,7 @@ const NAV: SidebarNavEntry[] = [
 
     { section: true, label: "System" },
     { to: "/activity", label: "Activity Log", icon: Shield, roles: ["super_admin"] },
-    { to: "/settings", label: "Settings", icon: Settings, roles: ["super_admin", "admin", "writer"] },
+    // { to: "/settings", label: "Settings", icon: Settings, roles: ["super_admin", "admin", "writer"] },
 ];
 interface SidebarProps {
   isOpen: boolean;

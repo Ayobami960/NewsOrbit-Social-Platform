@@ -1,9 +1,9 @@
 import { useState, type FormEvent, type ChangeEvent } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { authFetch } from "@/lib/apiFetch";
-import Layout from "@/components/layout/Layout";
-import { Card, Btn, Input, Textarea, FormGroup, Toggle, Avatar } from "@/components/ui";
-import { ROLE_LABEL } from "@/lib/utils";
+import { useAuth } from "../context/AuthContext";
+import { authFetch } from "../lib/apiFetch";
+import Layout from "../components/layout/Layout";
+import { Card, Btn, Input, Textarea, FormGroup, Toggle, Avatar } from "../components/ui";
+import { ROLE_LABEL } from "../lib/utils";
 import { User, Lock, Shield, Camera } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -49,7 +49,8 @@ export default function Settings() {
       if (avatarFile) fd.append("image", avatarFile);
 
       const { data } = await authFetch<{ user: typeof user }>("/users/me", {
-        method: "PATCH", body: fd, isFormData: true,
+        method: "PATCH", body: fd, 
+        // isFormData: true,
       });
       if (data && setUser) setUser(data.user as any);
       toast.success("Profile updated successfully.");

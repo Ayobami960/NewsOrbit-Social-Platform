@@ -42,6 +42,68 @@ function canAssign(creatorRole, targetRole) {
   return allowedRolesFor(creatorRole).includes(targetRole);
 }
 
+
+
+// GET /api/v1/admin/comments
+// admin / super_admin — fetch all comments across all resources
+exports.getAllComments = async (req, res, next) => {
+  try {
+    const {
+      page = 1,
+      limit = 20,
+      status,
+      search,
+      type,        // "article" | "blog"
+      isSuspicious,
+    } = req.query;
+
+    const filter = { isDeleted: false };
+
+    if (status)             filter.status  = status;
+    if (type === "article") filter.article = { $exists: true, $ne: null };
+    if (type === "blog")    filter.blog    = { $exists: true, $ne: null };
+    if (search)             filter.body    = { $regex: search, $options: "i" };
+
+    // admin scoped to articles written by their writers
+    if (req.user.role === "admin") {
+      const writers = await User.find({ createdBy: req.user._id, role: "writer" })
+        .select("_id")
+        .lean();
+      const writerIds = writers.map((w) => w._id);
+      const articles  = await Article.find({ author: { $in: writerIds } })
+        .select("_id")
+        .lean();
+      filter.article = { $in: articles.map((a) => a._id) };
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const [comments, total] = await Promise.all([
+      Comment.find(filter)
+        .sort("-createdAt")
+        .skip(skip)
+        .limit(parseInt(limit))
+        .populate("author",  "name email avatar role")
+        .populate("article", "title slug")
+        .populate("blog",    "title slug")
+        .lean(),
+      Comment.countDocuments(filter),
+    ]);
+
+    return sendSuccess(res, {
+      comments,
+      pagination: {
+        page:  +page,
+        limit: +limit,
+        total,
+        pages: Math.ceil(total / +limit),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/v1/admin/invite
 // super_admin → invites admin | admin → invites writer

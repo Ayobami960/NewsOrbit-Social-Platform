@@ -203,7 +203,7 @@ export function BlogCard({ blog }: { blog: Blog }) {
           </div>
         </Link>
       )}
-      <div className="p-4">
+      <div className="p-3">
         {(blog.tags ?? []).length > 0 && (
           <div className="flex flex-wrap gap-1 mb-2">
             {(blog.tags ?? []).slice(0, 3).map(tag => (
@@ -261,7 +261,7 @@ export function SectionHeader({ title, subtitle, action }: {
         </div>
         {subtitle && <p className="text-sm text-ink-500 font-body">{subtitle}</p>}
       </div>
-      {action}
+      {/* {action} */}
     </div>
   );
 }

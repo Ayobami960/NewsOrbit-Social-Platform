@@ -216,6 +216,68 @@ exports.updateComment = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+
+
+// PATCH /api/v1/comments/:id/moderate
+// admin / super_admin only — approve, reject, or mark as spam
+exports.moderateComment = async (req, res, next) => {
+  try {
+    const { status, reason } = req.body;
+
+    const VALID_STATUSES = ["approved", "rejected", "spam"];
+    if (!status || !VALID_STATUSES.includes(status)) {
+      return sendError(
+        res,
+        `Status must be one of: ${VALID_STATUSES.join(", ")}.`,
+        400
+      );
+    }
+
+    const comment = await Comment.findById(req.params.id);
+    if (!comment || comment.isDeleted) {
+      return sendNotFound(res, "Comment not found.");
+    }
+
+    // admin scoped check — can only moderate comments on their writers' articles
+    if (req.user.role === "admin" && comment.article) {
+      const Article = require("../models/Article");
+      const User    = require("../models/User");
+
+      const article = await Article.findById(comment.article).select("author").lean();
+      if (article) {
+        const isWriterOfAdmin = await User.exists({
+          _id:       article.author,
+          createdBy: req.user._id,
+          role:      "writer",
+        });
+        if (!isWriterOfAdmin) {
+          return sendForbidden(res, "You can only moderate comments on your writers' articles.");
+        }
+      }
+    }
+
+    comment.status = status;
+    if (reason) comment.moderationReason = stripHtml(reason).slice(0, 300);
+    comment.moderatedBy = req.user._id;
+    comment.moderatedAt = new Date();
+    await comment.save();
+
+    log({
+      user:         req.user._id,
+      action:       "comment_moderate",
+      resource:     comment._id.toString(),
+      resourceType: "Comment",
+      meta:         { status, reason },
+      severity:     status === "spam" ? "warning" : "info",
+      ip:           req.ip,
+    });
+
+    return sendSuccess(res, { comment }, `Comment ${status}.`);
+  } catch (err) {
+    next(err);
+  }
+};
+
 // DELETE /api/v1/comments/:id
 exports.deleteComment = async (req, res, next) => {
   try {

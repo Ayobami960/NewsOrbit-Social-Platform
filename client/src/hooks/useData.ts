@@ -883,6 +883,47 @@ export function usePostComment() {
   });
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMMENTS — edit & delete
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function useEditComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ commentId, body }: { commentId: string; body: string }) => {
+      const token = getStoredToken();
+      if (!token) throw new Error("Not authenticated");
+      return authFetch<{ comment: Comment }>(`/comments/${commentId}`, {
+        method: "PATCH",
+        body:   { body },
+      });
+    },
+    onSuccess: (_, vars) => {
+      // Invalidate all comment caches — covers both article and blog
+      qc.invalidateQueries({ queryKey: queryKeys.comments.all() });
+      toast.success("Comment updated.");
+    },
+    onError: (e: Error) => toast.error(e.message ?? "Failed to update comment."),
+  });
+}
+
+export function useDeleteComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (commentId: string) => {
+      const token = getStoredToken();
+      if (!token) throw new Error("Not authenticated");
+      return authFetch(`/comments/${commentId}`, { method: "DELETE" });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.comments.all() });
+      toast.success("Comment deleted.");
+    },
+    onError: (e: Error) => toast.error(e.message ?? "Failed to delete comment."),
+  });
+}
+
 interface CommentLikeResponse {
   likes: number;
   userLiked: boolean;

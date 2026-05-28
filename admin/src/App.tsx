@@ -14,6 +14,7 @@ import Blogs from "./pages/Blogs";
 import Newsletter from "./pages/Newsletter";
 import Push from "./pages/Push";
 import ActivityLog from "./pages/ActivityLog";
+import Settings from "./pages/Settings";
 
 const ALL_ROLES:  Role[] = ["super_admin", "admin", "writer"];
 const ALL_WRITER: Role[] = ["admin","writer"];
