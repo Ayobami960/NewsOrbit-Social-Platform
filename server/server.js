@@ -109,9 +109,16 @@ const bootstrap = async () => {
   try {
     await connectDB();
     initQueues();
-    server.listen(PORT, () => {
-      logger.info(`🚀  OsunGist API running on port ${PORT} [${process.env.NODE_ENV}]`);
-    });
+
+    // ✅ Only listen in local dev — Vercel handles this itself
+    if (process.env.NODE_ENV !== "production") {
+      server.listen(PORT, () => {
+        logger.info(`🚀  OsunGist API running on port ${PORT} [${process.env.NODE_ENV}]`);
+      });
+    } else {
+      logger.info(`🚀  OsunGist API ready [${process.env.NODE_ENV}]`);
+    }
+
   } catch (err) {
     logger.error("Bootstrap failed:", err);
     process.exit(1);
