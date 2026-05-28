@@ -103,7 +103,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
-const PORT = parseInt(process.env.PORT) || 5000;
+const PORT = parseInt(process.env.PORT) || 8000;
 
 const bootstrap = async () => {
   try {
