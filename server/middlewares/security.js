@@ -1,7 +1,6 @@
 
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
-// const xssClean = require("xss-clean");
 const hpp = require("hpp");
 const rateLimit  = require("express-rate-limit");
 const slowDown = require("express-slow-down");
@@ -51,7 +50,7 @@ const mongoSanitiseMiddleware = (req, res, next) => {
   }
   next();
 };
-// const xssMiddleware = xssClean();
+
 const hppMiddleware = hpp({ whitelist: ["tags","category","status","sort","fields"] });
 
 const globalRateLimiter = rateLimit({
