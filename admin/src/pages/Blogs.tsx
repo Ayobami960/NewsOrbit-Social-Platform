@@ -4,7 +4,7 @@ import Layout from "../components/layout/Layout";
 import { Spinner, Empty, Pagination, Avatar } from "../components/ui";
 import type { Blog } from "../types";
 import { formatDate, timeAgo, truncate } from "../lib/utils";
-import { Heart, MessageCircle, Eye, Trash2, Search, BookOpen, TrendingUp } from "lucide-react";
+import { Heart, MessageCircle, Eye, Search, BookOpen, TrendingUp } from "lucide-react";
 
 /**
  * ADMIN — COMMUNITY BLOGS
@@ -16,15 +16,10 @@ export default function Blogs() {
   const [search, setSearch] = useState("");
 
   const { data, isLoading } = useAdminBlogs({ page, search });
-  const { mutate: deleteBlog, isPending: isDeleting } = useAdminDeleteBlog();
+  const { mutate: deleteBlog } = useAdminDeleteBlog();
 
   const blogs      = data?.blogs      ?? [];
   const pagination = data?.pagination;
-
-  const handleDelete = (id: string, title: string) => {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    deleteBlog(id);
-  };
 
   return (
     <Layout title="Community Blogs">

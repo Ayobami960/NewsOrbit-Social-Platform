@@ -5,7 +5,7 @@ import type { SidebarNavEntry } from "../../types";
 import {
   LayoutDashboard, BarChart2, Newspaper, PenSquare,
   BookOpen, Tag, MessageSquare, Users, Mail, Bell,
-  Shield, Settings, LogOut, Radio, X,
+  Shield, LogOut, Radio, X,
 } from "lucide-react";
 
 const NAV: SidebarNavEntry[] = [

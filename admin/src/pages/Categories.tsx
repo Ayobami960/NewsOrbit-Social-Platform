@@ -123,7 +123,7 @@ export default function Categories() {
         <FormGroup label="Name">
           <Input
             value={form.name}
-            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+            onChange={e => setForm((f: CategoryPayload) => ({ ...f, name: e.target.value }))}
             placeholder="e.g. Politics"
           />
         </FormGroup>
@@ -131,7 +131,7 @@ export default function Categories() {
           <Textarea
             rows={2}
             value={form.description}
-            onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+            onChange={e => setForm((f: CategoryPayload) => ({ ...f, description: e.target.value }))}
             placeholder="Short description…"
           />
         </FormGroup>
@@ -140,12 +140,12 @@ export default function Categories() {
             <input
               type="color"
               value={form.color}
-              onChange={e => setForm(f => ({ ...f, color: e.target.value }))}
+              onChange={e => setForm((f: CategoryPayload) => ({ ...f, color: e.target.value }))}
               className="w-10 h-10 rounded-lg border border-zinc-700 cursor-pointer bg-zinc-900 p-0.5"
             />
             <Input
               value={form.color}
-              onChange={e => setForm(f => ({ ...f, color: e.target.value }))}
+              onChange={e => setForm((f: CategoryPayload) => ({ ...f, color: e.target.value }))}
               className="flex-1 font-mono"
               placeholder="#c0392b"
             />
@@ -155,7 +155,7 @@ export default function Categories() {
           <Input
             type="number"
             value={form.order}
-            onChange={e => setForm(f => ({ ...f, order: Number(e.target.value) }))}
+            onChange={e => setForm((f: CategoryPayload) => ({ ...f, order: Number(e.target.value) }))}
           />
         </FormGroup>
       </Modal>

@@ -1,6 +1,6 @@
 import type { ApiResponse } from "@/types";
 
-const base = (process.env.NEXT_PUBLIC_API_URL ?? "https://osun-gist-platform-jz9t.vercel.app/api/v1").replace(/\/+$/, "");
+const base = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1").replace(/\/+$/, "");
 
 interface ApiFetchOptions {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";

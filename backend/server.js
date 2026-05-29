@@ -35,6 +35,7 @@ app.set("trust proxy", 1);
 const allowedOrigins = [
   env.ADMIN_URL,
   env.CLIENT_URL,
+  ...((env.ALLOWED_ORIGINS ?? "").split(",").map(o => o.trim()).filter(Boolean)),
 ].filter(Boolean);
 
 const corsOptions = {
@@ -42,6 +43,7 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
+    logger.warn(`CORS blocked: ${origin}`);
     callback(new Error(`CORS blocked: ${origin}`));
   },
   credentials: true,

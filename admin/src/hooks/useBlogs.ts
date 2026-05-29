@@ -11,6 +11,8 @@ import type {
   CategoryPayload,
   AdminBlogFilters,
 } from "../types";
+
+export type { CategoryPayload };
 import toast from "react-hot-toast";
 
 // ── BLOGS ─────────────────────────────────────────────────────────────────────

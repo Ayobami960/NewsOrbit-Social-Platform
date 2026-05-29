@@ -12,7 +12,7 @@
  */
 
 import { useRef, useState, useCallback } from "react";
-import { ImageIcon, Upload, X, AlertCircle } from "lucide-react";
+import { Upload, X, AlertCircle } from "lucide-react";
 
 interface Props {
   articleId?: string;

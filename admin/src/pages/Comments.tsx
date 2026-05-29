@@ -50,16 +50,7 @@ export default function Comments() {
       toast.success("Comment updated.");
     },
     onError: (e: Error) => toast.error(e.message),
-  });
-
-  const deleteMut = useMutation({
-    mutationFn: (id: string) => authFetch(`/comments/${id}`, { method: "DELETE" }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["comments", "admin"] });
-      toast.success("Comment deleted.");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+  });}
 
   return (
     <Layout title="Comments">
