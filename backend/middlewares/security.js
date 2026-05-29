@@ -4,6 +4,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
 const rateLimit  = require("express-rate-limit");
 const slowDown = require("express-slow-down");
+const env = require("../lib/env");
 const { log } = require("../models/ActivityLog");
 
 const helmetMiddleware = helmet({
@@ -54,8 +55,8 @@ const mongoSanitiseMiddleware = (req, res, next) => {
 const hppMiddleware = hpp({ whitelist: ["tags","category","status","sort","fields"] });
 
 const globalRateLimiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max:      parseInt(process.env.RATE_LIMIT_MAX) || 100,
+  windowMs: env.RATE_LIMIT_WINDOW_MS,
+  max:      env.RATE_LIMIT_MAX,
   standardHeaders: true, legacyHeaders: false,
   message: { success: false, message: "Too many requests. Please try again later." },
   handler: (req, res, next, options) => {

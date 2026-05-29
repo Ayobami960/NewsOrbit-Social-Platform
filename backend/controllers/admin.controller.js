@@ -5,6 +5,7 @@ const Blog = require("../models/Blog");
 const Comment = require("../models/Comment");
 const Newsletter = require("../models/Newsletter");
 const User = require("../models/User");
+const env = require("../lib/env");
 const { sendEmail, templates }  = require("../utils/email");
 const { stripHtml } = require("../utils/sanitise");
 const { generateSecureToken, hashToken } = require("../utils/tokens");
@@ -139,7 +140,7 @@ exports.inviteUser = async (req, res, next) => {
     });
 
     // ── Send invite email (fire-and-forget) ───────────────────────────────────
-    const inviteUrl = `${process.env.ADMIN_URL}/accept-invite?token=${token}`;
+    const inviteUrl = `${env.ADMIN_URL}/accept-invite?token=${token}`;
     const { subject, html } = templates.adminInvite(req.user.name, role, inviteUrl);
     await sendEmail({ to: email, subject, html }).catch(() => {});
 

@@ -1,9 +1,8 @@
-require("dotenv").config();
-
 const Article = require("../models/Article");
 const User = require("../models/User");
 const ActivityLog = require("../models/ActivityLog");
 const Newsletter = require("../models/Newsletter");
+const env = require("../lib/env");
 const logger = require("../utils/logger");
 
 // ============================================================
@@ -15,7 +14,7 @@ let schedulerWorker = null;
 
 const createBullMQQueue = () => {
   // Only initialise BullMQ if Redis env vars are provided
-  if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
+  if (!env.REDIS_HOST || !env.REDIS_PORT) {
     logger.warn("Redis not configured — BullMQ disabled, using in-process timers only.");
     return;
   }
@@ -24,10 +23,10 @@ const createBullMQQueue = () => {
     const { Queue, Worker } = require("bullmq");
 
     const connection = {
-      host: process.env.REDIS_HOST,
-      port: parseInt(process.env.REDIS_PORT, 10),
-      password: process.env.REDIS_PASSWORD || undefined, // ✅ added missing auth
-      tls: process.env.REDIS_TLS === "true" ? {} : undefined, // ✅ added TLS support
+      host: env.REDIS_HOST,
+      port: env.REDIS_PORT,
+      password: env.REDIS_PASSWORD || undefined,
+      tls: env.REDIS_TLS ? {} : undefined,
     };
 
     schedulerQueue = new Queue("scheduler", {

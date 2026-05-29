@@ -2,8 +2,9 @@
 const mongoose = require("mongoose");
 const Blog = require("../models/Blog");
 const User = require("../models/User");
+const env = require("./lib/env");
 
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/yourdb";
+const MONGO_URI = env.MONGO_URI;
 
 const blogs = (authorId) => [
   // ── EDUCATION ───────────────────────────────────────────

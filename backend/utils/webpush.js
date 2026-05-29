@@ -1,10 +1,11 @@
 const webpush = require("web-push");
+const env = require("../lib/env");
 const logger = require("./logger");
 
 // Validate environment variables
-const VAPID_EMAIL = process.env.VAPID_EMAIL;
-const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY?.trim();
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY?.trim();
+const VAPID_EMAIL = env.VAPID_EMAIL;
+const VAPID_PUBLIC_KEY = env.VAPID_PUBLIC_KEY?.trim();
+const VAPID_PRIVATE_KEY = env.VAPID_PRIVATE_KEY?.trim();
 
 if (!VAPID_EMAIL || !VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
   console.error("❌ Missing VAPID configuration in .env file");

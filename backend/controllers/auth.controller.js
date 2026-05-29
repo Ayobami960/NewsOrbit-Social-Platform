@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const User   = require("../models/User");
+const env = require("../lib/env");
 const { log } = require("../models/ActivityLog");
 const {
   generateAccessToken, generateRefreshToken,
@@ -21,7 +22,7 @@ const generateOTP = () =>
 const setRefreshCookie = (res, token) => {
   res.cookie("refreshToken", token, {
     httpOnly: true,
-    secure:   process.env.NODE_ENV === "development" ? false : true,
+    secure:   env.NODE_ENV === "development" ? false : true,
     sameSite: "lax",
     maxAge:   7 * 24 * 60 * 60 * 1000,
     path:     "/",

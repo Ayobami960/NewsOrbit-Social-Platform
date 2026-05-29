@@ -1,11 +1,12 @@
 const { createLogger, format, transports } = require("winston");
 const { combine, timestamp, printf, colorize, errors } = format;
+const env = require("../lib/env");
 
 const devFormat = printf(({ level, message, timestamp, stack }) =>
   `${timestamp} [${level}]: ${stack || message}`
 );
 
-const isVercel = !!process.env.VERCEL;
+const isVercel = env.VERCEL;
 
 const loggerTransports = [new transports.Console()];
 
@@ -21,11 +22,11 @@ if (!isVercel) {
 }
 
 const logger = createLogger({
-  level: process.env.NODE_ENV === "production" ? "warn" : "debug",
+  level: env.NODE_ENV === "production" ? "warn" : "debug",
   format: combine(
     timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     errors({ stack: true }),
-    process.env.NODE_ENV !== "production"
+    env.NODE_ENV !== "production"
       ? combine(colorize(), devFormat)
       : format.json()
   ),

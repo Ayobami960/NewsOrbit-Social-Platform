@@ -30,7 +30,7 @@ exports.getImageKitAuth = (req, res, next) => {
     }
 
     // Log in dev so you can verify the fields look right
-    if (process.env.NODE_ENV !== "production") {
+    if (env.NODE_ENV !== "production") {
       console.log("[ImageKit auth] Generated auth params:", {
         token:       auth.token.slice(0, 12) + "…",
         expire:      auth.expire,

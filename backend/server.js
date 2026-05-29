@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -7,8 +5,9 @@ const compression = require("compression");
 const cookieParser = require("cookie-parser");
 const http = require("http");
 
+const env = require("./lib/env"); // ✅ Load env early
 const connectDB = require("./config/db");
-const { initQueues, shutdownScheduler } = require("./jobs/scheduler"); // ✅ added shutdownScheduler
+const { initQueues, shutdownScheduler } = require("./jobs/scheduler");
 const logger = require("./utils/logger");
 
 const {
@@ -34,8 +33,8 @@ app.set("trust proxy", 1);
 // CORS
 // ─────────────────────────────────────────────
 const allowedOrigins = [
-  process.env.ADMIN_URL,
-  process.env.CLIENT_URL,
+  env.ADMIN_URL,
+  env.CLIENT_URL,
 ].filter(Boolean);
 
 const corsOptions = {
@@ -80,7 +79,7 @@ app.use(hppMiddleware);
 // ─────────────────────────────────────────────
 // Logging (dev only — logs API routes only)
 // ─────────────────────────────────────────────
-if (process.env.NODE_ENV === "development") {
+if (env.NODE_ENV === "development") {
   app.use(
     morgan("dev", {
       skip: (req) => !req.path.startsWith("/api/v1"),
@@ -107,19 +106,19 @@ app.use(errorHandler);
 // ─────────────────────────────────────────────
 // Bootstrap
 // ─────────────────────────────────────────────
-const PORT = parseInt(process.env.PORT, 10) || 8000;
+const PORT = env.PORT;
 
 const bootstrap = async () => {
   try {
     await connectDB();
-    await initQueues(); // ✅ await since initQueues is now async
+    await initQueues();
 
-    if (process.env.NODE_ENV !== "production") {
+    if (env.NODE_ENV !== "production") {
       server.listen(PORT, () => {
-        logger.info(`🚀  Server running on port ${PORT} [${process.env.NODE_ENV}]`);
+        logger.info(`🚀  Server running on port ${PORT} [${env.NODE_ENV}]`);
       });
     } else {
-      logger.info(`🚀  Server ready [${process.env.NODE_ENV}]`);
+      logger.info(`🚀  Server ready [${env.NODE_ENV}]`);
     }
   } catch (err) {
     logger.error("Bootstrap failed:", err);

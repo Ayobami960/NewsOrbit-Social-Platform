@@ -1,28 +1,29 @@
 const nodemailer = require("nodemailer");
 const { Resend } = require("resend");
+const env = require("../lib/env");
 const logger = require("./logger");
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT),
-  secure: process.env.SMTP_SECURE === "true",
-  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-  tls: { rejectUnauthorized: process.env.NODE_ENV === "production" },
+  host: env.SMTP_HOST,
+  port: env.SMTP_PORT,
+  secure: env.SMTP_SECURE,
+  auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
+  tls: { rejectUnauthorized: env.NODE_ENV === "production" },
 });
 
 const sendEmail = async ({ to, subject, html, text }) => {
   const info = await transporter.sendMail({
-    from: process.env.EMAIL_FROM, to, subject, html, text,
+    from: env.EMAIL_FROM, to, subject, html, text,
   });
   logger.info(`Email sent: ${info.messageId}`);
   return info;
 };
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(env.RESEND_API_KEY);
 
 const sendNewsletter = async ({ to, subject, html }) => {
   const data = await resend.emails.send({
-    from: process.env.EMAIL_FROM,
+    from: env.EMAIL_FROM,
     to: Array.isArray(to) ? to : [to],
     subject, html,
   });

@@ -1,11 +1,12 @@
 
 
 // push.controller.js
+const env = require("../lib/env");
 const PushSub = require("../models/PushSubscription");
 const { broadcastPush } = require("../utils/webpush");
 const { sendSuccess, sendCreated, sendError } = require("../utils/apiResponse");
 
-exports.getPublicKey = (req, res) => sendSuccess(res, { publicKey: process.env.VAPID_PUBLIC_KEY });
+exports.getPublicKey = (req, res) => sendSuccess(res, { publicKey: env.VAPID_PUBLIC_KEY });
 
 exports.subscribe = async (req, res, next) => {
   try {

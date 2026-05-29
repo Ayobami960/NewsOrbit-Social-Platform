@@ -44,6 +44,18 @@ const env = {
   // Rate Limiting
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000,
   RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX) || 100,
+
+  // Redis (optional, for BullMQ scheduler)
+  REDIS_HOST: process.env.REDIS_HOST || "127.0.0.1",
+  REDIS_PORT: parseInt(process.env.REDIS_PORT) || 6379,
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+  REDIS_TLS: process.env.REDIS_TLS === "true",
+
+  // Cron
+  CRON_SECRET: process.env.CRON_SECRET,
+
+  // Deployment
+  VERCEL: !!process.env.VERCEL,
 };
 
 // ====================== VALIDATION ======================
