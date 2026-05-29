@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -5,7 +7,7 @@ const compression = require("compression");
 const cookieParser = require("cookie-parser");
 const http = require("http");
 
-const env = require("./lib/env"); // ✅ Load env early
+const env = require("./lib/env");
 const connectDB = require("./config/db");
 const { initQueues, shutdownScheduler } = require("./jobs/scheduler");
 const logger = require("./utils/logger");
@@ -30,32 +32,10 @@ const server = http.createServer(app);
 app.set("trust proxy", 1);
 
 // ─────────────────────────────────────────────
-// CORS
+// CORS — allow all origins
 // ─────────────────────────────────────────────
-const allowedOrigins = [
-  env.ADMIN_URL,
-  env.CLIENT_URL,
-  ...((env.ALLOWED_ORIGINS ?? "").split(",").map(o => o.trim()).filter(Boolean)),
-].filter(Boolean);
-
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    logger.warn(`CORS blocked: ${origin}`);
-    callback(new Error(`CORS blocked: ${origin}`));
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  exposedHeaders: ["Authorization"],
-  optionsSuccessStatus: 204,
-};
-
-// Preflight — must be registered before all other middleware
-app.options("/{*path}", cors(corsOptions));
-app.use(cors(corsOptions));
+app.options("/{*path}", cors({ origin: true, credentials: true }));
+app.use(cors({ origin: true, credentials: true }));
 
 // ─────────────────────────────────────────────
 // Security
@@ -79,7 +59,7 @@ app.use(mongoSanitiseMiddleware);
 app.use(hppMiddleware);
 
 // ─────────────────────────────────────────────
-// Logging (dev only — logs API routes only)
+// Logging (dev only)
 // ─────────────────────────────────────────────
 if (env.NODE_ENV === "development") {
   app.use(
@@ -108,7 +88,7 @@ app.use(errorHandler);
 // ─────────────────────────────────────────────
 // Bootstrap
 // ─────────────────────────────────────────────
-const PORT = env.PORT;
+const PORT = env.PORT || 8000;
 
 const bootstrap = async () => {
   try {
@@ -124,7 +104,7 @@ const bootstrap = async () => {
     }
   } catch (err) {
     logger.error("Bootstrap failed:", err);
-    process.exit(1);
+    throw err;
   }
 };
 
@@ -133,9 +113,9 @@ bootstrap();
 // ─────────────────────────────────────────────
 // Process Events
 // ─────────────────────────────────────────────
-const gracefulShutdown = async (signal) => { // ✅ now async
+const gracefulShutdown = async (signal) => {
   logger.info(`${signal} received — shutting down gracefully`);
-  await shutdownScheduler(); 
+  await shutdownScheduler();
   server.close(() => {
     logger.info("Server closed");
     process.exit(0);
