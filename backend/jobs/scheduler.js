@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const Article = require("../models/Article");
 const User = require("../models/User");
 const ActivityLog = require("../models/ActivityLog");
@@ -5,14 +7,102 @@ const Newsletter = require("../models/Newsletter");
 const logger = require("../utils/logger");
 
 // ============================================================
-// IN-PROCESS TIMER SYSTEM (for long-running / dev environments)
+// BULLMQ SETUP (Redis-backed, production-grade)
+// ============================================================
+
+let schedulerQueue = null;
+let schedulerWorker = null;
+
+const createBullMQQueue = () => {
+  // Only initialise BullMQ if Redis env vars are provided
+  if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
+    logger.warn("Redis not configured — BullMQ disabled, using in-process timers only.");
+    return;
+  }
+
+  try {
+    const { Queue, Worker } = require("bullmq");
+
+    const connection = {
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT, 10),
+      password: process.env.REDIS_PASSWORD || undefined, // ✅ added missing auth
+      tls: process.env.REDIS_TLS === "true" ? {} : undefined, // ✅ added TLS support
+    };
+
+    schedulerQueue = new Queue("scheduler", {
+      connection,
+      defaultJobOptions: {
+        removeOnComplete: 100, // ✅ prevent memory bloat
+        removeOnFail: 50,
+      },
+    });
+
+    // ✅ Worker handles the actual job execution
+    schedulerWorker = new Worker(
+      "scheduler",
+      async (job) => {
+        if (job.name === "runAllJobs") {
+          await runAllJobs();
+        }
+      },
+      { connection }
+    );
+
+    schedulerWorker.on("completed", (job) => {
+      logger.info(`[BullMQ] Job ${job.name} completed.`);
+    });
+
+    schedulerWorker.on("failed", (job, err) => {
+      logger.error(`[BullMQ] Job ${job?.name} failed: ${err.message}`);
+    });
+
+    logger.info("[BullMQ] Queue and worker initialised.");
+  } catch (err) {
+    logger.error(`[BullMQ] Failed to initialise: ${err.message}`);
+  }
+};
+
+// ✅ Add repeating job safely (removes old one first to avoid duplicates)
+const addRepeatingJob = async () => {
+  if (!schedulerQueue) return;
+
+  try {
+    // Remove existing repeatable jobs to avoid duplicates on restart
+    const repeatableJobs = await schedulerQueue.getRepeatableJobs();
+    for (const job of repeatableJobs) {
+      await schedulerQueue.removeRepeatableByKey(job.key);
+    }
+
+    // Run every hour
+    await schedulerQueue.add(
+      "runAllJobs",
+      {},
+      {
+        repeat: { pattern: "0 * * * *" },
+        jobId: "runAllJobs-repeat", // ✅ stable ID prevents duplicates
+      }
+    );
+
+    logger.info("[BullMQ] Repeating job scheduled (every hour).");
+  } catch (err) {
+    logger.error(`[BullMQ] Failed to add repeating job: ${err.message}`);
+  }
+};
+
+// ============================================================
+// IN-PROCESS TIMER SYSTEM (fallback for dev / no Redis)
 // ============================================================
 
 const activeTimers = new Map();
 
-const initQueues = () => {
-  logger.info("Scheduler initialised (in-process, no Redis required).");
-  rescheduleOnBoot();
+const initQueues = async () => {
+  // Try BullMQ first, fall back to in-process timers
+  createBullMQQueue();
+  await addRepeatingJob();
+
+  logger.info("Scheduler initialised.");
+  await rescheduleOnBoot();
 };
 
 const rescheduleOnBoot = async () => {
@@ -36,8 +126,10 @@ const scheduleArticlePublish = (articleId, publishAt) => {
   const delay = new Date(publishAt).getTime() - Date.now();
   if (delay < 0) return;
 
-  if (activeTimers.has(articleId.toString())) {
-    clearTimeout(activeTimers.get(articleId.toString()));
+  const id = articleId.toString();
+
+  if (activeTimers.has(id)) {
+    clearTimeout(activeTimers.get(id));
   }
 
   const timer = setTimeout(async () => {
@@ -50,18 +142,14 @@ const scheduleArticlePublish = (articleId, publishAt) => {
       await article.save();
 
       logger.info(`[Scheduler] Article ${articleId} auto-published.`);
-      activeTimers.delete(articleId.toString());
+      activeTimers.delete(id);
     } catch (err) {
-      logger.error(
-        `[Scheduler] Failed to publish article ${articleId}: ${err.message}`
-      );
+      logger.error(`[Scheduler] Failed to publish article ${articleId}: ${err.message}`);
     }
   }, delay);
 
-  activeTimers.set(articleId.toString(), timer);
-  logger.info(
-    `[Scheduler] Article ${articleId} scheduled for ${new Date(publishAt).toISOString()}`
-  );
+  activeTimers.set(id, timer);
+  logger.info(`[Scheduler] Article ${articleId} scheduled for ${new Date(publishAt).toISOString()}`);
 };
 
 const cancelSchedule = (articleId) => {
@@ -74,15 +162,9 @@ const cancelSchedule = (articleId) => {
 };
 
 // ============================================================
-// VERCEL CRON JOBS (runs on every cron trigger)
-// Each job is independent — one failure won't stop others
+// CRON JOB HANDLERS
 // ============================================================
 
-/**
- * Publishes any scheduled articles whose scheduledAt has passed.
- * This is the VERCEL-SAFE fallback for the setTimeout system.
- * Catches articles that were missed if the server was cold.
- */
 const publishOverdueArticles = async () => {
   try {
     const overdue = await Article.find({
@@ -99,10 +181,7 @@ const publishOverdueArticles = async () => {
       article.status = "published";
       article.publishedAt = new Date();
       await article.save();
-
-      // Also clear from in-process timer map if it exists
       cancelSchedule(article._id);
-
       logger.info(`✓ [Cron] Published overdue article: ${article._id}`);
     }
 
@@ -112,9 +191,6 @@ const publishOverdueArticles = async () => {
   }
 };
 
-/**
- * Cleans up expired password reset / email verify tokens from User model
- */
 const cleanExpiredTokens = async () => {
   try {
     await User.updateMany(
@@ -127,9 +203,6 @@ const cleanExpiredTokens = async () => {
   }
 };
 
-/**
- * Deletes activity logs older than 30 days
- */
 const cleanOldActivityLogs = async () => {
   try {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -142,23 +215,14 @@ const cleanOldActivityLogs = async () => {
   }
 };
 
-/**
- * Processes and sends any pending scheduled newsletters
- */
 const sendScheduledNewsletters = async () => {
   try {
-    // Replace with your actual Newsletter logic
-    // e.g. find newsletters where sendAt <= now and status === 'pending'
     logger.info("✓ Newsletters processed.");
   } catch (err) {
     logger.error(`✗ sendScheduledNewsletters failed: ${err.message}`);
   }
 };
 
-/**
- * Master function called by the cron endpoint.
- * Uses Promise.allSettled so all jobs run even if one fails.
- */
 const runAllJobs = async () => {
   logger.info("=== [Cron] Running all scheduled jobs ===");
 
@@ -169,7 +233,6 @@ const runAllJobs = async () => {
     sendScheduledNewsletters(),
   ]);
 
-  // Log any unexpected rejections
   results.forEach((result, i) => {
     if (result.status === "rejected") {
       logger.error(`[Cron] Job ${i} rejected: ${result.reason}`);
@@ -180,15 +243,27 @@ const runAllJobs = async () => {
 };
 
 // ============================================================
+// GRACEFUL SHUTDOWN
+// ============================================================
+
+const shutdownScheduler = async () => {
+  for (const [, timer] of activeTimers) clearTimeout(timer);
+  activeTimers.clear();
+
+  if (schedulerWorker) await schedulerWorker.close();
+  if (schedulerQueue) await schedulerQueue.close();
+
+  logger.info("[Scheduler] Shutdown complete.");
+};
+
+// ============================================================
 // EXPORTS
 // ============================================================
 
 module.exports = {
-  // In-process timer system
   initQueues,
   scheduleArticlePublish,
   cancelSchedule,
-
-  // Vercel cron system
   runAllJobs,
+  shutdownScheduler, // ✅ call this in server.js on SIGTERM/SIGINT
 };

@@ -8,7 +8,7 @@ const cookieParser = require("cookie-parser");
 const http = require("http");
 
 const connectDB = require("./config/db");
-const { initQueues } = require("./jobs/scheduler");
+const { initQueues, shutdownScheduler } = require("./jobs/scheduler"); // ✅ added shutdownScheduler
 const logger = require("./utils/logger");
 
 const {
@@ -40,7 +40,6 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow server-to-server requests (no origin) or whitelisted origins
     if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
@@ -84,7 +83,7 @@ app.use(hppMiddleware);
 if (process.env.NODE_ENV === "development") {
   app.use(
     morgan("dev", {
-      skip: (req) => !req.path.startsWith("/api/v1"), // ✅ fixed: log only API routes
+      skip: (req) => !req.path.startsWith("/api/v1"),
     })
   );
 }
@@ -113,7 +112,7 @@ const PORT = parseInt(process.env.PORT, 10) || 8000;
 const bootstrap = async () => {
   try {
     await connectDB();
-    initQueues();
+    await initQueues(); // ✅ await since initQueues is now async
 
     if (process.env.NODE_ENV !== "production") {
       server.listen(PORT, () => {
@@ -133,8 +132,9 @@ bootstrap();
 // ─────────────────────────────────────────────
 // Process Events
 // ─────────────────────────────────────────────
-const gracefulShutdown = (signal) => {
+const gracefulShutdown = async (signal) => { // ✅ now async
   logger.info(`${signal} received — shutting down gracefully`);
+  await shutdownScheduler(); 
   server.close(() => {
     logger.info("Server closed");
     process.exit(0);
