@@ -90,7 +90,7 @@ if (env.NODE_ENV === "development") {
 // ─────────────────────────────────────────────
 // Routes
 // ─────────────────────────────────────────────
-app.get("/health", (_req, res) =>
+app.get("/", (_req, res) =>
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() })
 );
 
