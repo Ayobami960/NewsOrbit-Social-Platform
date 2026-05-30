@@ -255,6 +255,7 @@ export default function Navbar() {
                     <Link
                       key={cat._id}
                       href={`/news?category=${cat.slug}`}
+                      onClick={() => setMobileOpen(false)}
                       className="px-3 py-2 rounded-lg text-sm font-sans text-ink-600 hover:bg-ink-50 transition-colors"
                     >
                       {cat.name}
