@@ -50,14 +50,11 @@ exports.getBlogBySlug = async (req, res, next) => {
 
     if (!blog) return sendNotFound(res, "Blog not found.");
 
-    // Increment blog views and also keep author's total views in sync
     Blog.findByIdAndUpdate(blog._id, { $inc: { views: 1 } }).exec();
     try {
       const authorId = blog.author?._id || blog.author;
       User.findByIdAndUpdate(authorId, { $inc: { "stats.totalViews": 1 } }).exec();
-    } catch (e) {
-      // Non-fatal: continue even if updating user stats fails
-    }
+    } catch (e) {}
 
     const blogObj = blog.toObject();
     const likedBy = blogObj.likedBy || [];
@@ -82,7 +79,6 @@ exports.getMyBlogs = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-
 exports.getBlogById = async (req, res, next) => {
   try {
     const blog = await Blog.findById(req.params.id)
@@ -99,9 +95,7 @@ exports.getBlogById = async (req, res, next) => {
     }
 
     return sendSuccess(res, { blog });
-  } catch (err) {
-    next(err);
-  }
+  } catch (err) { next(err); }
 };
 
 // ─────────────────────────────────────────────
@@ -174,7 +168,6 @@ exports.createBlog = async (req, res, next) => {
 // ─────────────────────────────────────────────
 exports.updateBlog = async (req, res, next) => {
   try {
-    // ✅ Fixed: was findByIdAndUpdate — must be findById to mutate and save
     const blog = await Blog.findById(req.params.id);
     if (!blog || blog.isDeleted) return sendNotFound(res, "Blog not found.");
     if (blog.author.toString() !== req.user._id.toString())
@@ -209,15 +202,26 @@ exports.updateBlog = async (req, res, next) => {
 
 // ─────────────────────────────────────────────
 // DELETE /api/v1/blog/:id
+// Permission matrix:
+//   super_admin → can delete ANY blog (content violation, abuse, etc.)
+//   admin       → can delete any blog (same moderation power)
+//   user/writer → can only delete their OWN blog
 // ─────────────────────────────────────────────
 exports.deleteBlog = async (req, res, next) => {
   try {
     const blog = await Blog.findById(req.params.id);
     if (!blog) return sendNotFound(res, "Blog not found.");
 
-    const isOwner = blog.author.toString() === req.user._id.toString();
-    const isAdmin = ["super_admin", "admin"].includes(req.user.role);
-    if (!isOwner && !isAdmin) return sendForbidden(res, "Not allowed.");
+    const isSuperAdmin = req.user.role === "super_admin";
+    const isAdmin      = req.user.role === "admin";
+    const isOwner      = blog.author.toString() === req.user._id.toString();
+
+    // super_admin has unconditional delete power (content violations, abuse, etc.)
+    // admin also has moderation delete power
+    // everyone else must own the blog
+    if (!isSuperAdmin && !isAdmin && !isOwner) {
+      return sendForbidden(res, "You do not have permission to delete this blog.");
+    }
 
     if (blog.featuredImage?.fileId) {
       await deleteFromImageKit(blog.featuredImage.fileId).catch(() => {});
@@ -227,7 +231,18 @@ exports.deleteBlog = async (req, res, next) => {
 
     await User.findByIdAndUpdate(blog.author, { $inc: { "stats.totalBlogs": -1 } });
 
-    log({ user: req.user._id, action: "blog_delete", resource: blog._id.toString(), ip: req.ip });
+    log({
+      user:     req.user._id,
+      action:   "blog_delete",
+      resource: blog._id.toString(),
+      meta: {
+        deletedBy: req.user.role,
+        // Flag when an admin/super_admin removes someone else's content
+        contentModeration: !isOwner,
+      },
+      severity: !isOwner ? "warning" : "info",
+      ip: req.ip,
+    });
 
     return sendSuccess(res, {}, "Blog deleted successfully.");
   } catch (err) { next(err); }
@@ -241,7 +256,7 @@ exports.likeBlog = async (req, res, next) => {
     const blog = await Blog.findById(req.params.id);
     if (!blog || blog.isDeleted) return sendNotFound(res, "Blog not found.");
 
-    const userId      = req.user._id;
+    const userId       = req.user._id;
     const alreadyLiked = blog.likedBy.some(id => id.toString() === userId.toString());
 
     if (alreadyLiked) {
@@ -254,12 +269,11 @@ exports.likeBlog = async (req, res, next) => {
 
     await blog.save();
 
-    // Update author's totalLikes stat
     try {
-      await User.findByIdAndUpdate(blog.author, { $inc: { "stats.totalLikes": alreadyLiked ? -1 : 1 } }).exec();
-    } catch (e) {
-      // Non-fatal
-    }
+      await User.findByIdAndUpdate(blog.author, {
+        $inc: { "stats.totalLikes": alreadyLiked ? -1 : 1 },
+      }).exec();
+    } catch (e) {}
 
     return sendSuccess(res, {
       likes:   blog.likes,

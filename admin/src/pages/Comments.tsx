@@ -50,7 +50,7 @@ export default function Comments() {
       toast.success("Comment updated.");
     },
     onError: (e: Error) => toast.error(e.message),
-  });}
+  });
 
   return (
     <Layout title="Comments">
