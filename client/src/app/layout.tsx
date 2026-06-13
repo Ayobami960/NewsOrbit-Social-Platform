@@ -4,9 +4,8 @@ import { Playfair_Display, Source_Serif_4, DM_Sans } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { Providers } from "@/lib/providers";
 import "./globals.css";
-import { Bounce, ToastContainer } from "react-toastify";
-import PrivacyConsentBanner from "@/components/PrivacyConsentBanner";
 import { CookieConsent } from "@/components/Cookieconsent";
+import ToastProvider from "@/components/ToastProvider";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -51,20 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
             {/* <PrivacyConsentBanner/>  */}
             <CookieConsent/>
-            <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick={false}
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
-              transition={Bounce}
-
-            />
+            <ToastProvider />   
           </AuthProvider>
         </Providers>
       </body>
