@@ -47,7 +47,7 @@ app.set("etag", false);
 // ─────────────────────────────────────────────
 // CORS — allow all origins
 // ─────────────────────────────────────────────
-app.options("*", cors({ origin: true, credentials: true }));
+app.options(/.*/, cors({ origin: true, credentials: true }));
 app.use(cors({ origin: true, credentials: true }));
 
 // ─────────────────────────────────────────────

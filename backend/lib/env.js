@@ -73,8 +73,7 @@ const requiredKeys = [
 
 for (const key of requiredKeys) {
   if (!env[key]) {
-    console.error(`❌ Missing required environment variable: ${key}`);
-    process.exit(1);
+    throw new Error(`Missing required environment variable: ${key}`);
   }
 }
 
