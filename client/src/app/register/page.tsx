@@ -22,7 +22,7 @@ export default function RegisterPage() {
     setForm(f => ({ ...f, [k]: e.target.value }));
 
 
-const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: any) => {
   e.preventDefault();
 
   if (form.password !== form.confirmPassword) {
