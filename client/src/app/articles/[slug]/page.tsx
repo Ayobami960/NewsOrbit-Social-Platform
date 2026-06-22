@@ -30,13 +30,14 @@ import {
   X,
 } from "lucide-react";
 import type { Comment } from "@/types";
-import { toast } from "react-toastify";
+import { useToast } from "@/components/ui/toast";
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ArticleDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { user, isLoggedIn } = useAuth();
+  const { error, success } = useToast();
 
   const likeInFlight = useRef(false);
 
@@ -58,7 +59,7 @@ export default function ArticleDetailPage() {
   // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleLike = () => {
-    if (!isLoggedIn) { toast.error("Sign in to like articles."); return; }
+    if (!isLoggedIn) { error("Sign in required", "Sign in to like articles."); return; }
     if (likeInFlight.current) return;
     likeInFlight.current = true;
     likeMut.mutate(article!._id, {
@@ -72,19 +73,19 @@ export default function ArticleDetailPage() {
       navigator.share({ title: article?.title, url: window.location.href });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied!");
+      success("Copied!", "Link copied to clipboard.");
     }
   };
 
   const submitComment = async () => {
-    if (!isLoggedIn) { toast.error("Sign in to comment."); return; }
+    if (!isLoggedIn) { error("Sign in required", "Sign in to comment."); return; }
     if (!commentText.trim()) return;
     await postComment.mutateAsync({ articleId: article!._id, body: commentText });
     setCommentText("");
   };
 
   const submitReply = async (parentId: string) => {
-    if (!isLoggedIn) { toast.error("Sign in to reply."); return; }
+    if (!isLoggedIn) { error("Sign in required", "Sign in to reply."); return; }
     if (!replyText.trim()) return;
     await postComment.mutateAsync({
       articleId: article!._id,
@@ -144,7 +145,7 @@ export default function ArticleDetailPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
 
           {/* Back link */}
           <Link
@@ -154,7 +155,8 @@ export default function ArticleDetailPage() {
             <ArrowLeft size={14} /> Back to News
           </Link>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-10">
+          {/* <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-10"> */}
+          <div className="">
 
             {/* ── Main column ── */}
             <article>
@@ -199,10 +201,10 @@ export default function ArticleDetailPage() {
                           {article.publishedAt && (
                             <span>{formatDate(article.publishedAt, "MMMM dd, yyyy")}</span>
                           )}
-                          <span>·</span>
+                          {/* <span>·</span>
                           <span className="flex items-center gap-1">
                             <Clock size={11} /> {article.readTime} min read
-                          </span>
+                          </span> */}
                         </div>
                       </div>
                     </>
@@ -415,7 +417,7 @@ export default function ArticleDetailPage() {
             </article>
 
             {/* ── Sidebar ── */}
-            <aside>
+            {/* <aside>
               <div className="sticky top-20 space-y-5">
                 <div className="border border-(--color-border) rounded-xl p-4 bg-white">
                   <p className="text-[11px] font-sans font-bold uppercase tracking-widest text-ink-400 mb-3">
@@ -444,7 +446,7 @@ export default function ArticleDetailPage() {
                   currentId={article._id}
                 />
               </div>
-            </aside>
+            </aside> */}
           </div>
         </div>
       </main>

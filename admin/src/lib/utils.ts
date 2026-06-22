@@ -23,16 +23,18 @@ export const cn = (...classes: (string | undefined | false | null)[]): string =>
 // Role utilities
 export const ROLE_LABEL: Record<Role, string> = {
   super_admin: "Super Admin",
-  admin:       "Admin",
-  writer:      "Writer",
-  user:        "User",
+  manager: "manager",
+  admin: "Admin",
+  writer: "Writer",
+  user: "User",
 };
 
 export const ROLE_COLOR: Record<Role, string> = {
   super_admin: "text-red-400 bg-red-500/15",
-  admin:       "text-blue-400 bg-blue-500/15",
-  writer:      "text-green-400 bg-green-500/15",
-  user:        "text-zinc-400 bg-zinc-500/15",
+  manager: "text-yellow-200 bg-white/15",
+  admin:  "text-blue-400 bg-blue-500/15",
+  writer: "text-green-400 bg-green-500/15",
+  user: "text-zinc-400 bg-zinc-500/15",
 };
 
 // Roles a given role can create

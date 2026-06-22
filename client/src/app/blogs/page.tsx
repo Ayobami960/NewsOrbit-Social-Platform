@@ -14,7 +14,7 @@ export default function BlogsPage() {
 
   const { data, isLoading } = useBlogs({ page, limit: 12, search: search || undefined });
 
-  const blogs      = data?.blogs      ?? [];
+  const blogs  = data?.blogs      ?? [];
   const pagination = data?.pagination;
 
   return (

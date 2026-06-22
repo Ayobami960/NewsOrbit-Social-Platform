@@ -4,40 +4,42 @@ import { useState } from "react";
 import Link from "next/link";
 import { Radio, ArrowLeft, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { apiFetch } from "@/lib/apiFetch";
-import { toast } from "react-toastify";
+import { useToast } from "@/components/ui/toast";
 
 type Step = "email" | "code" | "password" | "success";
 
 export default function ForgotPasswordPage() {
-  const [step, setStep]       = useState<Step>("email");
-  const [email, setEmail]     = useState("");
-  const [code, setCode]       = useState("");
-  const [password, setPassword]   = useState("");
-  const [confirm, setConfirm]     = useState("");
-  const [loading, setLoading]     = useState(false);
-  const [showPw1, setShowPw1]     = useState(false);
-  const [showPw2, setShowPw2]     = useState(false);
+  const [step, setStep] = useState<Step>("email");
+  const [email, setEmail] = useState("");
+  const [code, setCode]  = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm]= useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPw1, setShowPw1] = useState(false);
+  const [showPw2, setShowPw2] = useState(false);
+  const { success, error } = useToast();
 
   // ── Step 1: Send OTP ────────────────────────────────────────────────────────
-  const sendCode = async (e: React.FormEvent) => {
+  const sendCode = async (e: any) => {
     e.preventDefault();
     setLoading(true);
     try {
       await apiFetch("/auth/forgot-password", {
         method: "POST",
         body: { email },
-      });
-      toast.success("Reset code sent! Check your email.");
+      })
+      success("Reset code sent!", "Check your email.");
       setStep("code");
     } catch (err: any) {
-      toast.error(err.message || "Failed to send code.");
+      error("Failed to send code", err.message || "Please try again")
+      
     } finally {
       setLoading(false);
     }
   };
 
   // ── Step 2: Verify OTP ──────────────────────────────────────────────────────
-  const verifyCode = async (e: React.FormEvent) => {
+  const verifyCode = async (e: any) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -45,22 +47,22 @@ export default function ForgotPasswordPage() {
         method: "POST",
         body: { email, code },
       });
-      toast.success("Code verified!");
+      success("Code verified!", "Now set your new password.");
       setStep("password");
     } catch (err: any) {
-      toast.error(err.message || "Invalid or expired code.");
+      error("Verification failed", err.message || "Invalid or expired code.");
     } finally {
       setLoading(false);
     }
   };
 
   // ── Step 3: Reset password ──────────────────────────────────────────────────
-  const resetPassword = async (e: React.FormEvent) => {
+  const resetPassword = async (e: any) => {
     e.preventDefault();
 
     // Client-side guard — confirmPassword is frontend-only
     if (password !== confirm) {
-      toast.error("Passwords do not match.");
+      error("Passwords don't match", "Please try again.");
       return;
     }
 
@@ -70,10 +72,10 @@ export default function ForgotPasswordPage() {
         method: "POST",
         body: { email, code, password }, // no confirmPassword sent to backend
       });
-      toast.success("Password reset successful!");
+      success("Password reset!", "You can now sign in with your new password.");
       setStep("success");
     } catch (err: any) {
-      toast.error(err.message || "Failed to reset password.");
+      error("Reset failed", err.message || "Please try again.");
     } finally {
       setLoading(false);
     }
@@ -90,7 +92,7 @@ export default function ForgotPasswordPage() {
               <Radio size={18} className="text-white" />
             </div>
             <span className="font-display font-bold text-2xl text-ink-900">
-              Osun<span className="text-ember-600">Gist</span>
+              News<span className="text-ember-600">Orbit</span>
             </span>
           </Link>
         </div>

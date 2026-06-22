@@ -1,5 +1,3 @@
-// src/lib/queryKeys.ts
-
 import type {
   ArticleFilters,
   UserFilters,

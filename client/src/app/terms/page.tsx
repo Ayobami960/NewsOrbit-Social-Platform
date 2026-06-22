@@ -11,16 +11,16 @@ import { Radio, ArrowUp, FileText } from "lucide-react";
 const sections = [
   { id: "acceptance",   label: "Acceptance of terms" },
   { id: "eligibility",  label: "Eligibility" },
-  { id: "accounts",     label: "User accounts" },
-  { id: "content",      label: "Content & conduct" },
-  { id: "ip",           label: "Intellectual property" },
-  { id: "privacy",      label: "Privacy" },
-  { id: "third-party",  label: "Third-party links" },
-  { id: "disclaimer",   label: "Disclaimers" },
-  { id: "liability",    label: "Limitation of liability" },
-  { id: "termination",  label: "Termination" },
-  { id: "changes",      label: "Changes to terms" },
-  { id: "contact",      label: "Contact us" },
+  { id: "accounts", label: "User accounts" },
+  { id: "content", label: "Content & conduct" },
+  { id: "ip", label: "Intellectual property" },
+  { id: "privacy", label: "Privacy" },
+  { id: "third-party", label: "Third-party links" },
+  { id: "disclaimer", label: "Disclaimers" },
+  { id: "liability", label: "Limitation of liability" },
+  { id: "termination", label: "Termination" },
+  { id: "changes", label: "Changes to terms" },
+  { id: "contact", label: "Contact us" },
 ];
 
 // ─── Components ───────────────────────────────────────────────────────────────
@@ -125,7 +125,7 @@ export default function TermsPage() {
               <div className="w-7 h-7 bg-ember-600 rounded-sm flex items-center justify-center">
                 <Radio size={13} className="text-white" />
               </div>
-              <span className="font-sans text-sm font-semibold text-ink-400">OsunGist</span>
+              <span className="font-sans text-sm font-semibold text-ink-400">NewsOrbit</span>
               <span className="text-ink-300">/</span>
               <span className="font-sans text-sm font-semibold text-ink-700">Terms of Use</span>
             </div>
@@ -196,7 +196,7 @@ export default function TermsPage() {
               {/* Agreement note */}
               <div className="mt-6 p-3 bg-ember-600/6 border border-ember-600/15 rounded-xl">
                 <p className="text-[11px] font-sans text-ink-600 leading-relaxed">
-                  By using OsunGist you agree to these terms. Questions?{" "}
+                  By using NewsOrbit you agree to these terms. Questions?{" "}
                   <Link href="/contact" className="text-ember-600 hover:underline font-semibold">
                     Contact us
                   </Link>.
@@ -210,7 +210,7 @@ export default function TermsPage() {
               {/* Intro */}
               <div className="bg-ink-950 rounded-2xl p-6 mb-10">
                 <p className="font-body text-[15px] text-ink-300 leading-[1.85]">
-                  Welcome to <span className="text-white font-semibold">OsunGist</span> — Osun State's digital newsroom and community platform. These Terms of Use govern your access to and use of our website, mobile application, and all related services. Please read them carefully. By accessing or using OsunGist, you agree to be bound by these terms.
+                  Welcome to <span className="text-white font-semibold">NewsOrbit</span> — Osun State's digital newsroom and community platform. These Terms of Use govern your access to and use of our website, mobile application, and all related services. Please read them carefully. By accessing or using NewsOrbit, you agree to be bound by these terms.
                 </p>
               </div>
 
@@ -219,10 +219,10 @@ export default function TermsPage() {
                 Acceptance of terms
               </SectionTitle>
               <P>
-                By accessing or using the OsunGist platform — including our website, mobile applications, and any associated services — you confirm that you have read, understood, and agree to be bound by these Terms of Use and our Privacy Policy. If you do not agree with any part of these terms, you must not use our services.
+                By accessing or using the NewsOrbit platform — including our website, mobile applications, and any associated services — you confirm that you have read, understood, and agree to be bound by these Terms of Use and our Privacy Policy. If you do not agree with any part of these terms, you must not use our services.
               </P>
               <P>
-                These terms constitute a legally binding agreement between you and OsunGist. Your continued use of the platform following any updates to these terms constitutes acceptance of the revised terms.
+                These terms constitute a legally binding agreement between you and NewsOrbit. Your continued use of the platform following any updates to these terms constitutes acceptance of the revised terms.
               </P>
 
               <Divider />
@@ -232,13 +232,13 @@ export default function TermsPage() {
                 Eligibility
               </SectionTitle>
               <P>
-                To use OsunGist, you must meet the following eligibility requirements:
+                To use NewsOrbit, you must meet the following eligibility requirements:
               </P>
               <Ul items={[
                 "You must be at least 13 years of age to create an account. Users under 18 require parental or guardian consent.",
                 "You must provide accurate, complete, and current information during registration.",
                 "You must not be prohibited from using our services under applicable laws in Nigeria or any other jurisdiction.",
-                "You must not have previously had an account suspended or terminated by OsunGist for violations of these terms.",
+                "You must not have previously had an account suspended or terminated by NewsOrbit for violations of these terms.",
               ]} />
 
               <Divider />
@@ -248,17 +248,17 @@ export default function TermsPage() {
                 User accounts
               </SectionTitle>
               <P>
-                When you register for an account on OsunGist, you are responsible for maintaining the confidentiality of your login credentials. You agree to:
+                When you register for an account on NewsOrbit, you are responsible for maintaining the confidentiality of your login credentials. You agree to:
               </P>
               <Ul items={[
                 "Keep your password secure and not share it with any third party.",
-                "Notify OsunGist immediately at support@osungist.com if you suspect unauthorized access to your account.",
+                "Notify NewsOrbit immediately at support@newsorbit.com if you suspect unauthorized access to your account.",
                 "Accept responsibility for all activity that occurs under your account.",
                 "Not create more than one account per person without our prior written consent.",
                 "Not use another person's account without permission.",
               ]} />
               <P>
-                OsunGist reserves the right to suspend or terminate accounts that violate these terms, engage in fraudulent activity, or are inactive for an extended period without prior notice.
+                NewsOrbit reserves the right to suspend or terminate accounts that violate these terms, engage in fraudulent activity, or are inactive for an extended period without prior notice.
               </P>
 
               <Divider />
@@ -268,7 +268,7 @@ export default function TermsPage() {
                 Content &amp; conduct
               </SectionTitle>
               <P>
-                OsunGist is a platform for news, information, and community expression. You are solely responsible for any content you post, publish, or share — including blog posts, comments, and profile information. By submitting content, you represent that it does not violate any applicable laws or third-party rights.
+                NewsOrbit is a platform for news, information, and community expression. You are solely responsible for any content you post, publish, or share — including blog posts, comments, and profile information. By submitting content, you represent that it does not violate any applicable laws or third-party rights.
               </P>
               <P>You agree not to post or transmit content that:</P>
               <Ul items={[
@@ -281,7 +281,7 @@ export default function TermsPage() {
                 "Impersonates any person or entity, or misrepresents your affiliation.",
               ]} />
               <P>
-                OsunGist reserves the right — but is not obligated — to monitor, edit, or remove content that violates these guidelines. Repeated violations may result in permanent account termination.
+                NewsOrbit reserves the right — but is not obligated — to monitor, edit, or remove content that violates these guidelines. Repeated violations may result in permanent account termination.
               </P>
 
               <Divider />
@@ -291,13 +291,13 @@ export default function TermsPage() {
                 Intellectual property
               </SectionTitle>
               <P>
-                All content produced by OsunGist's editorial team — including articles, photographs, graphics, and the platform design — is the exclusive property of OsunGist and protected under Nigerian copyright law and applicable international treaties.
+                All content produced by NewsOrbit's editorial team — including articles, photographs, graphics, and the platform design — is the exclusive property of NewsOrbit and protected under Nigerian copyright law and applicable international treaties.
               </P>
               <P>
-                When you publish content on OsunGist (such as community blog posts), you retain ownership of your original work. However, you grant OsunGist a non-exclusive, royalty-free, worldwide licence to display, distribute, and promote that content on our platform and associated channels.
+                When you publish content on NewsOrbit (such as community blog posts), you retain ownership of your original work. However, you grant NewsOrbit a non-exclusive, royalty-free, worldwide licence to display, distribute, and promote that content on our platform and associated channels.
               </P>
               <P>
-                You may not reproduce, republish, or distribute OsunGist's editorial content without prior written permission. Fair use quotations with attribution are permitted for journalistic and educational purposes.
+                You may not reproduce, republish, or distribute NewsOrbit's editorial content without prior written permission. Fair use quotations with attribution are permitted for journalistic and educational purposes.
               </P>
 
               <Divider />
@@ -307,10 +307,10 @@ export default function TermsPage() {
                 Privacy
               </SectionTitle>
               <P>
-                Your use of OsunGist is also governed by our Privacy Policy, which is incorporated into these terms by reference. Our Privacy Policy describes how we collect, use, and protect your personal data in accordance with the Nigeria Data Protection Act (NDPA) 2023.
+                Your use of NewsOrbit is also governed by our Privacy Policy, which is incorporated into these terms by reference. Our Privacy Policy describes how we collect, use, and protect your personal data in accordance with the Nigeria Data Protection Act (NDPA) 2023.
               </P>
               <P>
-                By using OsunGist, you consent to the collection and use of your information as described in our Privacy Policy. We do not sell your personal data to third parties.
+                By using NewsOrbit, you consent to the collection and use of your information as described in our Privacy Policy. We do not sell your personal data to third parties.
               </P>
 
               <Divider />
@@ -320,7 +320,7 @@ export default function TermsPage() {
                 Third-party links
               </SectionTitle>
               <P>
-                OsunGist may contain links to third-party websites, social media platforms, or external content. These links are provided for convenience only. We do not endorse, control, or accept responsibility for the content, privacy practices, or accuracy of any third-party site. Accessing third-party links is at your own risk.
+                NewsOrbit may contain links to third-party websites, social media platforms, or external content. These links are provided for convenience only. We do not endorse, control, or accept responsibility for the content, privacy practices, or accuracy of any third-party site. Accessing third-party links is at your own risk.
               </P>
 
               <Divider />
@@ -330,7 +330,7 @@ export default function TermsPage() {
                 Disclaimers
               </SectionTitle>
               <P>
-                OsunGist provides its platform and content on an "as is" and "as available" basis. While we strive for accuracy in all editorial content, we make no warranties — express or implied — regarding:
+                NewsOrbit provides its platform and content on an "as is" and "as available" basis. While we strive for accuracy in all editorial content, we make no warranties — express or implied — regarding:
               </P>
               <Ul items={[
                 "The completeness, accuracy, or timeliness of any news article, blog post, or other content.",
@@ -339,7 +339,7 @@ export default function TermsPage() {
                 "The accuracy of community-generated blog posts, which reflect the views of individual authors.",
               ]} />
               <P>
-                Community blog posts represent the personal views of their authors and do not reflect the editorial position of OsunGist. We are not responsible for any errors or omissions in community content.
+                Community blog posts represent the personal views of their authors and do not reflect the editorial position of NewsOrbit. We are not responsible for any errors or omissions in community content.
               </P>
 
               <Divider />
@@ -349,7 +349,7 @@ export default function TermsPage() {
                 Limitation of liability
               </SectionTitle>
               <P>
-                To the fullest extent permitted by applicable Nigerian law, OsunGist and its officers, directors, employees, and affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from:
+                To the fullest extent permitted by applicable Nigerian law, NewsOrbit and its officers, directors, employees, and affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from:
               </P>
               <Ul items={[
                 "Your use of or inability to access the platform.",
@@ -358,7 +358,7 @@ export default function TermsPage() {
                 "Any errors, inaccuracies, or omissions in content.",
               ]} />
               <P>
-                Our total aggregate liability to you for any claims arising under or related to these terms shall not exceed the amount you paid to OsunGist, if any, in the twelve months prior to the claim.
+                Our total aggregate liability to you for any claims arising under or related to these terms shall not exceed the amount you paid to NewsOrbit, if any, in the twelve months prior to the claim.
               </P>
 
               <Divider />
@@ -371,7 +371,7 @@ export default function TermsPage() {
                 You may delete your account at any time from your account settings page. Upon deletion, your published blogs will be removed from public view within 48 hours.
               </P>
               <P>
-                OsunGist reserves the right to suspend or terminate your account at any time, with or without notice, if we reasonably believe you have violated these terms, engaged in harmful conduct, or for any other reason at our sole discretion. Termination does not affect any rights or obligations that arose prior to termination.
+                NewsOrbit reserves the right to suspend or terminate your account at any time, with or without notice, if we reasonably believe you have violated these terms, engaged in harmful conduct, or for any other reason at our sole discretion. Termination does not affect any rights or obligations that arose prior to termination.
               </P>
 
               <Divider />
@@ -381,7 +381,7 @@ export default function TermsPage() {
                 Changes to terms
               </SectionTitle>
               <P>
-                OsunGist reserves the right to modify these Terms of Use at any time. When we make material changes, we will:
+                NewsOrbit reserves the right to modify these Terms of Use at any time. When we make material changes, we will:
               </P>
               <Ul items={[
                 "Update the Last updated date at the top of this page.",
@@ -389,7 +389,7 @@ export default function TermsPage() {
                 "Send a notification to registered users via email or in-app alert for significant changes.",
               ]} />
               <P>
-                Your continued use of OsunGist after changes become effective constitutes your acceptance of the revised terms. If you do not agree to any updated terms, you must stop using the platform and may delete your account.
+                Your continued use of NewsOrbit after changes become effective constitutes your acceptance of the revised terms. If you do not agree to any updated terms, you must stop using the platform and may delete your account.
               </P>
 
               <Divider />
@@ -404,8 +404,8 @@ export default function TermsPage() {
               <div className="bg-white border border-(--color-border) rounded-2xl p-6 mb-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
-                    { label: "Email", value: "legal@osungist.com" },
-                    { label: "Support", value: "support@osungist.com" },
+                    { label: "Email", value: "legal@newsorbit.com" },
+                    { label: "Support", value: "support@newsorbit.com" },
                     { label: "Address", value: "Osogbo, Osun State, Nigeria" },
                     { label: "Response time", value: "Within 5 business days" },
                   ].map(({ label, value }) => (

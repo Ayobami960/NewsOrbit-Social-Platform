@@ -1,11 +1,12 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { authFetch } from "../lib/apiFetch";
+import { apiFetch, authFetch } from "../lib/apiFetch";
 import { queryKeys } from "../lib/queryKeys";
 import type {
   User,
   UserFilters,
   InviteUserPayload,
+  InviteManagerPayload,
   BanUserPayload,
   ChangeRolePayload,
   ActivityLog,
@@ -143,3 +144,16 @@ export function useChangeRole() {
 }
 
 
+
+export const useInviteManager = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: InviteManagerPayload) =>
+      authFetch("/admin/invite_management", { method: "POST", body: toBody(payload) }), 
+    onSuccess: () => {
+      toast.success("Manager invite sent!");
+      qc.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+};

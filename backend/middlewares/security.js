@@ -11,12 +11,12 @@ const helmetMiddleware = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc:  ["'self'"],
-      styleSrc:   ["'self'", "'unsafe-inline'"],
-      imgSrc:     ["'self'", "data:", "https://ik.imagekit.io"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https://ik.imagekit.io"],
       connectSrc: ["'self'"],
-      frameSrc:   ["'none'"],
-      objectSrc:  ["'none'"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
     },
   },
   crossOriginEmbedderPolicy: false,

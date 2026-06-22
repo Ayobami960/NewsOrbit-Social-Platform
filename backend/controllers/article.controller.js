@@ -184,6 +184,11 @@ const getBreakingNews = async (req, res, next) => {
 // ====================== GET ARTICLE BY ID (For Editor) ======================
 const getArticleById = async (req, res, next) => {
   try {
+    // Validate ObjectId format
+    if (!isObjectId(req.params.id)) {
+      return sendNotFound(res, "Article not found.");
+    }
+
     const article = await Article.findById(req.params.id)
       .populate("author", "_id name avatar bio socialLinks stats")
       .populate("category", "name slug color")
@@ -191,11 +196,110 @@ const getArticleById = async (req, res, next) => {
 
     if (!article) return sendNotFound(res, "Article not found.");
 
+    // Allow public access to published articles
+    if (article.status === "published" && !article.isDeleted) {
+      const articleObj = article.toObject();
+      // Strip likedBy from public response but attach isLiked
+      const likedBy = articleObj.likedBy || [];
+      delete articleObj.likedBy;
+      articleObj.isLiked = req.user
+        ? likedBy.some(id => id.toString() === req.user._id.toString())
+        : false;
+
+      // Background view increment
+      Article.findByIdAndUpdate(article._id, { $inc: { views: 1 } }).exec();
+
+      return sendSuccess(res, { article: articleObj });
+    }
+
+    // For draft/deleted articles, require authentication and ownership
+    if (!req.user) {
+      return sendNotFound(res, "Article not found.");
+    }
+
     const isOwner = article.author._id.toString() === req.user._id.toString();
     const isAdmin = ["super_admin", "admin"].includes(req.user.role);
 
-    if (req.user.role === "writer" && !isOwner && !isAdmin) {
-      return sendError(res, "You can only access your own articles.", 403);
+    if (!isOwner && !isAdmin) {
+      return sendNotFound(res, "Article not found.");
+    }
+
+    return sendSuccess(res, { article });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+const getArticleBySlug = async (req, res, next) => {
+  try {
+    const idOrSlug = req.params.id;
+    let article;
+
+    // Check if it's a valid ObjectId
+    if (isObjectId(idOrSlug)) {
+      // Try to fetch by ID
+      article = await Article.findById(idOrSlug)
+        .populate("author", "_id name avatar bio socialLinks stats")
+        .populate("category", "name slug color")
+        .populate("tags", "name slug");
+    } else {
+      // Treat as slug
+      article = await Article.findOne({
+        slug: idOrSlug,
+        status: "published",
+        isDeleted: false,
+      })
+        .populate("author", "_id name avatar bio socialLinks stats followersCount")
+        .populate("category", "name slug color")
+        .populate("tags", "name slug");
+
+      // If found by slug and published, allow public access
+      if (article) {
+        const articleObj = article.toObject();
+        const likedBy = articleObj.likedBy || [];
+        delete articleObj.likedBy;
+        articleObj.isLiked = req.user
+          ? likedBy.some(id => id.toString() === req.user._id.toString())
+          : false;
+
+        // Background view increment
+        Article.findByIdAndUpdate(article._id, { $inc: { views: 1 } }).exec();
+
+        return sendSuccess(res, { article: articleObj });
+      }
+
+      return sendNotFound(res, "Article not found.");
+    }
+
+    if (!article) return sendNotFound(res, "Article not found.");
+
+    // Allow public access to published articles
+    if (article.status === "published" && !article.isDeleted) {
+      const articleObj = article.toObject();
+      // Strip likedBy from public response but attach isLiked
+      const likedBy = articleObj.likedBy || [];
+      delete articleObj.likedBy;
+      articleObj.isLiked = req.user
+        ? likedBy.some(id => id.toString() === req.user._id.toString())
+        : false;
+
+      // Background view increment
+      Article.findByIdAndUpdate(article._id, { $inc: { views: 1 } }).exec();
+
+      return sendSuccess(res, { article: articleObj });
+    }
+
+    // For draft/deleted articles, require authentication and ownership
+    if (!req.user) {
+      return sendNotFound(res, "Article not found.");
+    }
+
+    const isOwner = article.author._id.toString() === req.user._id.toString();
+    const isAdmin = ["super_admin", "admin"].includes(req.user.role);
+
+    if (!isOwner && !isAdmin) {
+      return sendNotFound(res, "Article not found.");
     }
 
     return sendSuccess(res, { article });
@@ -573,6 +677,7 @@ module.exports = {
   getArticle,
   getBreakingNews,
   getArticleById,
+  getArticleBySlug,
   getArticleLikers,
   createArticle,
   updateArticle,

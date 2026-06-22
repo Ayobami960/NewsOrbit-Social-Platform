@@ -1,12 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-
 import toast from "react-hot-toast";
 import { Radio, Eye, EyeOff } from "lucide-react";
-import type { Role } from "../types";
 import { useAuth } from "../context/AuthContext";
-
-const ADMIN_ROLES: Role[] = ["super_admin", "admin", "writer"];
 
 export default function Login() {
   const { login }   = useAuth();
@@ -21,10 +17,6 @@ export default function Login() {
     setLoading(true);
     try {
       const user = await login(email, password);
-      if (!ADMIN_ROLES.includes(user.role)) {
-        toast.error("Access denied. Admin roles only.");
-        return;
-      }
       toast.success(`Welcome back, ${user.name.split(" ")[0]}!`);
       navigate("/");
     } catch (err) {
@@ -42,7 +34,7 @@ export default function Login() {
           <div className="w-12 h-12 rounded-xl bg-red-600/15 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
             <Radio size={22} className="text-red-500" />
           </div>
-          <h1 className="font-[Playfair_Display] text-2xl font-bold  mb-1">Osun Gist</h1>
+          <h1 className="font-[Playfair_Display] text-2xl font-bold  mb-1">NewsOrbit</h1>
           <p className="text-[13px] text-zinc-500">Admin Portal — Sign in to continue</p>
         </div>
 

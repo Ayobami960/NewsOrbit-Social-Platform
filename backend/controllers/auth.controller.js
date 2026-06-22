@@ -239,37 +239,6 @@ exports.forgotPassword = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// POST /api/v1/auth/reset-password   body: { email, code, password }
-// ─────────────────────────────────────────────────────────────────────────────
-
-// exports.resetPassword = async (req, res, next) => {
-//   try {
-//     const { email, code, password } = req.body;
-//     if (!email || !code || !password)
-//       return sendError(res, "Email, code and new password are required.", 400);
-
-//     const user = await User.findOne({ email })
-//       .select("+password +passwordResetCode +passwordResetExpires");
-
-//     if (!user) return sendError(res, "User not found.", 404);
-
-//     if (!user.passwordResetCode || user.passwordResetExpires < Date.now())
-//       return sendError(res, "Reset code has expired. Please request a new one.", 400);
-
-//     if (user.passwordResetCode !== code.toString())
-//       return sendError(res, "Invalid reset code.", 400);
-
-//     user.password             = password;
-//     user.passwordResetCode    = undefined;
-//     user.passwordResetExpires = undefined;
-//     user.refreshToken         = undefined;
-//     await user.save();
-
-//     res.clearCookie("refreshToken");
-//     return sendSuccess(res, {}, "Password reset. Please login.");
-//   } catch (err) { next(err); }
-// };
 
 // POST /api/v1/auth/verify-reset-code
 // Verifies the code only (before showing password form)
@@ -489,7 +458,7 @@ exports.inviteSendCode = async (req, res, next) => {
 
     const otp = await issueInviteOtp(user);
 
-    const subject = "Your OsunGist verification code";
+    const subject = "Your NewOrbit verification code";
     const html    = `
       <p style="font-family:sans-serif;">Hi ${user.name},</p>
       <p style="font-family:sans-serif;">
@@ -615,15 +584,15 @@ exports.inviteAccept = async (req, res, next) => {
       return sendError(res, "Incorrect verification code.", 400);
 
     // Activate the account
-    user.password     = password;   // pre-save hook hashes this
-    user.isVerified   = true;
-    user.isActive     = true;
+    user.password = password;   // pre-save hook hashes this
+    user.isVerified = true;
+    user.isActive = true;
     user.isInviteUsed = true;
 
     // Wipe all invite / OTP fields
-    user.inviteToken      = undefined;
-    user.inviteExpires    = undefined;
-    user.inviteOtp        = undefined;
+    user.inviteToken  = undefined;
+    user.inviteExpires  = undefined;
+    user.inviteOtp = undefined;
     user.inviteOtpExpires = undefined;
 
     await user.save();

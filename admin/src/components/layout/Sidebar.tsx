@@ -5,29 +5,31 @@ import type { SidebarNavEntry } from "../../types";
 import {
   LayoutDashboard, BarChart2, Newspaper, PenSquare,
   BookOpen, Tag, MessageSquare, Users, Mail, Bell,
-  Shield, LogOut, Radio, X,
+  Shield, LogOut, Radio, X, MessageCircle
 } from "lucide-react";
 
 const NAV: SidebarNavEntry[] = [
     { section: true, label: "Overview" },
-    { to: "/", label: "Dashboard", icon: LayoutDashboard, roles: ["super_admin", "admin", "writer"], exact: true },
-    { to: "/analytics", label: "Analytics", icon: BarChart2, roles: ["super_admin", "admin", "writer"] },
+    { to: "/", label: "Dashboard", icon: LayoutDashboard, roles: ["super_admin", "admin", "writer", "manager"], exact: true },
+    { to: "/analytics", label: "Analytics", icon: BarChart2, roles: ["super_admin", "admin", "writer", "manager"] },
 
     { section: true, label: "Content" },
-    { to: "/articles", label: "Articles", icon: Newspaper, roles: ["admin","writer"] },
-    { to: "/New-articles", label: "New Article", icon: PenSquare, roles: [ "writer"] },
-    { to: "/blogs", label: "User Blogs", icon: BookOpen, roles: ["super_admin", "admin"] },
-    { to: "/categories", label: "Categories", icon: Tag, roles: [ "super_admin", "admin" ] },
-    { to: "/comments", label: "Comments", icon: MessageSquare, roles: ["super_admin", "admin"] },
+    { to: "/articles", label: "Articles", icon: Newspaper, roles: ["admin", "writer"] },
+    { to: "/New-articles", label: "New Article", icon: PenSquare, roles: ["writer"] },
+    { to: "/blogs", label: "User Blogs", icon: BookOpen, roles: ["super_admin", "manager"] },
+    { to: "/categories", label: "Categories", icon: Tag, roles: ["super_admin", "admin"] },
+    { to: "/comments", label: "Comments", icon: MessageSquare, roles: ["super_admin", "manager"] },
 
     { section: true, label: "Audience" },
     { to: "/users", label: "Users & Roles", icon: Users, roles: ["super_admin", "admin"] },
     { to: "/newsletter", label: "Newsletter", icon: Mail, roles: ["admin", "writer"] },
     { to: "/push", label: "Push Notify", icon: Bell, roles: ["admin", "writer"] },
 
+    { to: "/messages", label: "Messages", icon: Mail, roles: ["super_admin", "manager"] },
+    { to: "/chat", label: "ChatBox", icon: MessageCircle, roles: ["super_admin", "manager"] },
+
     { section: true, label: "System" },
-    { to: "/activity", label: "Activity Log", icon: Shield, roles: ["super_admin"] },
-    // { to: "/settings", label: "Settings", icon: Settings, roles: ["super_admin", "admin", "writer"] },
+    { to: "/activity", label: "Activity Log", icon: Shield, roles: ["super_admin", "manager"] },
 ];
 interface SidebarProps {
   isOpen: boolean;
@@ -64,7 +66,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="flex items-center gap-2.5">
             <Radio size={16} className="text-red-500" />
             <span className="font-[Playfair_Display] text-[17px] font-bold text-zinc-100">
-              Osun<span className="text-red-500">Gist</span>
+              News<span className="text-red-500">Orbit</span>
             </span>
           </div>
 

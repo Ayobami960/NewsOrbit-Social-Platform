@@ -6,13 +6,13 @@ const mongoose = require("mongoose");
  */
 const blogSchema = new mongoose.Schema(
   {
-    title:   { type: String, required: true, trim: true, minlength: 5, maxlength: 200 },
-    slug:    { type: String, unique: true, lowercase: true, index: true },
+    title: { type: String, required: true, trim: true, minlength: 5, maxlength: 200 },
+    slug: { type: String, unique: true, lowercase: true, index: true },
     content: { type: String, required: true },
     excerpt: { type: String, maxlength: 400 },
 
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    tags:   [String],
+    tags: [String],
 
     featuredImage: {
       url:    String,
@@ -20,8 +20,8 @@ const blogSchema = new mongoose.Schema(
     },
 
     // Stats
-    views:   { type: Number, default: 0 },
-    likes:   { type: Number, default: 0 },
+    views: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
     likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     readTime:{ type: Number, default: 0 },
 

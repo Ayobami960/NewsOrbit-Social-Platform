@@ -34,7 +34,7 @@ function Logo() {
       <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm">
         <span className="text-zinc-900 font-bold text-sm">0</span>
       </div>
-      <span className="text-zinc-100 font-semibold text-sm tracking-wide">OsunGist</span>
+      <span className="text-zinc-100 font-semibold text-sm tracking-wide">NewsOrbit</span>
     </div>
   );
 }

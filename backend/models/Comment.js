@@ -5,7 +5,7 @@ const commentSchema = new mongoose.Schema(
   {
     // Can comment on article OR blog
     article: { type: mongoose.Schema.Types.ObjectId, ref: "Article", default: null, index: true },
-    blog:    { type: mongoose.Schema.Types.ObjectId, ref: "Blog",    default: null, index: true },
+    blog: { type: mongoose.Schema.Types.ObjectId, ref: "Blog",    default: null, index: true },
 
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     parent: { type: mongoose.Schema.Types.ObjectId, ref: "Comment", default: null },
@@ -20,7 +20,7 @@ const commentSchema = new mongoose.Schema(
       index: true,
     },
    
-    likes:   { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
     likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
     reports: [{

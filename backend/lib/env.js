@@ -46,8 +46,8 @@ const env = {
   RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX) || 100,
 
   // Redis (optional, for BullMQ scheduler)
-  REDIS_HOST: process.env.REDIS_HOST || "127.0.0.1",
-  REDIS_PORT: parseInt(process.env.REDIS_PORT) || 6379,
+  REDIS_HOST: process.env.REDIS_HOST || undefined,
+  REDIS_PORT: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : undefined,
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   REDIS_TLS: process.env.REDIS_TLS === "true",
 

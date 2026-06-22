@@ -2,7 +2,7 @@ const router = require("express").Router();
 const ctrl = require("../controllers/analytics.controller");
 const { protect, restrictTo } = require("../middlewares/auth");
 
-router.use(protect, restrictTo("super_admin"));
+router.use(protect, restrictTo("super_admin", "manager"));
 
 router.get("/overview",        ctrl.getOverview);
 router.get("/top-articles",    ctrl.getTopArticles);

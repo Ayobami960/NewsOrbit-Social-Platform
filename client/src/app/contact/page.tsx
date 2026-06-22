@@ -12,16 +12,18 @@ import {
 } from "lucide-react";
 import { BsInstagram, BsTwitter } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa6";
+import { useToast } from "@/components/ui/toast";
+import { apiFetch } from "@/lib/apiFetch";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const TOPICS = [
-  { id: "general",       label: "General enquiry",      icon: MessageSquare },
-  { id: "editorial",     label: "Editorial / tip",      icon: Newspaper },
-  { id: "bug",           label: "Report a bug",         icon: Bug },
-  { id: "partnership",   label: "Partnership",          icon: Users },
-  { id: "press",         label: "Press & media",        icon: ArrowUpRight },
-  { id: "other",         label: "Something else",       icon: ChevronRight },
+  { id: "general",  label: "General enquiry", icon: MessageSquare },
+  { id: "editorial", label: "Editorial / tip",  icon: Newspaper },
+  { id: "bug", label: "Report a bug", icon: Bug },
+  { id: "partnership",   label: "Partnership", icon: Users },
+  { id: "press", label: "Press & media", icon: ArrowUpRight },
+  { id: "other", label: "Something else", icon: ChevronRight },
 ] as const;
 
 type TopicId = (typeof TOPICS)[number]["id"];
@@ -30,9 +32,9 @@ const CONTACT_CARDS = [
   {
     icon: Mail,
     label: "Email us",
-    value: "hello@osungist.com",
+    value: "hello@newsorbit.com",
     sub: "We reply within 2 business days",
-    href: "mailto:hello@osungist.com",
+    href: "mailto:hello@newsorbit.com",
     accent: "bg-ember-600",
   },
   {
@@ -56,6 +58,7 @@ const CONTACT_CARDS = [
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ContactPage() {
+  const { success, error: toastError } = useToast();
   const [topic,       setTopic]       = useState<TopicId>("general");
   const [name,        setName]        = useState("");
   const [email,       setEmail]       = useState("");
@@ -66,28 +69,33 @@ export default function ContactPage() {
   const [error,       setError]       = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
+
   const isValid =
     name.trim().length >= 2 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
     subject.trim().length >= 3 &&
     message.trim().length >= 10;
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    if (!isValid) return;
-    setSending(true);
-    setError("");
-    try {
-      // Replace with your actual API call, e.g.:
-      // await apiFetch("/contact", { method: "POST", body: { name, email, subject, message, topic } });
-      await new Promise(r => setTimeout(r, 1200)); // simulate network
-      setSent(true);
-    } catch {
-      setError("Something went wrong. Please try again or email us directly.");
-    } finally {
-      setSending(false);
-    }
-  };
+
+const handleSubmit = async (e: any) => {
+  e.preventDefault();
+  if (!isValid) return;
+  setSending(true);
+  try {
+    await apiFetch("/contact", {
+      method: "POST",
+      body: { name, email, subject, message, topic },
+    });
+    setSent(true);
+    success("Message sent!", "We'll get back to you within 2 business days.");
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Something went wrong.";
+    toastError("Failed to send", msg);
+    setError(msg);
+  } finally {
+    setSending(false);
+  }
+};
 
   const inputCls = `
     w-full px-4 py-3 rounded-xl border border-[var(--color-border)] bg-white
@@ -121,7 +129,7 @@ export default function ContactPage() {
             className="absolute -right-8 top-1/2 -translate-y-1/2 pointer-events-none select-none"
             aria-hidden
           >
-            <span className="font-display text-[160px] font-black leading-none text-white/[0.03] tracking-tighter whitespace-nowrap">
+            <span className="font-display text-[160px] font-black leading-none text-white/3 tracking-tighter whitespace-nowrap">
               Contact
             </span>
           </div>
@@ -135,10 +143,12 @@ export default function ContactPage() {
               <div className="w-7 h-7 bg-ember-600 rounded-sm flex items-center justify-center">
                 <Radio size={13} className="text-white" />
               </div>
-              <span className="font-sans text-sm font-semibold text-ink-500">OsunGist</span>
+              <span className="font-sans text-sm font-semibold text-ink-500">NewsOrbit</span>
               <span className="text-ink-700">/</span>
               <span className="font-sans text-sm font-semibold text-ink-200">Contact</span>
             </div>
+
+            
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               {/* Left */}
@@ -207,9 +217,9 @@ export default function ContactPage() {
                   </span>
                   <div className="flex-1 h-px bg-ink-800" />
                   {[
-                    { icon: BsTwitter,  href: "https://twitter.com/osungist",   label: "Twitter" },
-                    { icon: FaFacebook, href: "https://facebook.com/osungist",  label: "Facebook" },
-                    { icon: BsInstagram,  href: "https://instagram.com/osungist", label: "Instagram" },
+                    { icon: BsTwitter,  href: "https://twitter.com/newsorbit",   label: "Twitter" },
+                    { icon: FaFacebook, href: "https://facebook.com/newsorbit",  label: "Facebook" },
+                    { icon: BsInstagram,  href: "https://instagram.com/newsorbit", label: "Instagram" },
                   ].map(({ icon: Icon, href, label }) => (
                     <a
                       key={label}
@@ -229,7 +239,7 @@ export default function ContactPage() {
               <div className="hidden lg:flex flex-col gap-4">
                 {[
                   { num: "01", head: "Story tips",   body: "Have a tip about something happening in Osun? Send it to our editorial team." },
-                  { num: "02", head: "Partnerships", body: "Looking to work with OsunGist? We're open to sponsorships and media partnerships." },
+                  { num: "02", head: "Partnerships", body: "Looking to work with NewsOrbit? We're open to sponsorships and media partnerships." },
                   { num: "03", head: "Press",        body: "Journalists and media organisations can reach our press team for statements and interviews." },
                   { num: "04", head: "Technical",    body: "Found a bug or have a feature request? Our dev team wants to hear from you." },
                 ].map(({ num, head, body }) => (
@@ -255,10 +265,10 @@ export default function ContactPage() {
 
             {/* Form — takes 2 cols */}
             <div className="lg:col-span-2">
-              <div className="bg-white border border-[var(--color-border)] rounded-3xl overflow-hidden shadow-sm">
+              <div className="bg-white border border-(--color-border) rounded-3xl overflow-hidden shadow-sm">
 
                 {/* Form header */}
-                <div className="px-8 py-6 border-b border-[var(--color-border)] flex items-center justify-between">
+                <div className="px-8 py-6 border-b border-(--color-border) flex items-center justify-between">
                   <div>
                     <h2 className="font-display text-2xl font-black text-ink-900">Send us a message</h2>
                     <p className="text-sm font-sans text-ink-400 mt-0.5">
@@ -288,7 +298,7 @@ export default function ContactPage() {
                         setName(""); setEmail(""); setSubject(""); setMessage("");
                         setTopic("general");
                       }}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 border border-[var(--color-border)] text-ink-700 hover:bg-ink-50 font-sans font-semibold text-sm rounded-xl transition-colors"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 border border-(--color-border) text-ink-700 hover:bg-ink-50 font-sans font-semibold text-sm rounded-xl transition-colors"
                     >
                       Send another message
                     </button>
@@ -312,7 +322,7 @@ export default function ContactPage() {
                               transition-all duration-150 text-left
                               ${topic === id
                                 ? "bg-ember-600 border-ember-600 text-white"
-                                : "bg-white border-[var(--color-border)] text-ink-600 hover:border-ember-300 hover:text-ember-600"
+                                : "bg-white border-(--color-border) text-ink-600 hover:border-ember-300 hover:text-ember-600"
                               }
                             `}
                           >
@@ -436,9 +446,9 @@ export default function ContactPage() {
                   {[
                     { q: "How do I submit a news tip?",     href: "#" },
                     { q: "How do I delete my account?",    href: "/profile" },
-                    { q: "Can I advertise on OsunGist?",   href: "#" },
+                    { q: "Can I advertise on NewsOrbit?",   href: "#" },
                     { q: "How do I report content?",       href: "#" },
-                    { q: "Is OsunGist free to use?",       href: "/about" },
+                    { q: "Is NewsOrbit free to use?",       href: "/about" },
                   ].map(({ q, href }) => (
                     <Link
                       key={q}
@@ -487,10 +497,10 @@ export default function ContactPage() {
                   You can submit tips anonymously. Our editorial team protects sources.
                 </p>
                 <a
-                  href="mailto:tips@osungist.com"
+                  href="mailto:tips@newsorbit.com"
                   className="inline-flex items-center gap-1.5 text-[12px] font-sans font-bold text-ember-600 hover:underline"
                 >
-                  tips@osungist.com <ArrowUpRight size={11} />
+                  tips@newsorbit.com <ArrowUpRight size={11} />
                 </a>
               </div>
 

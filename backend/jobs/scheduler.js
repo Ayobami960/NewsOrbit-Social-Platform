@@ -56,6 +56,10 @@ const createBullMQQueue = () => {
       logger.error(`[BullMQ] Job ${job?.name} failed: ${err.message}`);
     });
 
+    schedulerWorker.on("error", (err) => {
+      logger.error(`[BullMQ] Worker error: ${err.message}`);
+    });
+
     logger.info("[BullMQ] Queue and worker initialised.");
   } catch (err) {
     logger.error(`[BullMQ] Failed to initialise: ${err.message}`);

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Source_Serif_4, DM_Sans } from "next/font/google";
-
-import { AuthProvider } from "@/context/AuthContext";
 import { Providers } from "@/lib/providers";
-import "./globals.css";
+import { ToastProvider } from "@/components/ui/toast";
+import { AuthProvider } from "@/context/AuthContext";
 import { CookieConsent } from "@/components/Cookieconsent";
-import ToastProvider from "@/components/ToastProvider";
+import ChatPopupWrapper from "@/components/chat/ChatPopupWrapper";
+import "./globals.css";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -29,29 +29,35 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "OsunGist — Osun State News & Stories",
-    template: "%s | OsunGist",
+    default: "NewsOrbit — Osun State News & Stories",
+    template: "%s | NewsOrbit",
   },
-  description: "Your #1 source for Osun State news, politics, culture, community stories and in-depth reporting.",
-  keywords: ["Osun", "Osun State", "Nigeria news", "Osun gist", "Osun news today"],
+  description:
+    "Your #1 source for Osun State news, politics, culture, community stories and in-depth reporting.",
+  keywords: ["Osun", "Osun State", "Nigeria news", "New Orbit", "Osun news today"],
   openGraph: {
     type: "website",
     locale: "en_NG",
-    siteName: "OsunGist",
+    siteName: "NewsOrbit",
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`${playfair.variable} ${sourceSerif.variable} ${dmSans.variable}`}>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${playfair.variable} ${sourceSerif.variable} ${dmSans.variable}`}
+    >
       <body suppressHydrationWarning>
         <Providers>
-          <AuthProvider>
-            {children}
-            {/* <PrivacyConsentBanner/>  */}
-            <CookieConsent/>
-            <ToastProvider />   
-          </AuthProvider>
+          <ToastProvider defaultPosition="top-right" defaultDuration={4000}>
+            <AuthProvider>
+              {children}
+              <CookieConsent />
+              <ChatPopupWrapper />
+            </AuthProvider>
+          </ToastProvider>
         </Providers>
       </body>
     </html>

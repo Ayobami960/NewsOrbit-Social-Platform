@@ -15,7 +15,7 @@ if (!VAPID_EMAIL || !VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
 
 // Set VAPID details
 webpush.setVapidDetails(
-  VAPID_EMAIL,           // e.g., mailto:admin@osunnews.com
+  VAPID_EMAIL, 
   VAPID_PUBLIC_KEY,
   VAPID_PRIVATE_KEY
 );
@@ -34,7 +34,7 @@ const sendPushToOne = async (sub, payload) => {
       },
       JSON.stringify(payload),
       {
-        TTL: 60 * 60 * 24,        // 24 hours
+        TTL: 60 * 60 * 24,
       }
     );
     return true;

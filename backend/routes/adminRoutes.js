@@ -2,13 +2,17 @@
 const router = require("express").Router();
 const admin = require("../controllers/admin.controller");
 const { protect, restrictTo } = require("../middlewares/auth");
+const { validate } = require("../middlewares/validate");
+const { mongoIdParamSchema } = require("../Schema/admin");
+const { inviteUserSchema, inviteManagementSchema } = require("../Schema/auth");
 
 router.use(protect);
 
 // ── User management ───────────────────────────────────────────────────────────
 
 // Invite a new user (super_admin → admin | admin → writer)
-router.post("/invite", restrictTo("super_admin", "admin"), admin.inviteUser);
+router.post("/invite", restrictTo("super_admin", "admin"), validate(inviteUserSchema), admin.inviteUser);
+router.post("/invite_management", restrictTo("super_admin"), validate(inviteManagementSchema), admin.inviteManagement);
 
 // List users (scoped by role inside the controller)
 router.get("/users", restrictTo("admin", "super_admin"), admin.getUsers);
@@ -16,8 +20,9 @@ router.get("/users", restrictTo("admin", "super_admin"), admin.getUsers);
 // Single user detail
 
 // Role / ban / unban / activity — note /users/:id prefix on all of them
-router.patch("/users/:id/role", restrictTo("super_admin"),             admin.changeRole);
-router.patch("/users/:id/ban", restrictTo("admin", "super_admin"),    admin.banUser);
+
+router.patch("/users/:id/role", restrictTo("super_admin"), validate(mongoIdParamSchema, "params"), admin.changeRole);
+router.patch("/users/:id/ban", restrictTo("admin", "super_admin"), admin.banUser);
 router.patch("/users/:id/unban", restrictTo("admin", "super_admin"),    admin.unbanUser);
 router.get  ("/users/:id/activity",restrictTo("admin", "super_admin"),    admin.getUserActivity);
 
@@ -35,20 +40,20 @@ router.get("/articles-by-day", protect, admin.getArticlesByDay);
 router.get(
   "/comments",
   protect,
-  restrictTo("super_admin", "admin"),
+  restrictTo("super_admin", "manager"),
   admin.getAllComments
 );
 router.get(
   "/activity",
   protect,
-  restrictTo("super_admin", "admin"),
+  restrictTo("super_admin", "manager"),
   admin.getActivityLogs
 );
 
 // These two are super_admin-only — no role-based scoping inside the controller
 router.get("/activity-logs",   restrictTo("super_admin"), admin.getActivityLogs);
 // Allow admins and super_admins to create activity log entries via API
-router.post("/activity-logs",  restrictTo("super_admin", "admin"), admin.createActivityLog);
+router.post("/activity-logs",  restrictTo("super_admin", "manager"), admin.createActivityLog);
 router.get("/users-by-role",   restrictTo("super_admin"), admin.getUsersByRole);
 
 module.exports = router;

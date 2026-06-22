@@ -3,7 +3,7 @@
 // hooks/useImageUpload.ts
 import { useState, useCallback } from "react";
 import { authFetch } from "../lib/apiFetch";
-import { toast } from "react-toastify";
+import { useToast } from "@/components/ui/toast";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -42,6 +42,7 @@ export function useImageUpload({
   const [error,         setError]         = useState<string | null>(null);
   const [preview,       setPreview]       = useState<string | null>(null);
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
+  const { error: showError, success: showSuccess } = useToast();
 
   const MAX_BYTES      = maxSizeMB * 1024 * 1024;
   const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -50,12 +51,12 @@ export function useImageUpload({
 
     // ── Validate ──────────────────────────────────────────────────────────────
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      const msg = "Only JPEG, PNG, WebP, and GIF are allowed.";
-      setError(msg); onError?.(msg); toast.error(msg);
+      const msg = "Only JPEG, PNG, WeshowError("Invalid file type", msg);
       return null;
     }
     if (file.size > MAX_BYTES) {
       const msg = `Image must be smaller than ${maxSizeMB} MB.`;
+      setError(msg); onError?.(msg); showError("File too large", axSizeMB} MB.`;
       setError(msg); onError?.(msg); toast.error(msg);
       return null;
     }
@@ -146,7 +147,7 @@ export function useImageUpload({
       setPreview(image.url);
       setUploadedImage(image);
       onSuccess?.(image);
-      toast.success("Image uploaded.");
+      showSuccess("Image uploaded!", "Your image is ready to use.");
       return image;
 
     } catch (err: unknown) {
@@ -156,7 +157,7 @@ export function useImageUpload({
       setError(msg);
       setPreview(null);
       onError?.(msg);
-      toast.error(msg);
+      showError("Upload failed", msg);
       return null;
     } finally {
       setUploading(false);

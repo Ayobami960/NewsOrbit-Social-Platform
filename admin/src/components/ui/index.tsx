@@ -3,7 +3,7 @@ import { cn, STATUS_COLOR } from "../../lib/utils";
 import { Loader2, X } from "lucide-react";
 
 // ── Button ────────────────────────────────────────────────────────────────────
-type BtnVariant = "primary" | "outline" | "ghost" | "danger" | "success";
+type BtnVariant = "primary"  | "secondary" | "outline" | "ghost" | "danger" | "success";
 type BtnSize    = "xs" | "sm" | "md" | "lg";
 
 interface BtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -15,6 +15,7 @@ interface BtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANT: Record<BtnVariant, string> = {
   primary: "bg-red-600 text-white hover:bg-red-700 shadow-sm shadow-red-900/20",
+  secondary: "bg-zinc-700 text-zinc-100 hover:bg-zinc-600 shadow-sm",
   outline: "border border-zinc-700 text-zinc-200 hover:border-zinc-500 hover:bg-zinc-800/60",
   ghost:   "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60",
   danger:  "bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25",

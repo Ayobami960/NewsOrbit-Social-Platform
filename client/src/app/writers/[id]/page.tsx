@@ -11,15 +11,16 @@ import { useArticles } from "@/hooks/useArticles";
 import { useAuth } from "@/context/AuthContext";
 import { formatNumber, getInitials, formatDate, cn } from "@/lib/utils";
 import { UserPlus, UserMinus, Newspaper, Eye, Users, ArrowLeft } from "lucide-react";
-import { toast } from "react-toastify";
+import { useToast } from "@/components/ui/toast";
 import { BsInstagram, BsTwitter } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa6";
 
 export default function WriterProfilePage() {
-  const { id }              = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
   const { user, isLoggedIn } = useAuth();
-  const router              = useRouter();
-  const [page, setPage]     = useState(1);
+  const { error } = useToast();
+  const router = useRouter();
+  const [page, setPage] = useState(1);
 
   // Auth guard — redirect unauthenticated users to login
   useEffect(() => {
@@ -28,8 +29,8 @@ export default function WriterProfilePage() {
     }
   }, [isLoggedIn, router]);
 
-  const { data: writer,   isLoading: writerLoading }   = useWriterProfile(id ?? "");
-  const { data: followData }                            = useFollowStatus(id ?? "", isLoggedIn && id !== user?._id);
+  const { data: writer, isLoading: writerLoading } = useWriterProfile(id ?? "");
+  const { data: followData } = useFollowStatus(id ?? "", isLoggedIn && id !== user?._id);
   const { data: articles, isLoading: articlesLoading } = useArticles({
     author: id,
     limit: 9,
@@ -37,16 +38,16 @@ export default function WriterProfilePage() {
     status: "published",
   });
 
-  const followMut   = useFollow();
+  const followMut = useFollow();
   const unfollowMut = useUnfollow();
 
   const isFollowing  = followData?.isFollowing ?? false;
   const isOwnProfile = user?._id === id;
 
   const handleFollowToggle = () => {
-    if (!isLoggedIn) { toast.error("Sign in to follow writers."); return; }
+    if (!isLoggedIn) { error("Sign in required", "Sign in to follow writers."); return; }
     if (isFollowing) unfollowMut.mutate(id!);
-    else             followMut.mutate(id!);
+    else followMut.mutate(id!);
   };
 
   // Don't render anything while redirecting unauthenticated users
@@ -82,7 +83,7 @@ export default function WriterProfilePage() {
   }
 
   const articlesData = articles?.articles   ?? [];
-  const pagination   = articles?.pagination;
+  const pagination = articles?.pagination;
 
   return (
     <div className="min-h-screen flex flex-col">

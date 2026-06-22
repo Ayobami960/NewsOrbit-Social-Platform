@@ -1,8 +1,8 @@
-# OsunGist Admin
+# NewsOrbit Admin
 
 ## Project Overview
 
-OsunGist is a full-stack blogging and community platform. It is built as a three-part workspace:
+NewsOrbit is a full-stack blogging and community platform. It is built as a three-part workspace:
 
 - `client/` — the public Next.js frontend for readers and writers
 - `server/` — the Express/MongoDB backend API and application logic
@@ -99,7 +99,7 @@ This ensures the user profile and admin analytics show accurate numbers.
 
 ## Admin README Purpose
 
-This file is intended to summarize the OsunGist platform from the admin project perspective.
+This file is intended to summarize the NewsOrbit platform from the admin project perspective.
 
 The admin dashboard should support:
 
@@ -136,4 +136,4 @@ npm run dev
 
 ## Summary
 
-OsunGist brings blogging, author networking, and analytics together in a modern full-stack application. The admin dashboard is a central control point for managing the platform and monitoring performance.
+NewsOrbit brings blogging, author networking, and analytics together in a modern full-stack application. The admin dashboard is a central control point for managing the platform and monitoring performance.

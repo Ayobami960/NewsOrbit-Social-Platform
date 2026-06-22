@@ -200,18 +200,18 @@ button {
     transform: none !important;
   }
 
-  .osun-toast {
+  .new-toast {
     border-radius: 10px !important;
     margin: 8px 0 0 0 !important;
   }
 }
 
 /* ensure toast fills container */
-.osun-toast {
+.new-toast {
   width: 100% !important;
 }
 
-.osun-toast {
+.new-toast {
   background: #ffffff;
   color: var(--color-ink-800);
   font-family: var(--font-sans), system-ui, sans-serif;
@@ -228,20 +228,20 @@ button {
 }
 
 /* ── Top colour strip ── */
-.osun-toast::before {
+.new-toast::before {
   content: "";
   display: block;
   height: 3px;
   width: 100%;
   background: var(--color-ink-300);
 }
-.osun-toast--success::before { background: linear-gradient(90deg, #07bc0c, #4ade80); }
-.osun-toast--error::before   { background: linear-gradient(90deg, var(--color-ember-700), var(--color-ember-400)); }
-.osun-toast--warning::before { background: linear-gradient(90deg, #b45309, #fbbf24); }
-.osun-toast--info::before    { background: linear-gradient(90deg, #1d4ed8, #60a5fa); }
+.new-toast--success::before { background: linear-gradient(90deg, #07bc0c, #4ade80); }
+.new-toast--error::before   { background: linear-gradient(90deg, var(--color-ember-700), var(--color-ember-400)); }
+.new-toast--warning::before { background: linear-gradient(90deg, #b45309, #fbbf24); }
+.new-toast--info::before    { background: linear-gradient(90deg, #1d4ed8, #60a5fa); }
 
 /* ── Inner body padding — more left space ── */
-.osun-toast .Toastify__toast-body {
+.new-toast .Toastify__toast-body {
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 0.875rem;
   line-height: 1.55;
@@ -253,7 +253,7 @@ button {
 }
 
 /* ── Toast message text ── */
-.osun-toast .Toastify__toast-body > div:last-child {
+.new-toast .Toastify__toast-body > div:last-child {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -261,20 +261,20 @@ button {
 }
 
 /* ── Icon styling ── */
-.osun-toast .Toastify__toast-icon {
+.new-toast .Toastify__toast-icon {
   width: 22px;
   height: 22px;
   margin-left: 2px !important;
   flex-shrink: 0;
 }
 
-.osun-toast--success .Toastify__toast-icon svg { color: #07bc0c; }
-.osun-toast--error   .Toastify__toast-icon svg { color: var(--color-ember-600); }
-.osun-toast--warning .Toastify__toast-icon svg { color: #b45309; }
-.osun-toast--info    .Toastify__toast-icon svg { color: #1d4ed8; }
+.new-toast--success .Toastify__toast-icon svg { color: #07bc0c; }
+.new-toast--error   .Toastify__toast-icon svg { color: var(--color-ember-600); }
+.new-toast--warning .Toastify__toast-icon svg { color: #b45309; }
+.new-toast--info    .Toastify__toast-icon svg { color: #1d4ed8; }
 
 /* ── Close button ── */
-.osun-toast .Toastify__close-button {
+.new-toast .Toastify__close-button {
   color: var(--color-ink-400) !important;
   opacity: 1;
   align-self: flex-start;
@@ -289,24 +289,24 @@ button {
   flex-shrink: 0;
   transition: all 0.15s ease;
 }
-.osun-toast .Toastify__close-button:hover {
+.new-toast .Toastify__close-button:hover {
   background: var(--color-ink-100);
   color: var(--color-accent) !important;
 }
-.osun-toast .Toastify__close-button > svg {
+.new-toast .Toastify__close-button > svg {
   width: 12px;
   height: 12px;
 }
 
 /* ── Progress bar ── */
-.osun-toast .Toastify__progress-bar {
+.new-toast .Toastify__progress-bar {
   height: 2px;
   bottom: 0;
 }
-.osun-toast--success .Toastify__progress-bar { background: #07bc0c; }
-.osun-toast--error   .Toastify__progress-bar { background: var(--color-ember-600); }
-.osun-toast--warning .Toastify__progress-bar { background: #b45309; }
-.osun-toast--info    .Toastify__progress-bar { background: #1d4ed8; }
+.new-toast--success .Toastify__progress-bar { background: #07bc0c; }
+.new-toast--error   .Toastify__progress-bar { background: var(--color-ember-600); }
+.new-toast--warning .Toastify__progress-bar { background: #b45309; }
+.new-toast--info    .Toastify__progress-bar { background: #1d4ed8; }
 
 .ticker-scroll {
   display: inline-block;

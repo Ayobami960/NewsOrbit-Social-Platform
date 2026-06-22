@@ -16,18 +16,18 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const sections = [
-  { id: "overview",      label: "Overview",             icon: Shield },
-  { id: "collection",    label: "Data we collect",      icon: Database },
-  { id: "use",           label: "How we use it",        icon: UserCheck },
-  { id: "sharing",       label: "Sharing",              icon: Share2 },
-  { id: "cookies",       label: "Cookies",              icon: Cookie },
-  { id: "retention",     label: "Retention",            icon: Clock },
-  { id: "rights",        label: "Your rights",          icon: UserCheck },
-  { id: "security",      label: "Security",             icon: Lock },
-  { id: "children",      label: "Children",             icon: Baby },
-  { id: "international", label: "Transfers",            icon: Globe },
-  { id: "changes",       label: "Policy changes",       icon: RefreshCw },
-  { id: "contact",       label: "Contact",              icon: Mail },
+  { id: "overview", label: "Overview", icon: Shield },
+  { id: "collection", label: "Data we collect", icon: Database },
+  { id: "use", label: "How we use it",   icon: UserCheck },
+  { id: "sharing", label: "Sharing",  icon: Share2 },
+  { id: "cookies", label: "Cookies",  icon: Cookie },
+  { id: "retention", label: "Retention", icon: Clock },
+  { id: "rights", label: "Your rights",  icon: UserCheck },
+  { id: "security", label: "Security", icon: Lock },
+  { id: "children", label: "Children",  icon: Baby },
+  { id: "international", label: "Transfers",  icon: Globe },
+  { id: "changes", label: "Policy changes",  icon: RefreshCw },
+  { id: "contact", label: "Contact", icon: Mail },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -35,8 +35,8 @@ const sections = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function CookieConsent() {
-  const [visible,   setVisible]   = useState(false);
-  const [expanded,  setExpanded]  = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [prefs, setPrefs] = useState({
     essential:  true,   // always on
     analytics:  false,
@@ -71,7 +71,7 @@ export function CookieConsent() {
       role="dialog"
       aria-modal="true"
       aria-label="Cookie consent"
-      className="fixed inset-0 z-[200] flex items-end sm:items-end justify-center sm:justify-end pointer-events-none px-0 sm:px-6 sm:pb-6"
+      className="fixed inset-0 z-200 flex items-end sm:items-end justify-center sm:justify-end pointer-events-none px-0 sm:px-6 sm:pb-6"
     >
       {/* Backdrop — only visible on mobile */}
       <div
@@ -82,7 +82,7 @@ export function CookieConsent() {
       <div
         className="
           relative pointer-events-auto w-full sm:max-w-sm
-          bg-white border border-[var(--color-border)] shadow-2xl
+          bg-white border border-(--color-border) shadow-2xl
           rounded-t-3xl sm:rounded-2xl overflow-hidden
           animate-[slideUp_0.35s_cubic-bezier(0.34,1.56,0.64,1)_both]
         "
@@ -98,7 +98,7 @@ export function CookieConsent() {
         `}</style>
 
         {/* Top accent */}
-        <div className="h-1 bg-gradient-to-r from-ember-600 via-ember-500 to-ember-400" />
+        <div className="h-1 bg-linear-to-r from-ember-600 via-ember-500 to-ember-400" />
 
         <div className="p-5">
           {/* Header */}
@@ -111,7 +111,7 @@ export function CookieConsent() {
                 <h2 className="font-display font-black text-ink-900 text-base leading-tight">
                   Cookie preferences
                 </h2>
-                <p className="font-sans text-[11px] text-ink-400 mt-0.5">OsunGist · NDPA 2023</p>
+                <p className="font-sans text-[11px] text-ink-400 mt-0.5">NewsOrbit · NDPA {new Date().getFullYear() }</p>
               </div>
             </div>
             <button
@@ -142,7 +142,7 @@ export function CookieConsent() {
             </button>
 
             {expanded && (
-              <div className="space-y-2 bg-ink-50 rounded-xl p-3 border border-[var(--color-border)]">
+              <div className="space-y-2 bg-ink-50 rounded-xl p-3 border border-(--color-border)">
                 {[
                   {
                     key: "essential",
@@ -153,7 +153,7 @@ export function CookieConsent() {
                   {
                     key: "analytics",
                     label: "Analytics",
-                    desc: "Help us understand how you use OsunGist.",
+                    desc: "Help us understand how you use NewsOrbit.",
                     locked: false,
                   },
                   {
@@ -203,7 +203,7 @@ export function CookieConsent() {
           <div className="flex gap-2">
             <button
               onClick={() => save("essential")}
-              className="flex-1 py-2.5 border border-[var(--color-border)] rounded-xl text-[13px] font-sans font-semibold text-ink-700 hover:bg-ink-50 transition-colors"
+              className="flex-1 py-2.5 border border-(--color-border) rounded-xl text-[13px] font-sans font-semibold text-ink-700 hover:bg-ink-50 transition-colors"
             >
               Essential only
             </button>
@@ -238,7 +238,7 @@ function BulletList({ items }: { items: string[] }) {
     <ul className="space-y-2.5">
       {items.map((item, i) => (
         <li key={i} className="flex items-start gap-3">
-          <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-ember-600 shrink-0" />
+          <span className="mt-1.75 w-1.5 h-1.5 rounded-full bg-ember-600 shrink-0" />
           <span className="font-body text-[14px] text-ink-600 leading-relaxed">{item}</span>
         </li>
       ))}
@@ -262,10 +262,10 @@ function SectionCard({
   return (
     <div
       id={id}
-      className="scroll-mt-32 bg-white border border-[var(--color-border)] rounded-2xl overflow-hidden"
+      className="scroll-mt-32 bg-white border border-(--color-border) rounded-2xl overflow-hidden"
     >
       {/* Card header */}
-      <div className="flex items-center gap-4 px-6 py-5 border-b border-[var(--color-border)] bg-ink-50/50">
+      <div className="flex items-center gap-4 px-6 py-5 border-b border-(--color-border) bg-ink-50/50">
         <div className="w-9 h-9 rounded-xl bg-ember-600/10 flex items-center justify-center shrink-0">
           <Icon size={17} className="text-ember-600" />
         </div>
@@ -306,9 +306,9 @@ function ProgressNav({
   const progress  = ((activeIdx + 1) / sections.length) * 100;
 
   return (
-    <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-sm border-b border-[var(--color-border)]">
+    <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-sm border-b border-(--color-border)">
       {/* Progress bar */}
-      <div className="h-[3px] bg-ink-100">
+      <div className="h-0.75 bg-ink-100">
         <div
           className="h-full bg-ember-600 transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}
@@ -375,7 +375,7 @@ export default function PrivacyPage() {
         <main className="flex-1">
 
           {/* ── HERO ──────────────────────────────────────────────────────── */}
-          <div className="bg-white border-b border-[var(--color-border)] relative overflow-hidden">
+          <div className="bg-white border-b border-(--color-border) relative overflow-hidden">
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
@@ -385,7 +385,7 @@ export default function PrivacyPage() {
               aria-hidden
             />
             <div className="absolute right-0 bottom-0 pointer-events-none select-none overflow-hidden" aria-hidden>
-              <span className="font-display text-[180px] font-black text-ink-900/[0.025] leading-none tracking-tighter whitespace-nowrap">
+              <span className="font-display text-[180px] font-black text-ink-900/2.5 leading-none tracking-tighter whitespace-nowrap">
                 Privacy
               </span>
             </div>
@@ -396,7 +396,7 @@ export default function PrivacyPage() {
                 <div className="w-7 h-7 bg-ember-600 rounded-sm flex items-center justify-center">
                   <Radio size={13} className="text-white" />
                 </div>
-                <span className="font-sans text-sm font-semibold text-ink-400">OsunGist</span>
+                <span className="font-sans text-sm font-semibold text-ink-400">NewsOrbit</span>
                 <span className="text-ink-300">/</span>
                 <span className="font-sans text-sm font-semibold text-ink-700">Privacy Policy</span>
               </div>
@@ -421,7 +421,7 @@ export default function PrivacyPage() {
                     <span className="w-px h-4 bg-ink-200" />
                     <span className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                      NDPA 2023 compliant
+                      NDPA {new Date().getFullYear() } compliant
                     </span>
                   </div>
                 </div>
@@ -435,7 +435,7 @@ export default function PrivacyPage() {
                   ].map(({ label, icon: Icon }) => (
                     <div
                       key={label}
-                      className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-[var(--color-border)] rounded-xl text-[13px] font-sans font-semibold text-ink-700"
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-(--color-border) rounded-xl text-[13px] font-sans font-semibold text-ink-700"
                     >
                       <Icon size={13} className="text-ember-600" />
                       {label}
@@ -454,9 +454,9 @@ export default function PrivacyPage() {
             <div className="flex items-start gap-8">
 
               {/* ── Left sidebar — desktop only ────────────────────────────── */}
-              <aside className="hidden xl:flex flex-col w-56 shrink-0 sticky top-[105px] self-start gap-4">
+              <aside className="hidden xl:flex flex-col w-56 shrink-0 sticky top-26.25 self-start gap-4">
                 {/* Mini TOC */}
-                <div className="bg-white border border-[var(--color-border)] rounded-2xl p-4">
+                <div className="bg-white border border-(--color-border) rounded-2xl p-4">
                   <p className="text-[10px] font-sans font-bold text-ink-400 uppercase tracking-[0.18em] mb-3">
                     On this page
                   </p>
@@ -489,11 +489,11 @@ export default function PrivacyPage() {
 
                 {/* NDPA card */}
                 <div className="bg-ember-600/6 border border-ember-600/15 rounded-2xl p-4">
-                  <p className="text-[11px] font-sans font-bold text-ember-700 mb-1.5">🇳🇬 NDPA 2023</p>
+                  <p className="text-[11px] font-sans font-bold text-ember-700 mb-1.5">🇳🇬 NDPA {new Date().getFullYear() }</p>
                   <p className="text-[11px] font-sans text-ink-600 leading-relaxed">
                     You have rights under Nigerian data law. Contact{" "}
-                    <a href="mailto:privacy@osungist.com" className="text-ember-600 font-semibold hover:underline">
-                      privacy@osungist.com
+                    <a href="mailto:privacy@newsorbit.com" className="text-ember-600 font-semibold hover:underline">
+                      privacy@newsorbit.com
                     </a>
                     .
                   </p>
@@ -506,15 +506,15 @@ export default function PrivacyPage() {
                 {/* Intro card */}
                 <div className="bg-ink-950 rounded-2xl p-6">
                   <p className="font-body text-[15px] text-ink-300 leading-[1.85]">
-                    At <span className="text-white font-semibold">OsunGist</span>, we are committed to protecting your personal data and respecting your privacy rights. This Privacy Policy explains what information we collect, why we collect it, how we use it, and your rights under the{" "}
-                    <span className="text-ember-400 font-semibold">Nigeria Data Protection Act (NDPA) 2023</span>. We encourage you to read it carefully.
+                    At <span className="text-white font-semibold">NewsOrbit</span>, we are committed to protecting your personal data and respecting your privacy rights. This Privacy Policy explains what information we collect, why we collect it, how we use it, and your rights under the{" "}
+                    <span className="text-ember-400 font-semibold">Nigeria Data Protection Act (NDPA) {new Date().getFullYear() }</span>. We encourage you to read it carefully.
                   </p>
                 </div>
 
                 {/* §01 */}
                 <SectionCard id="overview" num="§01" title="Overview" icon={Shield}>
                   <p>
-                    OsunGist ("we", "us", "our") operates as a digital newsroom and community platform serving Osun State and the broader Nigerian public. As the data controller for information collected through our website and mobile applications, we take our obligations under Nigerian data protection law seriously.
+                    NewsOrbit ("we", "us", "our") operates as a digital newsroom and community platform serving Osun State and the broader Nigerian public. As the data controller for information collected through our website and mobile applications, we take our obligations under Nigerian data protection law seriously.
                   </p>
                   <p>
                     This policy applies to all users — casual readers, registered members, and community bloggers. It covers our website, mobile apps, newsletters, and all services we provide.
@@ -552,7 +552,7 @@ export default function PrivacyPage() {
                     "To comply with our legal obligations under Nigerian law.",
                     "To respond to your enquiries and provide customer support.",
                   ]} />
-                  <div className="bg-ink-50 border border-[var(--color-border)] rounded-xl p-4 text-[13px]">
+                  <div className="bg-ink-50 border border-(--color-border) rounded-xl p-4 text-[13px]">
                     <p className="font-sans font-semibold text-ink-800 mb-1.5">Legal bases for processing</p>
                     <div className="grid grid-cols-2 gap-2">
                       {["Contractual necessity", "Legitimate interests", "Legal obligation", "Consent"].map(b => (
@@ -575,7 +575,7 @@ export default function PrivacyPage() {
                   <BulletList items={[
                     "Service providers: Trusted vendors (hosting, analytics, email, payments) under strict data processing agreements.",
                     "Legal requirements: When required by law, court order, or lawful government request.",
-                    "Safety: To protect the rights, property, or safety of OsunGist, our users, or the public.",
+                    "Safety: To protect the rights, property, or safety of NewsOrbit, our users, or the public.",
                     "Business transfers: In the event of a merger or acquisition — we will notify you before any change.",
                     "With your explicit consent: For any other purpose, only with your permission.",
                   ]} />
@@ -593,7 +593,7 @@ export default function PrivacyPage() {
                       { type: "Preferences", color: "bg-amber-500",    desc: "Remember your notification and display settings." },
                       { type: "Marketing",   color: "bg-ember-600",    desc: "Show relevant content. Requires your consent." },
                     ].map(({ type, color, desc }) => (
-                      <div key={type} className="bg-ink-50 border border-[var(--color-border)] rounded-xl p-3.5">
+                      <div key={type} className="bg-ink-50 border border-(--color-border) rounded-xl p-3.5">
                         <div className="flex items-center gap-2 mb-1.5">
                           <span className={`w-2 h-2 rounded-full ${color}`} />
                           <span className="font-sans font-bold text-ink-800 text-[12px]">{type}</span>
@@ -619,7 +619,7 @@ export default function PrivacyPage() {
                     ].map(({ period, desc }) => (
                       <div
                         key={period}
-                        className="flex items-start gap-4 p-3 bg-ink-50 border border-[var(--color-border)] rounded-xl"
+                        className="flex items-start gap-4 p-3 bg-ink-50 border border-(--color-border) rounded-xl"
                       >
                         <span className="shrink-0 font-mono text-[11px] font-bold text-ember-600 bg-ember-600/10 px-2 py-1 rounded-lg whitespace-nowrap">
                           {period}
@@ -632,18 +632,18 @@ export default function PrivacyPage() {
 
                 {/* §07 */}
                 <SectionCard id="rights" num="§07" title="Your rights (NDPA)" icon={UserCheck}>
-                  <p>Under the Nigeria Data Protection Act 2023, you have the following rights:</p>
+                  <p>Under the Nigeria Data Protection Act {new Date().getFullYear() }, you have the following rights:</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {[
-                      { right: "Access",            desc: "Request a copy of your personal data." },
-                      { right: "Rectification",     desc: "Correct inaccurate or incomplete data." },
-                      { right: "Erasure",           desc: "Request deletion, subject to legal obligations." },
-                      { right: "Restrict",          desc: "Limit how we use your data in certain cases." },
-                      { right: "Portability",       desc: "Receive your data in a machine-readable format." },
-                      { right: "Object",            desc: "Object to processing or direct marketing." },
-                      { right: "Withdraw consent",  desc: "Withdraw consent at any time without penalty." },
+                      { right: "Access", desc: "Request a copy of your personal data." },
+                      { right: "Rectification", desc: "Correct inaccurate or incomplete data." },
+                      { right: "Erasure", desc: "Request deletion, subject to legal obligations." },
+                      { right: "Restrict", desc: "Limit how we use your data in certain cases." },
+                      { right: "Portability", desc: "Receive your data in a machine-readable format." },
+                      { right: "Object", desc: "Object to processing or direct marketing." },
+                      { right: "Withdraw consent", desc: "Withdraw consent at any time without penalty." },
                     ].map(({ right, desc }) => (
-                      <div key={right} className="flex items-start gap-3 p-3 bg-white border border-[var(--color-border)] rounded-xl">
+                      <div key={right} className="flex items-start gap-3 p-3 bg-white border border-(--color-border) rounded-xl">
                         <span className="mt-0.5 w-4 h-4 rounded bg-ember-600/10 flex items-center justify-center shrink-0">
                           <span className="w-1.5 h-1.5 rounded-full bg-ember-600" />
                         </span>
@@ -656,8 +656,8 @@ export default function PrivacyPage() {
                   </div>
                   <div className="bg-sky-50 border border-sky-200 rounded-xl p-4 text-[13px] font-sans text-sky-800">
                     To exercise any right, email{" "}
-                    <a href="mailto:privacy@osungist.com" className="font-bold hover:underline">
-                      privacy@osungist.com
+                    <a href="mailto:privacy@newsorbit.com" className="font-bold hover:underline">
+                      privacy@newsorbit.com
                     </a>
                     . We respond within 30 days as required by the NDPA. You may also complain to the{" "}
                     <strong>Nigeria Data Protection Commission (NDPC)</strong>.
@@ -673,7 +673,7 @@ export default function PrivacyPage() {
                       { label: "Access controls",    sub: "Need-to-know basis for all staff" },
                       { label: "Regular audits",     sub: "Vulnerability assessments & pen tests" },
                     ].map(({ label, sub }) => (
-                      <div key={label} className="bg-ink-50 border border-[var(--color-border)] rounded-xl p-3.5">
+                      <div key={label} className="bg-ink-50 border border-(--color-border) rounded-xl p-3.5">
                         <p className="font-sans font-bold text-ink-800 text-[12px] mb-0.5">{label}</p>
                         <p className="font-body text-ink-500 text-[11px] leading-relaxed">{sub}</p>
                       </div>
@@ -687,17 +687,17 @@ export default function PrivacyPage() {
                 {/* §09 */}
                 <SectionCard id="children" num="§09" title="Children's privacy" icon={Baby}>
                   <p>
-                    OsunGist is not directed at children under 13. We do not knowingly collect personal data from children under 13. If you are a parent or guardian and believe your child has provided us with personal information without your consent, contact <a href="mailto:privacy@osungist.com" className="text-ember-600 font-semibold hover:underline">privacy@osungist.com</a> and we will promptly delete such information.
+                    NewsOrbit is not directed at children under 13. We do not knowingly collect personal data from children under 13. If you are a parent or guardian and believe your child has provided us with personal information without your consent, contact <a href="mailto:privacy@newsorbit.com" className="text-ember-600 font-semibold hover:underline">privacy@newsorbit.com</a> and we will promptly delete such information.
                   </p>
                   <p>
-                    Users aged 13–17 may use OsunGist with verifiable parental or guardian consent. We encourage parents to monitor their children's online activity.
+                    Users aged 13–17 may use NewsOrbit with verifiable parental or guardian consent. We encourage parents to monitor their children's online activity.
                   </p>
                 </SectionCard>
 
                 {/* §10 */}
                 <SectionCard id="international" num="§10" title="International transfers" icon={Globe}>
                   <p>
-                    OsunGist is based in Nigeria and primarily serves a Nigerian audience. Some service providers (cloud hosting, analytics) may process data outside Nigeria. Where we transfer personal data internationally, appropriate safeguards are in place in accordance with the NDPA 2023 — including standard contractual clauses or equivalent protections.
+                    NewsOrbit is based in Nigeria and primarily serves a Nigerian audience. Some service providers (cloud hosting, analytics) may process data outside Nigeria. Where we transfer personal data internationally, appropriate safeguards are in place in accordance with the NDPA {new Date().getFullYear() } — including standard contractual clauses or equivalent protections.
                   </p>
                 </SectionCard>
 
@@ -710,7 +710,7 @@ export default function PrivacyPage() {
                     "Notify registered users via email or in-app alert for significant changes.",
                   ]} />
                   <p>
-                    Continued use of OsunGist after the effective date constitutes acceptance of the revised policy.
+                    Continued use of NewsOrbit after the effective date constitutes acceptance of the revised policy.
                   </p>
                 </SectionCard>
 
@@ -718,12 +718,12 @@ export default function PrivacyPage() {
                 <SectionCard id="contact" num="§12" title="Contact us" icon={Mail}>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                     {[
-                      { label: "Privacy / DPO",   value: "privacy@osungist.com" },
-                      { label: "Support",          value: "support@osungist.com" },
-                      { label: "Address",          value: "Osogbo, Osun State, Nigeria" },
-                      { label: "Response time",    value: "Within 30 days (NDPA)" },
+                      { label: "Privacy / DPO", value: "privacy@newsorbit.com" },
+                      { label: "Support", value: "support@newsorbit.com" },
+                      { label: "Address", value: "Osogbo, Osun State, Nigeria" },
+                      { label: "Response time", value: "Within 30 days (NDPA)" },
                     ].map(({ label, value }) => (
-                      <div key={label} className="bg-ink-50 border border-[var(--color-border)] rounded-xl p-3.5">
+                      <div key={label} className="bg-ink-50 border border-(--color-border) rounded-xl p-3.5">
                         <p className="text-[10px] font-sans font-bold text-ink-400 uppercase tracking-widest mb-1">
                           {label}
                         </p>
@@ -731,16 +731,16 @@ export default function PrivacyPage() {
                       </div>
                     ))}
                   </div>
-                  <div className="flex items-start gap-3 p-4 bg-ink-50 border border-[var(--color-border)] rounded-xl">
+                  <div className="flex items-start gap-3 p-4 bg-ink-50 border border-(--color-border) rounded-xl">
                     <span className="text-lg shrink-0">🇳🇬</span>
                     <p className="text-[13px] font-sans text-ink-600 leading-relaxed">
-                      <Highlight>Governing law.</Highlight> This Privacy Policy is governed by the Nigeria Data Protection Act (NDPA) 2023. You have the right to lodge a complaint with the <Highlight>Nigeria Data Protection Commission (NDPC)</Highlight>.
+                      <Highlight>Governing law.</Highlight> This Privacy Policy is governed by the Nigeria Data Protection Act (NDPA) {new Date().getFullYear() }. You have the right to lodge a complaint with the <Highlight>Nigeria Data Protection Commission (NDPC)</Highlight>.
                     </p>
                   </div>
                 </SectionCard>
 
                 {/* Footer links */}
-                <div className="pt-4 pb-8 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--color-border)]">
+                <div className="pt-4 pb-8 flex flex-wrap items-center justify-between gap-4 border-t border-(--color-border)">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 bg-ember-600 rounded-sm flex items-center justify-center">
                       <Radio size={13} className="text-white" />

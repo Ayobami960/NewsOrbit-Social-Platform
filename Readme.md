@@ -1,4 +1,4 @@
-# OsunGist — Project Snapshot
+# NewsOrbit — Project Snapshot
 
 This file contains a concise snapshot of the repository: top-level folders, key files, and a short note about how to explore or run each part.
 

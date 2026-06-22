@@ -35,7 +35,7 @@ export default function SubscribePage() {
               <Mail size={28} className="text-ember-400" />
             </div>
             <h1 className="font-display text-5xl font-bold mb-4 leading-tight">
-              Osun news,<br />
+              News Orbit,<br />
               <span className="text-ember-400">every morning.</span>
             </h1>
             <p className="text-ink-300 font-body text-lg leading-relaxed max-w-xl mx-auto">
@@ -55,7 +55,7 @@ export default function SubscribePage() {
                   </div>
                   <h2 className="font-display text-3xl font-bold text-ink-900 mb-3">You're subscribed!</h2>
                   <p className="text-ink-600 font-body mb-2">
-                    Welcome to OsunGist. Check your inbox for a confirmation email.
+                    Welcome to NewsOrbit. Check your inbox for a confirmation email.
                   </p>
                   <p className="text-ink-500 font-body text-sm mb-8">
                     Your first daily digest arrives tomorrow morning.
@@ -97,7 +97,7 @@ export default function SubscribePage() {
                   </form>
 
                   <p className="text-xs text-ink-400 font-sans mt-4 leading-relaxed">
-                    By subscribing you agree to receive email newsletters from OsunGist. You can unsubscribe at any time via the link in any email.
+                    By subscribing you agree to receive email newsletters from NewsOrbit. You can unsubscribe at any time via the link in any email.
                   </p>
                 </>
               )}
@@ -129,7 +129,7 @@ export default function SubscribePage() {
                 {
                   icon: Rss,
                   title: "Writer Spotlights",
-                  desc: "Discover new voices — we feature a different OsunGist writer every week.",
+                  desc: "Discover new voices — we feature a different NewsOrbit writer every week.",
                   color: "bg-green-600/10 text-green-600",
                 },
               ].map(({ icon: Icon, title, desc, color }) => (

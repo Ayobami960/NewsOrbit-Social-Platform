@@ -10,7 +10,7 @@ export default function Blogs() {
   const [page,   setPage]   = useState(1);
   const [search, setSearch] = useState("");
 
-  const { data, isLoading }              = useAdminBlogs({ page, search });
+  const { data, isLoading }  = useAdminBlogs({ page, search });
   const { mutate: deleteBlog, isPending: isDeleting } = useAdminDeleteBlog();
 
   const blogs      = data?.blogs      ?? [];

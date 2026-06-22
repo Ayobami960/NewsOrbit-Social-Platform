@@ -19,7 +19,7 @@ const { moderateComment } = require("../controllers/comment.controller");
 standaloneRouter.patch(
   "/:id/moderate",
   protect,
-  restrictTo("super_admin", "admin"),
+  restrictTo("super_admin", "admin", "manager"),
   ctrl.moderateComment
 );
 

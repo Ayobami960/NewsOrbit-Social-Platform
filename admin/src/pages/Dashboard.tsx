@@ -5,8 +5,8 @@ import {
 } from "../components/ui";
 import AreaChart from "../components/charts/AreaChart";
 import { useAuth } from "../context/AuthContext";
-import type { SuperAdminOverview, AdminOverview, WriterOverview } from "../types";
-import { Newspaper, Users, BookOpen, AlertTriangle } from "lucide-react";
+import type { SuperAdminOverview, AdminOverview, WriterOverview, ManagerOverview } from "../types";
+import { Newspaper, Users, BookOpen, AlertTriangle, MessageSquare } from "lucide-react";
 
 const SPARKS = [12, 18, 14, 28, 22, 30, 24, 32, 20, 28, 35, 40];
 
@@ -23,6 +23,7 @@ export default function Dashboard() {
   const isWriter = user?.role === "writer";
   const isAdmin = user?.role === "admin";
   const isSuperAdmin = user?.role === "super_admin";
+  const isManager = user?.role === "manager";
 
   // Early return if no overview
   if (!overview) {
@@ -32,150 +33,219 @@ export default function Dashboard() {
   return (
     <Layout title="Powered By Management">
       {/* ── Stats Grid ── */}
-      <div className={`grid gap-4 mb-6 ${isWriter ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2 md:grid-cols-4"}`}>
+      <div className={`grid gap-4 mb-6 ${isWriter || isManager ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2 md:grid-cols-4"}`}>
         {isSuperAdmin && (
           <>
-            <StatCard 
-              label="Total Articles" 
+            <StatCard
+              label="Total Articles"
               value={(overview as SuperAdminOverview).articles.total}
-              sub={`${(overview as SuperAdminOverview).articles.published} published`} 
+              sub={`${(overview as SuperAdminOverview).articles.published} published`}
               subColor="text-green-400"
-              accent="bg-red-500" 
-              icon={Newspaper} 
-              sparkData={SPARKS} 
+              accent="bg-red-500"
+              icon={Newspaper}
+              sparkData={SPARKS}
             />
-            <StatCard 
-              label="Registered Users" 
+            <StatCard
+              label="Registered Users"
               value={(overview as SuperAdminOverview).users.total}
-              sub={`+${(overview as SuperAdminOverview).users.newThisMonth} this month`} 
+              sub={`+${(overview as SuperAdminOverview).users.newThisMonth} this month`}
               subColor="text-green-400"
-              accent="bg-green-500" 
-              icon={Users} 
-              sparkData={SPARKS.map(v => v * 2)} 
+              accent="bg-green-500"
+              icon={Users}
+              sparkData={SPARKS.map(v => v * 2)}
             />
-            <StatCard 
-              label="Community Blogs" 
+            <StatCard
+              label="Community Blogs"
               value={(overview as SuperAdminOverview).blogs.total}
-              sub="All published by users" 
+              sub="All published by users"
               subColor="text-zinc-400"
-              accent="bg-blue-500" 
-              icon={BookOpen} 
-              sparkData={SPARKS.map(v => Math.round(v * 0.5))} 
+              accent="bg-blue-500"
+              icon={BookOpen}
+              sparkData={SPARKS.map(v => Math.round(v * 0.5))}
             />
-            <StatCard 
-              label="Total Views" 
+            <StatCard
+              label="Total Views"
               value={(overview as SuperAdminOverview).totalViews}
-              sub="Across all content" 
+              sub="Across all content"
               accent="bg-amber-500"
-              sparkData={SPARKS.map(v => v * 30)} 
+              sparkData={SPARKS.map(v => v * 30)}
+            />
+          </>
+        )}
+
+        {isManager && (
+          <>
+            <StatCard
+              label="Community Blogs"
+              value={(overview as ManagerOverview).blogs.total}
+              sub={`${(overview as ManagerOverview).blogs.pending} pending review`}
+              subColor="text-amber-400"
+              accent="bg-blue-500"
+              icon={BookOpen}
+            />
+            <StatCard
+              label="Total Comments"
+              value={(overview as ManagerOverview).comments.total}
+              sub={`${(overview as ManagerOverview).comments.pending} pending`}
+              subColor="text-amber-400"
+              accent="bg-amber-500"
+              icon={MessageSquare}
+            />
+            <StatCard
+              label="Newsletter Subs"
+              value={(overview as ManagerOverview).newsletter.subscribers}
+              sub="Active subscribers"
+              accent="bg-green-500"
+              icon={Users}
             />
           </>
         )}
 
         {isAdmin && (
           <>
-            <StatCard 
-              label="My Writers" 
-              value={(overview as AdminOverview).writers} 
-              sub="Under your management" 
-              accent="bg-blue-500" 
-              icon={Users} 
+            <StatCard
+              label="My Writers"
+              value={(overview as AdminOverview).writers}
+              sub="Under your management"
+              accent="bg-blue-500"
+              icon={Users}
             />
-            <StatCard 
-              label="Team Articles" 
-              value={(overview as AdminOverview).articles.total} 
-              sub={`${(overview as AdminOverview).articles.published} published`} 
-              subColor="text-green-400" 
-              accent="bg-red-500" 
-              icon={Newspaper} 
+            <StatCard
+              label="Team Articles"
+              value={(overview as AdminOverview).articles.total}
+              sub={`${(overview as AdminOverview).articles.published} published`}
+              subColor="text-green-400"
+              accent="bg-red-500"
+              icon={Newspaper}
             />
-            <StatCard 
-              label="Total Views" 
-              value={(overview as AdminOverview).totalViews} 
-              sub="From your team's content" 
-              accent="bg-amber-500" 
+            <StatCard
+              label="Total Views"
+              value={(overview as AdminOverview).totalViews}
+              sub="From your team's content"
+              accent="bg-amber-500"
             />
           </>
         )}
 
         {isWriter && (
           <>
-            <StatCard 
-              label="My Articles" 
-              value={(overview as WriterOverview).articles.total} 
-              sub={`${(overview as WriterOverview).articles.published} published`} 
-              subColor="text-green-400" 
-              accent="bg-red-500" 
-              icon={Newspaper} 
+            <StatCard
+              label="My Articles"
+              value={(overview as WriterOverview).articles.total}
+              sub={`${(overview as WriterOverview).articles.published} published`}
+              subColor="text-green-400"
+              accent="bg-red-500"
+              icon={Newspaper}
             />
-            <StatCard 
-              label="Drafts" 
-              value={(overview as WriterOverview).articles.draft} 
-              sub="In progress" 
-              accent="bg-amber-500" 
+            <StatCard
+              label="Drafts"
+              value={(overview as WriterOverview).articles.draft}
+              sub="In progress"
+              accent="bg-amber-500"
             />
-            <StatCard 
-              label="Total Views" 
-              value={(overview as WriterOverview).totalViews} 
-              sub="Across all your articles" 
-              accent="bg-blue-500" 
+            <StatCard
+              label="Total Views"
+              value={(overview as WriterOverview).totalViews}
+              sub="Across all your articles"
+              accent="bg-blue-500"
             />
           </>
         )}
       </div>
 
       {/* ── Chart + Top Articles ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-        <Card className="p-5">
-          <SectionHead title="Articles Published — Last 14 Days" />
-          {chartData.length > 0 ? (
-            <AreaChart data={chartData} height={220} />
-          ) : (
-            <div className="h-55 flex items-center justify-center text-zinc-600 text-sm">
-              No data yet
-            </div>
-          )}
-        </Card>
+      {/* Managers don't have an article-authoring role, so this section is
+          skipped for them — there's nothing meaningful to show here. */}
+      {!isManager && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          <Card className="p-5">
+            <SectionHead title="Articles Published — Last 14 Days" />
+            {chartData.length > 0 ? (
+              <AreaChart data={chartData} height={220} />
+            ) : (
+              <div className="h-55 flex items-center justify-center text-zinc-600 text-sm">
+                No data yet
+              </div>
+            )}
+          </Card>
 
-        <Card className="p-5">
-          <SectionHead title="Top Articles by Views" />
-          {topArticles.length > 0 ? (
-            topArticles.slice(0, 5).map((a: any) => (
-              <BarRow 
-                key={a._id} 
-                label={a.title.slice(0, 22) + "…"} 
-                value={a.views} 
-                max={topArticles[0]?.views || 1} 
-              />
-            ))
-          ) : (
-            <p className="text-xs text-zinc-600 text-center py-6">No articles yet</p>
-          )}
-        </Card>
-      </div>
+          <Card className="p-5">
+            <SectionHead title="Top Articles by Views" />
+            {topArticles.length > 0 ? (
+              topArticles.slice(0, 5).map((a: any) => (
+                <BarRow
+                  key={a._id}
+                  label={a.title.slice(0, 22) + "…"}
+                  value={a.views}
+                  max={topArticles[0]?.views || 1}
+                />
+              ))
+            ) : (
+              <p className="text-xs text-zinc-600 text-center py-6">No articles yet</p>
+            )}
+          </Card>
+        </div>
+      )}
+
+      {/* ── Manager Panels ── */}
+      {isManager && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Card className="p-5">
+            <SectionHead title="Community Content" />
+            <BarRow
+              label="Pending blogs"
+              value={(overview as ManagerOverview).blogs.pending}
+              max={(overview as ManagerOverview).blogs.total || 1}
+              color="bg-amber-500"
+            />
+            <BarRow
+              label="Total blogs"
+              value={(overview as ManagerOverview).blogs.total}
+              max={(overview as ManagerOverview).blogs.total || 1}
+              color="bg-blue-500"
+            />
+          </Card>
+
+          <Card className="p-5">
+            <SectionHead title="Comments" />
+            <BarRow
+              label="Pending comments"
+              value={(overview as ManagerOverview).comments.pending}
+              max={(overview as ManagerOverview).comments.total || 1}
+              color="bg-amber-500"
+            />
+            <BarRow
+              label="Total comments"
+              value={(overview as ManagerOverview).comments.total}
+              max={(overview as ManagerOverview).comments.total || 1}
+              color="bg-green-500"
+            />
+          </Card>
+        </div>
+      )}
 
       {/* ── Super Admin Only Extra Panels ── */}
       {isSuperAdmin && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <Card className="p-5">
             <SectionHead title="Audience" />
-            <BarRow 
-              label="Newsletter subs" 
-              value={(overview as SuperAdminOverview).newsletter.subscribers} 
-              max={(overview as SuperAdminOverview).newsletter.subscribers || 1} 
-              color="bg-blue-500" 
+            <BarRow
+              label="Newsletter subs"
+              value={(overview as SuperAdminOverview).newsletter.subscribers}
+              max={(overview as SuperAdminOverview).newsletter.subscribers || 1}
+              color="bg-blue-500"
             />
-            <BarRow 
-              label="Pending comments" 
-              value={(overview as SuperAdminOverview).comments.pending} 
-              max={(overview as SuperAdminOverview).comments.total || 1} 
-              color="bg-amber-500" 
+            <BarRow
+              label="Pending comments"
+              value={(overview as SuperAdminOverview).comments.pending}
+              max={(overview as SuperAdminOverview).comments.total || 1}
+              color="bg-amber-500"
             />
-            <BarRow 
-              label="Total comments" 
-              value={(overview as SuperAdminOverview).comments.total} 
-              max={(overview as SuperAdminOverview).comments.total || 1} 
-              color="bg-green-500" 
+            <BarRow
+              label="Total comments"
+              value={(overview as SuperAdminOverview).comments.total}
+              max={(overview as SuperAdminOverview).comments.total || 1}
+              color="bg-green-500"
             />
           </Card>
 

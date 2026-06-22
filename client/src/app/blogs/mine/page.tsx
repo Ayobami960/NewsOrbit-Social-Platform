@@ -140,10 +140,10 @@ function BlogRow({
                   <Heart size={11} />
                   {formatNumber(blog.likes ?? 0)}
                 </span>
-                <span className="flex items-center gap-1">
+                {/* <span className="flex items-center gap-1">
                   <Clock size={11} />
                   {blog.readTime ?? 1} min read
-                </span>
+                </span> */}
                 <span className="hidden sm:inline text-ink-300">
                   {formatDate(blog.createdAt, "MMM d, yyyy")}
                 </span>

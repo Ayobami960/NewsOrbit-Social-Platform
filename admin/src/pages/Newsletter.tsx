@@ -15,8 +15,8 @@ export default function Newsletter() {
   const sendMut = useSendNewsletter();
 
   const subscribers = data?.subscribers ?? [];
-  const total       = data?.total ?? 0;
-  const active      = subscribers.filter(s => s.isActive).length;
+  const total  = data?.total ?? 0;
+  const active = subscribers.filter(s => s.isActive).length;
 
   const [sendPush, setSendPush] = useState(true);
   const [form, setForm] = useState<SendNewsletterPayload>({
@@ -36,9 +36,9 @@ export default function Newsletter() {
     <Layout title="Newsletter">
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <StatCard label="Total Subscribers" value={total}            accent="bg-blue-500" icon={Mail} />
-        <StatCard label="Active"            value={active}           accent="bg-green-500" sub="Receiving emails" subColor="text-green-400" />
-        <StatCard label="Unsubscribed"      value={total - active}   accent="bg-red-500" />
+        <StatCard label="Total Subscribers" value={total}  accent="bg-blue-500" icon={Mail} />
+        <StatCard label="Active" value={active} accent="bg-green-500" sub="Receiving emails" subColor="text-green-400" />
+        <StatCard label="Unsubscribed"  value={total - active}   accent="bg-red-500" />
       </div>
 
       <div className="grid grid-cols-[1fr_380px] gap-5">
@@ -76,7 +76,7 @@ export default function Newsletter() {
                     value={form.pushBody ?? ""} onChange={e => setForm(f => ({ ...f, pushBody: e.target.value }))} />
                 </FormGroup>
                 <FormGroup label="Article URL (optional)">
-                  <Input placeholder="https://osunnews.com/articles/weekly-digest"
+                  <Input placeholder="https://newsorbit.com/articles/weekly-digest"
                     value={form.articleUrl ?? ""} onChange={e => setForm(f => ({ ...f, articleUrl: e.target.value }))} />
                 </FormGroup>
               </div>

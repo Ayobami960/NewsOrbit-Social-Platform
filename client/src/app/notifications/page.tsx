@@ -13,27 +13,27 @@ import { useEffect } from "react";
 
 const ICON_MAP: Record<NotificationType, React.ElementType> = {
   new_article:   Newspaper,
-  new_blog:      Radio,
-  new_comment:   MessageCircle,
-  new_follower:  Users,
+  new_blog:  Radio,
+  new_comment: MessageCircle,
+  new_follower: Users,
   comment_reply: MessageCircle,
   breaking_news: Radio,
-  newsletter:    Bell,
+  newsletter: Bell,
 };
 
 const COLOR_MAP: Record<NotificationType, string> = {
   new_article:   "bg-ember-600/10 text-ember-600",
-  new_blog:      "bg-blue-600/10 text-blue-600",
-  new_comment:   "bg-amber-600/10 text-amber-600",
+  new_blog:  "bg-blue-600/10 text-blue-600",
+  new_comment: "bg-amber-600/10 text-amber-600",
   new_follower:  "bg-green-600/10 text-green-600",
   comment_reply: "bg-purple-600/10 text-purple-600",
   breaking_news: "bg-red-600/10 text-red-600",
-  newsletter:    "bg-ink-600/10 text-ink-600",
+  newsletter: "bg-ink-600/10 text-ink-600",
 };
 
 export default function NotificationsPage() {
   const { user, loading: authLoading } = useAuth();
-  const router                         = useRouter();
+  const router  = useRouter();
 
   const { data, isLoading }    = useNotifications();
   const markRead  = useMarkNotificationRead();

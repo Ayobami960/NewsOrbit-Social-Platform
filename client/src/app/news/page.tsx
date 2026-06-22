@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils";
 
 const SORT_OPTIONS = [
   { value: "-publishedAt", label: "Newest" },
-  { value: "-views",       label: "Most Read" },
-  { value: "-likes",       label: "Most Liked" },
+  { value: "-views",  label: "Most Read" },
+  { value: "-likes", label: "Most Liked" },
 ];
 
 function NewsContent() {
@@ -34,7 +34,7 @@ function NewsContent() {
     limit: 12,
     status: "published",
     sort,
-    search:   search   || undefined,
+    search: search   || undefined,
     category: category || undefined,
   });
 

@@ -52,23 +52,42 @@ export function BreakingBadge() {
 // Always uses <span> — never <a>/<Link> — safe inside any outer <Link>.
 
 export function AuthorLine({
-  author, date, readTime, size = "sm", variant = "blog",
+  author, date, 
+  // readTime, 
+  size = "sm", variant = "blog",
 }: {
-  author: { _id: string; name: string; avatar?: { url: string } };
+  author: { _id?: string; name: string; avatar?: { url: string } };
   date?: string;
-  readTime?: number;
+  // readTime?: number;
   size?: "xs" | "sm";
   variant?: "article" | "blog";
 }) {
   const router = useRouter();
-  const href = variant === "article" ? `/writers/${author._id}` : `/profile/user/${author._id}`;
+  const hasAuthorId = !!author._id && author._id !== "undefined" && author._id !== "null";
+  const href = hasAuthorId
+    ? variant === "article"
+      ? `/writers/${author._id}`
+      : `/profile/user/${author._id}`
+    : undefined;
+
+  const handleNavigate = () => {
+    if (!href) return;
+    router.push(href);
+  };
 
   return (
     <div className={cn("flex items-center gap-2", size === "xs" ? "text-[11px]" : "text-xs")}>
-      <span role="link" tabIndex={0}
-        className="flex items-center gap-1.5 group cursor-pointer"
-        onClick={e => { e.preventDefault(); e.stopPropagation(); router.push(href); }}
-        onKeyDown={e => { if (e.key === "Enter") router.push(href); }}>
+      <span
+        role={hasAuthorId ? "link" : undefined}
+        tabIndex={hasAuthorId ? 0 : undefined}
+        className={cn("flex items-center gap-1.5 group", hasAuthorId ? "cursor-pointer" : "cursor-default")}
+        onClick={e => {
+          if (!hasAuthorId) return;
+          e.preventDefault();
+          e.stopPropagation();
+          handleNavigate();
+        }}
+        onKeyDown={e => { if (hasAuthorId && e.key === "Enter") handleNavigate(); }}>
         {author.avatar?.url ? (
           <img src={author.avatar.url} alt={author.name}
             className={cn("rounded-full object-cover shrink-0", size === "xs" ? "w-4 h-4" : "w-5 h-5")} />
@@ -85,7 +104,7 @@ export function AuthorLine({
         </span>
       </span>
       {date && <><span className="text-ink-300">·</span><span className="text-ink-500 font-sans">{timeAgo(date)}</span></>}
-      {readTime && <><span className="text-ink-300">·</span><span className="flex items-center gap-1 text-ink-500 font-sans"><Clock size={10} /> {readTime}m</span></>}
+      {/* {readTime && <><span className="text-ink-300">·</span><span className="flex items-center gap-1 text-ink-500 font-sans"><Clock size={10} /> {readTime}m</span></>} */}
     </div>
   );
 }
@@ -116,7 +135,7 @@ export function ArticleCardHero({ article }: { article: ArticleListItem }) {
         )}
       </Link>
       <div className="p-1.5">
-        <AuthorLine author={article.author} date={article.publishedAt} readTime={article.readTime} variant="article" />
+        <AuthorLine author={article.author} date={article.publishedAt} variant="article" />
       </div>
     </article>
   );
@@ -178,7 +197,7 @@ export function ArticleCard({ article }: { article: ArticleListItem }) {
             {article.title}
           </h3>
         </Link>
-        <AuthorLine author={article.author} date={article.publishedAt} readTime={article.readTime} size="xs" variant="article" />
+        <AuthorLine author={article.author} date={article.publishedAt}  size="xs" variant="article" />
         <div className="flex items-center gap-3 mt-3 pt-3 border-t border-(--color-border)">
           <span className="flex items-center gap-1 text-[11px] text-ink-400 font-sans"><Eye size={11} /> {formatNumber(article.views)}</span>
           <span className="flex items-center gap-1 text-[11px] text-ink-400 font-sans"><Heart size={11} /> {formatNumber(article.likes)}</span>
@@ -221,7 +240,7 @@ export function BlogCard({ blog }: { blog: Blog }) {
         {blog.excerpt && (
           <p className="text-ink-500 text-xs font-body line-clamp-2 mb-3">{blog.excerpt}</p>
         )}
-        <AuthorLine author={blog.author} date={blog.createdAt} readTime={blog.readTime} size="xs" variant="blog" />
+        <AuthorLine author={blog.author} date={blog.createdAt}  size="xs" variant="blog" />
         <div className="flex items-center gap-3 mt-3 pt-3 border-t border-(--color-border)">
           <span className="flex items-center gap-1 text-[11px] text-ink-400 font-sans"><Eye size={11} /> {formatNumber(blog.views)}</span>
           <span className="flex items-center gap-1 text-[11px] text-ink-400 font-sans"><Heart size={11} /> {formatNumber(blog.likes)}</span>

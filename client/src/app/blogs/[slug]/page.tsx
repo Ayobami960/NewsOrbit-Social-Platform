@@ -31,11 +31,12 @@ import {
   X,
 } from "lucide-react";
 import type { Comment } from "@/types";
-import { toast } from "react-toastify";
+import { useToast } from "@/components/ui/toast";
 
 export default function BlogDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { user, isLoggedIn } = useAuth();
+  const { error, success } = useToast();
   const likeMut = useLikeBlog();
   const postComment = usePostComment();
 
@@ -51,7 +52,7 @@ export default function BlogDetailPage() {
   const comments = commentData?.comments ?? [];
 
   const handleLike = () => {
-    if (!isLoggedIn) { toast.error("Sign in to like posts."); return; }
+    if (!isLoggedIn) { error("Sign in required", "Sign in to like posts."); return; }
     if (!blog) return;
     likeMut.mutate(blog._id);
   };
@@ -61,19 +62,19 @@ export default function BlogDetailPage() {
       navigator.share({ title: blog?.title, url: window.location.href });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied!");
+      success("Copied!", "Link copied to clipboard.");
     }
   };
 
   const submitComment = async () => {
-    if (!isLoggedIn) { toast.error("Sign in to comment."); return; }
+    if (!isLoggedIn) { error("Sign in required", "Sign in to comment."); return; }
     if (!commentText.trim() || !blog) return;
     await postComment.mutateAsync({ blogId: blog._id, body: commentText });
     setCommentText("");
   };
 
   const submitReply = async (parentId: string) => {
-    if (!isLoggedIn) { toast.error("Sign in to reply."); return; }
+    if (!isLoggedIn) { error("Sign in required", "Sign in to reply."); return; }
     if (!replyText.trim() || !blog) return;
     await postComment.mutateAsync({ blogId: blog._id, body: replyText, parent: parentId });
     setReplyTo(null);
@@ -153,8 +154,22 @@ export default function BlogDetailPage() {
               <div className="flex items-center gap-3">
                 {blog.author ? (
                   <>
-                    <Link href={`/profile/user/${blog.author._id}`}>
-                      {blog.author.avatar?.url ? (
+                    {blog.author._id ? (
+                      <Link href={`/profile/user/${blog.author._id}`}>
+                        {blog.author.avatar?.url ? (
+                          <img
+                            src={blog.author.avatar.url}
+                            alt={blog.author.name}
+                            className="w-11 h-11 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-11 h-11 rounded-full bg-ember-600 flex items-center justify-center text-white font-bold">
+                            {getInitials(blog.author.name)}
+                          </div>
+                        )}
+                      </Link>
+                    ) : (
+                      blog.author.avatar?.url ? (
                         <img
                           src={blog.author.avatar.url}
                           alt={blog.author.name}
@@ -164,21 +179,27 @@ export default function BlogDetailPage() {
                         <div className="w-11 h-11 rounded-full bg-ember-600 flex items-center justify-center text-white font-bold">
                           {getInitials(blog.author.name)}
                         </div>
-                      )}
-                    </Link>
+                      )
+                    )}
                     <div>
-                      <Link
-                        href={`/profile/user/${blog.author._id}`}
-                        className="font-sans font-semibold text-ink-900 hover:text-ember-600 transition-colors text-sm block"
-                      >
-                        {blog.author.name}
-                      </Link>
+                      {blog.author._id ? (
+                        <Link
+                          href={`/profile/user/${blog.author._id}`}
+                          className="font-sans font-semibold text-ink-900 hover:text-ember-600 transition-colors text-sm block"
+                        >
+                          {blog.author.name}
+                        </Link>
+                      ) : (
+                        <p className="font-sans font-semibold text-ink-900 text-sm block">
+                          {blog.author.name}
+                        </p>
+                      )}
                       <div className="flex items-center gap-2 text-xs text-ink-500 font-sans">
                         <span>{formatDate(blog.createdAt, "MMMM dd, yyyy")}</span>
-                        <span>·</span>
+                        {/* <span>·</span>
                         <span className="flex items-center gap-1">
                           <Clock size={11} /> {blog.readTime} min read
-                        </span>
+                        </span> */}
                       </div>
                     </div>
                   </>

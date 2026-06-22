@@ -10,16 +10,16 @@ import toast from "react-hot-toast";
 export default function Settings() {
   const { user, isRole, setUser } = useAuth();
 
-  const [avatarFile,    setAvatarFile]    = useState<File | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar?.url ?? null);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [savingPw,      setSavingPw]      = useState(false);
+  const [savingPw, setSavingPw] = useState(false);
 
   const [profile, setProfile] = useState({
-    name:      user?.name      ?? "",
-    bio:       user?.bio       ?? "",
-    twitter:   user?.socialLinks?.twitter   ?? "",
-    facebook:  user?.socialLinks?.facebook  ?? "",
+    name: user?.name      ?? "",
+    bio: user?.bio       ?? "",
+    twitter: user?.socialLinks?.twitter   ?? "",
+    facebook: user?.socialLinks?.facebook  ?? "",
     instagram: user?.socialLinks?.instagram ?? "",
   });
 

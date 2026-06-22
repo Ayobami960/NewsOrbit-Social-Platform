@@ -4,14 +4,14 @@ const Joi = require("joi");
 const objectId = Joi.string().pattern(/^[a-f\d]{24}$/i);
 
 const mediaSchema = Joi.object({
-  url:      Joi.string().uri().required(),
-  fileId:   Joi.string().allow(null, "").optional(),
+  url:  Joi.string().uri().required(),
+  fileId: Joi.string().allow(null, "").optional(),
   fileType: Joi.string().valid("image", "video").default("image"),
-  caption:  Joi.string().max(200).optional(),
-  alt:      Joi.string().max(150).optional(),
-  width:    Joi.number().integer().positive().optional(),
-  height:   Joi.number().integer().positive().optional(),
-  size:     Joi.number().integer().positive().optional(),
+  caption: Joi.string().max(200).optional(),
+  alt:  Joi.string().max(150).optional(),
+  width: Joi.number().integer().positive().optional(),
+  height: Joi.number().integer().positive().optional(),
+  size:  Joi.number().integer().positive().optional(),
 }).optional().allow(null);
 
 const tagSchema = Joi.alternatives().try(
@@ -20,10 +20,10 @@ const tagSchema = Joi.alternatives().try(
 );
 
 const createArticle = Joi.object({
-  title:        Joi.string().min(5).max(250).trim().required(),
-  content:      Joi.string().min(10).required(),
+  title: Joi.string().min(5).max(250).trim().required(),
+  content: Joi.string().min(10).required(),
   contentDelta: Joi.object().optional(),
-  excerpt:      Joi.string().max(500).trim().allow("").optional(),
+  excerpt: Joi.string().max(500).trim().allow("").optional(),
 
   category: Joi.alternatives().try(
     objectId,
@@ -52,22 +52,22 @@ const createArticle = Joi.object({
   status: Joi.string().valid("draft", "scheduled", "published").default("draft"),
 
   scheduledAt: Joi.when("status", {
-    is:        "scheduled",
-    then:      Joi.date().iso().greater("now").required(),
+    is: "scheduled",
+    then: Joi.date().iso().greater("now").required(),
     otherwise: Joi.date().iso().optional().allow(null),
   }),
 
-  isBreaking:        Joi.boolean().default(false),
+  isBreaking: Joi.boolean().default(false),
   breakingExpiresAt: Joi.date().iso().optional().allow(null),
-  allowComments:     Joi.boolean().default(true),
-  isFeatured:        Joi.boolean().default(false),
-  isPinned:          Joi.boolean().default(false),
+  allowComments: Joi.boolean().default(true),
+  isFeatured: Joi.boolean().default(false),
+  isPinned:  Joi.boolean().default(false),
 
   seo: Joi.object({
-    metaTitle:       Joi.string().max(70).optional(),
+    metaTitle: Joi.string().max(70).optional(),
     metaDescription: Joi.string().max(160).optional(),
-    canonicalUrl:    Joi.string().uri().optional(),
-    noIndex:         Joi.boolean().default(false),
+    canonicalUrl: Joi.string().uri().optional(),
+    noIndex: Joi.boolean().default(false),
   }).optional(),
 });
 
@@ -79,7 +79,7 @@ const updateArticle = createArticle
   .concat(
     Joi.object({
       featuredImage: mediaSchema.allow(null),
-      gallery:       Joi.array().items(mediaSchema).max(20).allow(null),
+      gallery: Joi.array().items(mediaSchema).max(20).allow(null),
       // Also allow flat fields on update
       featuredImageUrl:    Joi.string().uri().allow("", null).optional(),
       featuredImageFileId: Joi.string().allow("", null).optional(),

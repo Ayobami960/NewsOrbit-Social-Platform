@@ -15,7 +15,7 @@ import {
   Heart, Clock, Edit3, Trash2,
   AlertTriangle, BarChart2, Users,
 } from "lucide-react";
-import { toast } from "react-toastify";
+import { useToast } from "@/components/ui/toast";
 import type { User as UserType } from "@/types";
 import { BsInstagram, BsTwitter } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa6";
@@ -39,7 +39,7 @@ function DeleteModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-ink-950/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl border border-[var(--color-border)] shadow-2xl max-w-md w-full p-6">
+      <div className="bg-white rounded-2xl border border-(--color-border) shadow-2xl max-w-md w-full p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
             <AlertTriangle size={18} className="text-red-600" />
@@ -54,7 +54,7 @@ function DeleteModal({
         </p>
         <div className="flex gap-3">
           <button type="button" onClick={onCancel} disabled={isPending}
-            className="flex-1 py-2.5 border border-[var(--color-border)] rounded-xl text-sm font-sans font-semibold text-ink-700 hover:bg-ink-50 transition-colors disabled:opacity-50">
+            className="flex-1 py-2.5 border border-(--color-border) rounded-xl text-sm font-sans font-semibold text-ink-700 hover:bg-ink-50 transition-colors disabled:opacity-50">
             Cancel
           </button>
           <button type="button" onClick={onConfirm} disabled={isPending}
@@ -97,7 +97,7 @@ function MyBlogsTab() {
 
   if (blogs.length === 0) {
     return (
-      <div className="text-center py-16 bg-white border border-[var(--color-border)] rounded-2xl">
+      <div className="text-center py-16 bg-white border border-(--color-border) rounded-2xl">
         <div className="inline-flex items-center justify-center w-14 h-14 bg-ink-100 rounded-2xl mb-4">
           <PenLine size={22} className="text-ink-400" />
         </div>
@@ -126,7 +126,7 @@ function MyBlogsTab() {
       <div className="space-y-3">
         {blogs.map((blog: any) => (
           <div key={blog._id}
-            className="group bg-white border border-[var(--color-border)] rounded-2xl overflow-hidden hover:shadow-md transition-all duration-200">
+            className="group bg-white border border-(--color-border) rounded-2xl overflow-hidden hover:shadow-md transition-all duration-200">
             <div className="flex items-stretch">
               {/* Thumbnail */}
               {blog.featuredImage?.url ? (
@@ -135,7 +135,7 @@ function MyBlogsTab() {
                     className="w-full h-full object-cover" />
                 </div>
               ) : (
-                <div className="shrink-0 w-28 sm:w-36 bg-gradient-to-br from-ink-100 to-ink-200 flex items-center justify-center">
+                <div className="shrink-0 w-28 sm:w-36 bg-linear-to-br from-ink-100 to-ink-200 flex items-center justify-center">
                   <BookOpen size={22} className="text-ink-300" />
                 </div>
               )}
@@ -212,9 +212,9 @@ function MyBlogsTab() {
 
 function WriteTab() {
   return (
-    <div className="bg-white border border-[var(--color-border)] rounded-2xl overflow-hidden">
+    <div className="bg-white border border-(--color-border) rounded-2xl overflow-hidden">
       {/* Banner */}
-      <div className="h-28 bg-gradient-to-r from-ember-900 via-ink-900 to-ink-800 relative overflow-hidden flex items-center px-8 gap-5">
+      <div className="h-28 bg-linear-to-r from-ember-900 via-ink-900 to-ink-800 relative overflow-hidden flex items-center px-8 gap-5">
         <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
           <PenLine size={26} className="text-white" />
         </div>
@@ -232,11 +232,11 @@ function WriteTab() {
         {/* Quick tips */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
-            { icon: PenLine,  title: "Write freely",    desc: "No editorial gatekeeping — your voice, your story." },
-            { icon: Eye,      title: "Instant publish",  desc: "Your blog goes live immediately after posting." },
-            { icon: Users,    title: "Build a following", desc: "Readers can follow you and get notified of new posts." },
+            { icon: PenLine, title: "Write freely", desc: "No editorial gatekeeping — your voice, your story." },
+            { icon: Eye, title: "Instant publish",  desc: "Your blog goes live immediately after posting." },
+            { icon: Users, title: "Build a following", desc: "Readers can follow you and get notified of new posts." },
           ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="flex flex-col items-center text-center gap-2 p-4 bg-ink-50 rounded-xl border border-[var(--color-border)]">
+            <div key={title} className="flex flex-col items-center text-center gap-2 p-4 bg-ink-50 rounded-xl border border-(--color-border)">
               <div className="w-9 h-9 rounded-xl bg-ember-600/10 flex items-center justify-center">
                 <Icon size={16} className="text-ember-600" />
               </div>
@@ -252,7 +252,7 @@ function WriteTab() {
             <Plus size={16} /> Start writing now
           </Link>
           <Link href="/blogs/mine"
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 border border-[var(--color-border)] text-ink-700 hover:bg-ink-50 font-sans font-semibold text-sm rounded-xl transition-colors">
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 border border-(--color-border) text-ink-700 hover:bg-ink-50 font-sans font-semibold text-sm rounded-xl transition-colors">
             <BookOpen size={16} /> View all my blogs
           </Link>
         </div>
@@ -301,18 +301,18 @@ function SettingsTab({
 
       {/* Profile form */}
       <form onSubmit={onSave}>
-        <div className="bg-white border border-[var(--color-border)] rounded-2xl p-6">
+        <div className="bg-white border border-(--color-border) rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-5">
             <User size={16} className="text-ink-400" />
             <h2 className="font-display text-lg font-bold text-ink-900">My Profile</h2>
           </div>
 
           {/* Avatar */}
-          <div className="flex items-center gap-4 mb-6 pb-6 border-b border-[var(--color-border)]">
+          <div className="flex items-center gap-4 mb-6 pb-6 border-b border-(--color-border)">
             <div className="relative">
               {avatarPreview ? (
                 <img src={avatarPreview} alt="avatar"
-                  className="w-16 h-16 rounded-full object-cover border-2 border-[var(--color-border)]" />
+                  className="w-16 h-16 rounded-full object-cover border-2 border-(--color-border)" />
               ) : (
                 <div className="w-16 h-16 rounded-full bg-ember-600 flex items-center justify-center text-white text-xl font-bold">
                   {getInitials(user.name)}
@@ -376,7 +376,7 @@ function SettingsTab({
       {/* Right column */}
       <div className="flex flex-col gap-6">
         {/* Stats card */}
-        <div className="bg-white border border-[var(--color-border)] rounded-2xl p-6">
+        <div className="bg-white border border-(--color-border) rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-4">
             <BarChart2 size={16} className="text-ink-400" />
             <h2 className="font-display text-lg font-bold text-ink-900">Account Stats</h2>
@@ -402,7 +402,7 @@ function SettingsTab({
         </div>
 
         {/* Account info */}
-        <div className="bg-white border border-[var(--color-border)] rounded-2xl p-6">
+        <div className="bg-white border border-(--color-border) rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-4">
             <User size={16} className="text-ink-400" />
             <h2 className="font-display text-lg font-bold text-ink-900">Account Info</h2>
@@ -412,7 +412,7 @@ function SettingsTab({
               { label: "Email",  value: user.email },
               { label: "Role",   value: user.role.replace("_", " ") },
             ].map(({ label, value }) => (
-              <div key={label} className="flex justify-between py-2 border-b border-[var(--color-border)] last:border-0">
+              <div key={label} className="flex justify-between py-2 border-b border-(--color-border) last:border-0">
                 <span className="text-sm text-ink-500 font-sans">{label}</span>
                 <span className="text-sm font-sans font-semibold text-ink-900 capitalize">{value}</span>
               </div>
@@ -428,6 +428,7 @@ function SettingsTab({
 
 export default function ProfilePage() {
   const { user, loading: authLoading, setUser } = useAuth();
+  const { success, error } = useToast();
   const router = useRouter();
 
   const [activeTab,    setActiveTab]    = useState<TabId>("settings");
@@ -472,10 +473,10 @@ export default function ProfilePage() {
       const { data } = await authFetch<{ user: UserType }>("/users/profile", {
         method: "PATCH", body: fd,
       });
-      setUser(data.user);
-      toast.success("Profile updated!");
+      success("Profile updated!", "Your changes have been saved.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Update failed.");
+      error("Update failed", err instanceof Error ? err.message : "Please try again")
+     
     } finally {
       setSavingProfile(false);
     }
@@ -501,11 +502,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--color-bg)]">
+    <div className="min-h-screen flex flex-col bg-(--color-bg)">
       <Navbar />
 
       {/* ── Profile header ── */}
-      <div className="bg-white border-b border-[var(--color-border)]">
+      <div className="bg-white border-b border-(--color-border)">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-0">
 
           {/* User info row */}
@@ -514,7 +515,7 @@ export default function ProfilePage() {
             <div className="relative shrink-0">
               {avatarPreview ? (
                 <img src={avatarPreview} alt={user.name}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-[var(--color-border)]" />
+                  className="w-16 h-16 rounded-full object-cover border-2 border-(--color-border)" />
               ) : (
                 <div className="w-16 h-16 rounded-full bg-ember-600 flex items-center justify-center text-white text-xl font-bold">
                   {getInitials(user.name)}
@@ -559,7 +560,7 @@ export default function ProfilePage() {
                   group flex items-center gap-2 px-4 py-2.5 rounded-t-xl border-x border-t text-sm font-sans font-semibold
                   transition-all duration-150 select-none
                   ${activeTab === id
-                    ? "bg-white border-[var(--color-border)] text-ember-600 border-b-white -mb-px z-10"
+                    ? "bg-white border-(--color-border) text-ember-600 border-b-white -mb-px z-10"
                     : "bg-transparent border-transparent text-ink-500 hover:text-ink-900 hover:bg-ink-50"
                   }
                 `}

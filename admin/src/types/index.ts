@@ -2,7 +2,7 @@
 // ENUMS & UNIONS
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type Role = "super_admin" | "admin" | "writer" | "user";
+export type Role = "super_admin" | "manager" | "admin" | "writer";
 
 
 export type ArticleStatus = "draft" | "scheduled" | "published" | "archived";
@@ -20,8 +20,8 @@ export type NotificationType =
   | "comment_reply"
   | "breaking_news"
   | "newsletter"
-  | "blog_approved"
-  | "blog_rejected";
+  // | "blog_approved"
+  // | "blog_rejected";
 
 export type ActivityAction =
   | "login" | "logout" | "register" | "password_reset" | "email_verify"
@@ -116,34 +116,36 @@ export interface SocialLinks {
 }
 
 export interface User extends BaseEntity {
-  name:                 string;
-  email:                string;
-  role:                 Role;
-  avatar?:              Avatar;
-  bio?:                 string;
-  isVerified:           boolean;
-  isActive:             boolean;
-  isBanned:             boolean;
-  banReason?:           string;
-  createdBy?:           UserRef | null;
-  followersCount:       number;
-  followingCount:       number;
-  stats:                UserStats;
+  name: string;
+  email: string;
+  role:  Role;
+  partnerCompany: string;
+  inviteManagement?: string;
+  avatar?:  Avatar;
+  bio?: string;
+  isVerified: boolean;
+  isActive: boolean;
+  isBanned:  boolean;
+  banReason?:  string;
+  createdBy?: UserRef | null;
+  followersCount: number;
+  followingCount:   number;
+  stats:  UserStats;
   newsletterSubscribed: boolean;
-  socialLinks?:         SocialLinks;
-  lastLogin?:           string;
-  loginCount:           number;
+  socialLinks?:  SocialLinks;
+  lastLogin?:  string;
+  loginCount:number;
 }
 
 /** Lightweight user reference used inside populated documents */
 export interface UserRef {
-  _id:            string;
-  name:           string;
-  avatar?:        Avatar;
-  role?:          Role;
-  bio?:           string;
+  _id: string;
+  name: string;
+  avatar?: Avatar;
+  role?:  Role;
+  bio?: string;
   followersCount?: number;
-  stats?:         Partial<UserStats>;
+  stats?:  Partial<UserStats>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -151,30 +153,30 @@ export interface UserRef {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Category extends BaseEntity {
-  name:         string;
-  slug:         string;
+  name:  string;
+  slug: string;
   description?: string;
-  color:        string;
-  isActive:     boolean;
-  order:        number;
+  color: string;
+  isActive: boolean;
+  order: number;
   createdBy?:   UserRef;
 }
 
 export interface CategoryRef {
-  _id:   string;
-  name:  string;
-  slug:  string;
+  _id: string;
+  name:string;
+  slug: string;
   color: string;
 }
 export interface CategoryPayload {
-  name:        string;
+  name:  string;
   description: string;
-  color:       string;
-  order:       number;
+  color: string;
+  order: number;
 }
 export interface Tag extends BaseEntity {
-  name:       string;
-  slug:       string;
+  name:  string;
+  slug: string;
   usageCount: number;
   createdBy?: UserRef;
 }
@@ -190,10 +192,10 @@ export interface TagRef {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface ArticleSEO {
-  metaTitle?:       string;
+  metaTitle?: string;
   metaDescription?: string;
-  canonicalUrl?:    string;
-  noIndex?:         boolean;
+  canonicalUrl?:  string;
+  noIndex?:  boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -201,33 +203,33 @@ export interface ArticleSEO {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Article extends BaseEntity {
-  title:             string;
-  slug:              string;
-  content:           string;
-  contentDelta?:     Record<string, unknown>;
-  excerpt?:          string;
-  category:          CategoryRef;
-  tags:              TagRef[];
+  title:  string;
+  slug:    string;
+  content:  string;
+  contentDelta?: Record<string, unknown>;
+  excerpt?:   string;
+  category:   CategoryRef;
+  tags:  TagRef[];
   featuredImage?:    MediaFile;
-  gallery:           MediaFile[];
-  author:            UserRef;
-  coAuthors:         UserRef[];
-  status:            ArticleStatus;
-  scheduledAt?:      string;
-  publishedAt?:      string;
-  isBreaking:        boolean;
+  gallery:  MediaFile[];
+  author:  UserRef;
+  coAuthors:  UserRef[];
+  status: ArticleStatus;
+  scheduledAt?: string;
+  publishedAt?: string;
+  isBreaking:  boolean;
   breakingExpiresAt?: string;
-  seo?:              ArticleSEO;
-  views:             number;
-  readTime:          number;
-  likes:             number;
-  reactions:         Record<string, number>;
-  isFeatured:        boolean;
-  isPinned:          boolean;
+  seo?:  ArticleSEO;
+  views:   number;
+  readTime:  number;
+  likes:    number;
+  reactions: Record<string, number>;
+  isFeatured:   boolean;
+  isPinned:   boolean;
   allowComments:     boolean;
-  isDeleted:         boolean;
-  deletedAt?:        string;
-  deletedBy?:        UserRef;
+  isDeleted:   boolean;
+  deletedAt?:   string;
+  deletedBy?:  UserRef;
 }
 
 export interface ArticleListItem extends Omit<Article, "content" | "contentDelta"> {}
@@ -403,6 +405,8 @@ export interface WriterOverview {
   totalViews: number;
 }
 
+
+
 export interface AdminOverview {
   scope:      "admin";
   writers:    number;
@@ -421,7 +425,19 @@ export interface SuperAdminOverview {
   totalViews: number;
 }
 
-export type AnalyticsOverview = WriterOverview | AdminOverview | SuperAdminOverview;
+export interface ManagerOverview {
+  scope:      "manager";
+  articles:   { total: number; published: number };
+  blogs:      { total: number; pending: number };
+  users:      { total: number; newThisMonth: number };
+  comments:   { total: number; pending: number };
+  newsletter: { subscribers: number };
+  security:   { suspiciousLast30Days: number };
+  totalViews: number;
+}
+
+// export type AnalyticsOverview = WriterOverview | AdminOverview | SuperAdminOverview;
+export type AnalyticsOverview = WriterOverview | AdminOverview | SuperAdminOverview | ManagerOverview;
 
 export interface ArticlesByDayItem {
   _id:   string; // "YYYY-MM-DD"
@@ -504,6 +520,14 @@ export interface InviteUserPayload {
   email:  string;
   // FIX: "user" and "super_admin" cannot be invited — only admin and writer
   role:   "admin" | "writer";
+}
+
+
+export interface InviteManagerPayload {
+  name:             string;
+  email:            string;
+  inviteManagement: string;
+  [key: string]: unknown;   // ← satisfies Record<string, unknown>
 }
 
 export interface BanUserPayload {

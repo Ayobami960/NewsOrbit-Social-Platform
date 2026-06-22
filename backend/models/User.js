@@ -1,23 +1,59 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-const ROLES = ["super_admin", "admin", "writer", "user"];
+const ROLES = ["super_admin", "admin", "manager", "writer", "user"];
 const FOLLOWABLE_ROLES = ["writer", "user"];
+
+// Roles that must have a partnerCompany
+// - admin:  required at invite time (they represent the partner company)
+// - writer: inherited from their admin at invite time (never supplied directly)
+const COMPANY_ROLES = ["admin", "writer"];
+const MANAGER_ROLES = ["manager"]
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true, minlength: 2, maxlength: 80 },
+    name: { type: String, required: true, trim: true, minlength: 5, maxlength: 80 },
     email: {
       type: String,
       required: true,
-      unique: true,           // This is enough (creates index)
+      unique: true,
       lowercase: true,
       trim: true,
-      match: [/^\S+@\S+\.\S+$/, "Invalid email"]
+      match: [/^\S+@\S+\.\S+$/, "Invalid email"],
     },
     password: { type: String, required: true, minlength: 8, select: false },
 
     role: { type: String, enum: ROLES, default: "user" },
+
+    // In your schema — rename the field to camelCase consistently
+    inviteManagement: {          // ← your schema has this
+      type: String,
+      trim: true,
+      minlength: 2,
+      maxlength: 100,
+      required: [
+        function () { return MANAGER_ROLES.includes(this.role); },
+        "inviteManagement is required for manager roles.",
+      ],
+      default: null,
+    },
+
+    // Required for admin (set at invite) and writer (inherited from admin).
+    // Not applicable to super_admin or regular user.
+    partnerCompany: {
+      type: String,
+      trim: true,
+      minlength: 2,
+      maxlength: 100,
+      required: [
+        function () {
+          return COMPANY_ROLES.includes(this.role);
+        },
+        "partnerCompany is required for admin and writer roles.",
+      ],
+      default: null,
+    },
+
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
 
     avatar: { url: String, fileId: String },
@@ -29,6 +65,7 @@ const userSchema = new mongoose.Schema(
 
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+
     inviteOtp: { type: String, select: false },
     inviteOtpExpires: { type: Date, select: false },
 
@@ -62,9 +99,6 @@ const userSchema = new mongoose.Schema(
     lastLoginIp: { type: String, select: false },
     loginCount: { type: Number, default: 0 },
 
-
-
-
     newsletterSubscribed: { type: Boolean, default: false },
     socialLinks: {
       twitter: String,
@@ -80,9 +114,7 @@ userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1, isBanned: 1 });
 userSchema.index({ createdBy: 1 });
 userSchema.index({ createdAt: -1 });
-
-// Optional: Compound index if you often query by role + active status
-// userSchema.index({ role: 1, isActive: 1 });
+userSchema.index({ partnerCompany: 1 });
 
 // ====================== MIDDLEWARE ======================
 userSchema.pre("save", function (next) {
@@ -112,8 +144,13 @@ userSchema.statics.canBeFollowed = function (role) {
   return FOLLOWABLE_ROLES.includes(role);
 };
 
+userSchema.statics.requiresCompany = function (role) {
+  return COMPANY_ROLES.includes(role);
+};
+
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
+
   delete obj.password;
   delete obj.refreshToken;
   delete obj.emailVerifyCode;
@@ -128,10 +165,14 @@ userSchema.methods.toJSON = function () {
   delete obj.inviteOtp;
   delete obj.inviteOtpExpires;
 
-
   if (!FOLLOWABLE_ROLES.includes(obj.role)) {
     delete obj.followersCount;
     delete obj.followingCount;
+  }
+
+  // Hide partnerCompany on roles where it's not applicable
+  if (!COMPANY_ROLES.includes(obj.role)) {
+    delete obj.partnerCompany;
   }
 
   return obj;

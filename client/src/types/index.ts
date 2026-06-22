@@ -1,4 +1,45 @@
-export type Role = "user";
+export type Role =  "writer" | "user";
+
+export type ToastType = "success" | "error" | "warning" | "info";
+export type ToastPosition =
+  | "top-right" | "top-left" | "top-center"
+  | "bottom-right" | "bottom-left" | "bottom-center";
+
+export interface ToastOptions {
+  type?: ToastType;
+  title: string;
+  message?: string;
+  duration?: number;
+  position?: ToastPosition;
+}
+
+export interface ToastItem extends Required<ToastOptions> {
+  id: string;
+}
+
+
+export type ContactTopic = "general" | "editorial" | "bug" | "partnership" | "press" | "other";
+export type ContactStatus = "unread" | "read" | "replied" | "archived";
+
+export interface ContactReply {
+  body: string;
+  repliedBy: User;
+  repliedAt: string;
+}
+
+export interface ContactMessage {
+  _id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  topic: ContactTopic;
+  status: ContactStatus;
+  reply: ContactReply | null;
+  user?: User;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -68,10 +109,10 @@ export interface ImageKitAuthResponse {
 }
 
 export interface UseImageUploadOptions {
-  folder?:    string;
+  folder?: string;
   maxSizeMB?: number;
   onSuccess?: (image: UploadedImage) => void;
-  onError?:   (error: string) => void;
+  onError?: (error: string) => void;
 }
 
 export interface Article {

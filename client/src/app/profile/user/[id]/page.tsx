@@ -30,27 +30,30 @@ import {
   Heart,
   Calendar,
 } from "lucide-react";
-import { toast } from "react-toastify";
+import { useToast } from "@/components/ui/toast";
 import { BsInstagram, BsTwitter } from "react-icons/bs";
 import { FaFacebook } from "react-icons/fa6";
 
 export default function UserProfilePage() {
   const { id }               = useParams<{ id: string }>();
   const { user, isLoggedIn } = useAuth();
+  const { error } = useToast();
   const router               = useRouter();
   const [page, setPage]      = useState(1);
 
+  const normalizedId = id && id !== "undefined" && id !== "null" ? id : "";
+
   // ── Data fetching ──────────────────────────────────────────────────────────
-  const { data: profile, isLoading: profileLoading } = usePublicUserProfile(id ?? "");
+  const { data: profile, isLoading: profileLoading } = usePublicUserProfile(normalizedId);
 
   // Only fetch follow status when logged in and viewing someone else's profile
   const { data: followData } = useFollowStatus(
-    id ?? "",
-    isLoggedIn && id !== user?._id
+    normalizedId,
+    isLoggedIn && normalizedId !== user?._id
   );
 
   // All blogs by this user (published, paginated)
-  const { data: blogsData, isLoading: blogsLoading } = useUserBlogs(id ?? "", page);
+  const { data: blogsData, isLoading: blogsLoading } = useUserBlogs(normalizedId, page);
 
   const followMut   = useFollow();
   const unfollowMut = useUnfollow();
@@ -60,7 +63,7 @@ export default function UserProfilePage() {
 
   const handleFollowToggle = () => {
     if (!isLoggedIn) {
-      toast.error("Sign in to follow this user.");
+      error("Sign in required", "Sign in to follow this user.");
       router.push("/login");
       return;
     }

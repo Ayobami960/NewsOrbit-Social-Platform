@@ -4,14 +4,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, authFetch, getStoredToken } from "@/lib/apiFetch";
 import { queryKeys } from "@/lib/queryKeys";
 import type { Article, ArticleFilters, ArticlesResponse } from "@/types";
-import { toast } from "react-toastify";
+import { useToast } from "@/components/ui/toast";
 
 interface LikeResponse {
   likes: number;
   isLiked: boolean;
 }
 
-// ─── Queries ──────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// ARTICLES — read
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function useArticles(filters: ArticleFilters = {}) {
   const params = new URLSearchParams();
@@ -19,7 +21,6 @@ export function useArticles(filters: ArticleFilters = {}) {
   Object.entries(merged).forEach(([k, v]) => {
     if (v !== undefined && v !== "") params.set(k, String(v));
   });
-
   return useQuery({
     queryKey: queryKeys.articles.list(filters),
     queryFn:  () =>
@@ -27,14 +28,30 @@ export function useArticles(filters: ArticleFilters = {}) {
   });
 }
 
+/** Public reader — GET /articles/:slug (by slug) */
 export function useArticle(slug: string) {
-  return useQuery({
-    queryKey: queryKeys.articles.detail(slug),
-    queryFn:  () =>
-      apiFetch<{ article: Article }>(`/articles/${slug}`).then(
-        (r) => r.data.article
-      ),
+  return useQuery<Article>({
+    queryKey: queryKeys.articles.bySlug(slug),
+    queryFn:  async () => {
+      const res = await apiFetch<{ article: Article }>(`/articles/${slug}`);
+      return res.data.article;
+    },
     enabled: !!slug,
+  });
+}
+
+/** Public reader — GET /articles/slug/:slug */
+export function useArticleBySlug(slug: string) {
+  return useArticle(slug);
+}
+
+/** Writer/admin edit view — GET /articles/edit/:id (protected) */
+export function useArticleById(id: string) {
+  return useQuery({
+    queryKey: queryKeys.articles.detail(id),
+    queryFn:  () =>
+      authFetch<{ article: Article }>(`/articles/edit/${id}`).then((r) => r.data.article),
+    enabled: !!id,
   });
 }
 
@@ -59,10 +76,13 @@ export function useFeaturedArticles() {
   });
 }
 
-// ─── useLikeArticle ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// ARTICLES — like (optimistic)
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function useLikeArticle() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
+  const { error: showError } = useToast();
 
   return useMutation({
     mutationFn: async (articleId: string) => {
@@ -76,33 +96,33 @@ export function useLikeArticle() {
     },
 
     onMutate: async (articleId: string) => {
-      // Cancel ALL in-flight article queries to prevent stale overwrites
-      await queryClient.cancelQueries({ queryKey: queryKeys.articles.all });
+      await qc.cancelQueries({ queryKey: queryKeys.articles.all });
 
-      // Snapshot for rollback
-      const snapshots = queryClient.getQueriesData<unknown>({
+      const snapshots = qc.getQueriesData<unknown>({
         queryKey: queryKeys.articles.all,
       });
 
-      // ── Patch detail cache (Article stored directly) ───────────────────────
-      queryClient.setQueriesData<Article>(
+      // Patch detail cache
+      qc.setQueriesData<{ article: Article }>(
         { queryKey: queryKeys.articles.details() },
         (cached) => {
-          if (!cached || cached._id !== articleId) return cached;
-          const wasLiked = Boolean(cached.isLiked);
+          if (!cached?.article || cached.article._id !== articleId) return cached;
+          const wasLiked = Boolean(cached.article.isLiked);
           return {
             ...cached,
-            isLiked: !wasLiked,
-            likes:    wasLiked
-              ? Math.max(0, cached.likes - 1)
-              : cached.likes + 1,
+            article: {
+              ...cached.article,
+              isLiked: !wasLiked,
+              likes: wasLiked
+                ? Math.max(0, cached.article.likes - 1)
+                : cached.article.likes + 1,
+            },
           };
         }
       );
 
-      // ── Patch all list caches ({ articles: Article[] }) ───────────────────
-      // Covers: useArticles, useBreakingArticles, useFeaturedArticles
-      queryClient.setQueriesData<ArticlesResponse>(
+      // Patch list caches
+      qc.setQueriesData<ArticlesResponse>(
         { queryKey: queryKeys.articles.lists() },
         (cached) => {
           if (!cached?.articles) return cached;
@@ -114,9 +134,7 @@ export function useLikeArticle() {
               return {
                 ...a,
                 isLiked: !wasLiked,
-                likes:    wasLiked
-                  ? Math.max(0, a.likes - 1)
-                  : a.likes + 1,
+                likes: wasLiked ? Math.max(0, a.likes - 1) : a.likes + 1,
               };
             }),
           };
@@ -126,19 +144,18 @@ export function useLikeArticle() {
       return { snapshots };
     },
 
-    // Write server truth — no refetch, no flicker
     onSuccess: ({ articleId, likes, isLiked }) => {
-      // Reconcile detail cache
-      queryClient.setQueriesData<Article>(
+      // Reconcile detail cache with server truth
+      qc.setQueriesData<{ article: Article }>(
         { queryKey: queryKeys.articles.details() },
         (cached) => {
-          if (!cached || cached._id !== articleId) return cached;
-          return { ...cached, likes, isLiked };
+          if (!cached?.article || cached.article._id !== articleId) return cached;
+          return { ...cached, article: { ...cached.article, likes, isLiked } };
         }
       );
 
-      // Reconcile list caches
-      queryClient.setQueriesData<ArticlesResponse>(
+      // Reconcile list caches with server truth
+      qc.setQueriesData<ArticlesResponse>(
         { queryKey: queryKeys.articles.lists() },
         (cached) => {
           if (!cached?.articles) return cached;
@@ -152,12 +169,11 @@ export function useLikeArticle() {
       );
     },
 
-    // Full rollback on error
     onError: (_err, _articleId, context) => {
-      context?.snapshots?.forEach(([queryKey, data]) => {
-        queryClient.setQueryData(queryKey, data);
+      context?.snapshots?.forEach(([queryKey, data]: [readonly unknown[], unknown]) => {
+        qc.setQueryData(queryKey, data);
       });
-      toast.error("Could not update like. Please try again.");
+      showError("Update failed", "Could not update like. Please try again.");
     },
   });
 }

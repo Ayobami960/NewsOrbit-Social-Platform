@@ -1,30 +1,5 @@
 "use client";
 
-/**
- * CookieConsent
- *
- * Drop this into your root layout.tsx so it appears on every page:
- *
- *   import { CookieConsent } from "@/components/ui/CookieConsent";
- *
- *   export default function RootLayout({ children }) {
- *     return (
- *       <html>
- *         <body>
- *           <CookieConsent />
- *           {children}
- *         </body>
- *       </html>
- *     );
- *   }
- *
- * Behaviour:
- *   - First visit: shows after 800 ms.
- *   - After accepting/declining: saves choice to localStorage ("og_cookie_consent").
- *   - Does NOT show again until localStorage is cleared.
- *   - "Manage preferences" expands toggles for analytics & marketing cookies.
- */
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -83,7 +58,7 @@ export function CookieConsent() {
       role="dialog"
       aria-modal="true"
       aria-label="Cookie preferences"
-      className="fixed inset-0 z-[200] flex items-end sm:items-end justify-center sm:justify-end pointer-events-none px-0 sm:px-6 sm:pb-6"
+      className="fixed inset-0 z-200 flex items-end sm:items-end justify-center sm:justify-end pointer-events-none px-0 sm:px-6 sm:pb-6"
     >
       {/* Mobile backdrop */}
       <div
@@ -95,7 +70,7 @@ export function CookieConsent() {
       <div
         className="
           relative pointer-events-auto w-full sm:max-w-sm
-          bg-white border border-[var(--color-border)]
+          bg-white border border-(--color-border)
           shadow-2xl rounded-t-3xl sm:rounded-2xl overflow-hidden
         "
         style={{ animation: "og-cookie-slide 0.35s cubic-bezier(0.34,1.56,0.64,1) both" }}
@@ -108,7 +83,7 @@ export function CookieConsent() {
         `}</style>
 
         {/* Top colour bar */}
-        <div className="h-1 bg-gradient-to-r from-ember-600 via-ember-500 to-ember-400" />
+        <div className="h-1 bg-linear-to-r from-ember-600 via-ember-500 to-ember-400" />
 
         <div className="p-5">
           {/* Header */}
@@ -122,7 +97,7 @@ export function CookieConsent() {
                   Cookie preferences
                 </h2>
                 <p className="font-sans text-[11px] text-ink-400 mt-0.5">
-                  OsunGist · NDPA 2023
+                  NewOrbit · NDPA {new Date().getFullYear()}
                 </p>
               </div>
             </div>
@@ -155,10 +130,10 @@ export function CookieConsent() {
             </button>
 
             {expanded && (
-              <div className="space-y-2.5 bg-ink-50 border border-[var(--color-border)] rounded-xl p-3">
+              <div className="space-y-2.5 bg-ink-50 border border-(--color-border) rounded-xl p-3">
                 {([
                   { key: "essential", label: "Essential",  desc: "Required for the site to work. Always on.", locked: true  },
-                  { key: "analytics", label: "Analytics",  desc: "Help us understand how you use OsunGist.",  locked: false },
+                  { key: "analytics", label: "Analytics",  desc: "Help us understand how you use NewOrbit.",  locked: false },
                   { key: "marketing", label: "Marketing",  desc: "Used to show relevant content and offers.", locked: false },
                 ] as const).map(({ key, label, desc, locked }) => (
                   <div key={key} className="flex items-center justify-between gap-3">
@@ -201,7 +176,7 @@ export function CookieConsent() {
           <div className="flex gap-2">
             <button
               onClick={() => save("essential")}
-              className="flex-1 py-2.5 border border-[var(--color-border)] rounded-xl text-[13px] font-sans font-semibold text-ink-700 hover:bg-ink-50 transition-colors"
+              className="flex-1 py-2.5 border border-(--color-border) rounded-xl text-[13px] font-sans font-semibold text-ink-700 hover:bg-ink-50 transition-colors"
             >
               Essential only
             </button>

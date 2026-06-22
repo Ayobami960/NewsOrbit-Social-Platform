@@ -51,7 +51,7 @@ export default function Footer() {
               <Radio size={16} className="text-white" />
             </div>
             <span className="font-display font-bold text-xl text-white">
-              Osun<span className="text-ember-500">Gist</span>
+              New<span className="text-ember-500">Orbit</span>
             </span>
           </div>
           <p className="text-sm text-ink-400 leading-relaxed mb-5 font-body">
@@ -106,7 +106,7 @@ export default function Footer() {
           <h4 className="font-sans font-bold text-white text-sm uppercase tracking-widest mb-4">About</h4>
           <ul className="space-y-2.5">
             {[
-              { href: "/about",   label: "About OsunGist" },
+              { href: "/about",   label: "About NewOrbit" },
               { href: "/contact", label: "Contact Us" },
               { href: "/privacy", label: "Privacy Policy" },
               { href: "/terms",   label: "Terms of Use" },
@@ -123,7 +123,7 @@ export default function Footer() {
 
       <div className="border-t border-ink-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-xs text-ink-600 font-sans">© {new Date().getFullYear()} OsunGist. All rights reserved.</p>
+          <p className="text-xs text-ink-600 font-sans">© {new Date().getFullYear()} NewOrbit. All rights reserved.</p>
           <p className="text-xs text-ink-600 font-sans">Made with ♥ in Osun State, Nigeria</p>
         </div>
       </div>

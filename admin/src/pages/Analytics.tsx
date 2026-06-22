@@ -16,6 +16,7 @@ import AreaChart from "../components/charts/AreaChart";
 import type {
   SuperAdminOverview, AdminOverview, WriterOverview,
   ArticleListItem,
+  ManagerOverview,
 } from "../types";
 import { formatDate } from "../lib/utils";
 import {
@@ -326,8 +327,159 @@ function SuperAdminAnalytics() {
               max={totalUsers || 1}
               color={
                 r._id === "super_admin" ? "bg-red-500" :
-                r._id === "admin"       ? "bg-blue-500" :
-                r._id === "writer"      ? "bg-green-500" : "bg-zinc-500"
+                r._id === "manager" ? "bg-yellow-500" :
+                r._id === "admin" ? "bg-blue-500" :
+                r._id === "writer" ? "bg-green-500" : "bg-zinc-500"
+              }
+            />
+          ))}
+        </Card>
+
+        {/* Content summary */}
+        <Card className="p-5">
+          <SectionHead title="Content Summary" />
+          {[
+            { label: "Published Articles", value: ov?.articles.published ?? 0, color: "text-green-400" },
+            { label: "Draft Articles",      value: (ov?.articles.total ?? 0) - (ov?.articles.published ?? 0), color: "text-amber-400" },
+            { label: "Community Blogs",     value: ov?.blogs.total ?? 0,        color: "text-violet-400" },
+            { label: "Total Comments",      value: ov?.comments.total ?? 0,     color: "text-blue-400" },
+            { label: "Newsletter Subs",     value: ov?.newsletter.subscribers ?? 0, color: "text-cyan-400" },
+          ].map(item => (
+            <div key={item.label} className="flex justify-between items-center py-2.5 border-b border-zinc-800 last:border-0">
+              <span className="text-[13px] text-zinc-500">{item.label}</span>
+              <span className={`text-sm font-bold ${item.color}`}>{item.value.toLocaleString()}</span>
+            </div>
+          ))}
+        </Card>
+
+        {/* Security */}
+        <Card className="p-5">
+          <SectionHead title="Security Overview" />
+          <div className="space-y-3 mt-2">
+            {[
+              { label: "Suspicious (30d)",  value: ov?.security.suspiciousLast30Days ?? 0, color: "bg-rose-500",   threshold: 20 },
+              { label: "Pending Comments",  value: ov?.comments.pending ?? 0,               color: "bg-amber-500", threshold: 50 },
+            ].map(item => (
+              <div key={item.label}>
+                <div className="flex justify-between text-xs text-zinc-500 mb-1">
+                  <span>{item.label}</span>
+                  <span className={item.value > item.threshold ? "text-rose-400 font-bold" : "text-zinc-400"}>
+                    {item.value}
+                  </span>
+                </div>
+                <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${item.color}`}
+                    style={{ width: `${Math.min(100, (item.value / (item.threshold * 2)) * 100)}%`, transition: "width .6s ease" }} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 pt-4 border-t border-zinc-800">
+            <p className="text-[11px] text-zinc-600 uppercase tracking-widest font-semibold mb-2">Quick Links</p>
+            <div className="space-y-1.5">
+              <a href="/activity" className="block text-xs text-zinc-500 hover:text-red-400 transition-colors">→ View full activity log</a>
+              <a href="/comments" className="block text-xs text-zinc-500 hover:text-red-400 transition-colors">→ Moderate comments</a>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function ManagerAnalytics() {
+  const { data: overview, isLoading } = useAnalyticsOverview();
+  const { data: topArticles = [] }    = useTopArticles();
+  const { data: chartData = [] }      = useArticlesByDay(30);
+  const { data: usersByRole = [] }    = useUsersByRole();
+  const [days, setDays]               = useState(30);
+
+  if (isLoading) return <Spinner />;
+  const ov = overview as ManagerOverview | undefined;
+
+  const SPARKS = [12, 18, 14, 28, 22, 30, 24, 32, 20, 28, 35, 40];
+
+  const totalUsers = usersByRole.reduce((s, r) => s + r.count, 0);
+
+  return (
+    <div className="space-y-6">
+      {/* Stats row 1 */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatCard label="Total Articles"   value={ov?.articles.total ?? 0}         sub={`${ov?.articles.published ?? 0} published`} subColor="text-green-400" accent="bg-red-500"   icon={Newspaper}  sparkData={SPARKS} />
+        {/* <StatCard label="Registered Users" value={ov?.users.total ?? 0}            sub={`+${ov?.users.newThisMonth ?? 0} this month`} subColor="text-green-400" accent="bg-blue-500" icon={Users}      sparkData={SPARKS.map(v => v * 2)} /> */}
+        <StatCard label="Community Blogs"  value={ov?.blogs.total ?? 0}            sub="User-generated posts" accent="bg-violet-500"   icon={BookOpen}   sparkData={SPARKS.map(v => Math.round(v * .6))} />
+        <StatCard label="Total Views"      value={ov?.totalViews ?? 0}             sub="Across all content"  accent="bg-amber-500"   icon={Eye}        sparkData={SPARKS.map(v => v * 80)} />
+      </div>
+
+      {/* Stats row 2 */}
+      <div className="grid grid-cols-2 lg:grid-cols-3  gap-4">
+        <StatCard label="Newsletter Subs"   value={ov?.newsletter.subscribers ?? 0}  accent="bg-cyan-500" />
+        {/* <StatCard label="Pending Comments"  value={ov?.comments.pending ?? 0}         accent="bg-amber-500"
+          sub={`${ov?.comments.total ?? 0} total`} /> */}
+        <StatCard label="Suspicious (30d)"  value={ov?.security.suspiciousLast30Days ?? 0}
+          accent="bg-rose-600" subColor="text-rose-400"
+          sub={ov?.security.suspiciousLast30Days ?? 0 > 20 ? "⚠ High activity" : "Normal"} />
+        <StatCard label="Total Comments"   value={ov?.comments.total ?? 0}           accent="bg-green-500" />
+      </div>
+
+      {/* Main chart */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Card className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <SectionHead title="Articles Published" />
+            <div className="flex gap-1">
+              {[7, 14, 30].map(d => (
+                <button key={d} onClick={() => setDays(d)}
+                  className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+                    days === d ? "bg-red-600 text-white" : "text-zinc-500 hover:text-zinc-300"
+                  }`}>
+                  {d}d
+                </button>
+              ))}
+            </div>
+          </div>
+          {chartData.length > 0
+            ? <AreaChart data={chartData} height={240} />
+            : <div className="h-60 flex items-center justify-center text-zinc-600 text-sm">No data</div>
+          }
+        </Card>
+
+        <Card className="p-5">
+          <SectionHead title="Top 5 Articles" />
+          {topArticles.slice(0, 5).map((a, i) => (
+            <div key={a._id} className="flex items-start gap-3 py-3 border-b border-zinc-800 last:border-0">
+              <span className="text-lg font-black text-zinc-800 w-6 shrink-0 leading-none mt-0.5">
+                {i + 1}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12.5px] text-zinc-300 leading-snug line-clamp-2 font-medium">{a.title}</p>
+                <div className="flex items-center gap-2 mt-1 text-[10px] text-zinc-600">
+                  <Eye size={9} />{a.views.toLocaleString()} views
+                  <span>·</span>
+                  {a.category?.name}
+                </div>
+              </div>
+            </div>
+          ))}
+        </Card>
+      </div>
+
+      {/* Bottom row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* Users by role */}
+        <Card className="p-5">
+          <SectionHead title="Users by Role" />
+          {usersByRole.map(r => (
+            <BarRow
+              key={r._id}
+              label={r._id.replace("_", " ")}
+              value={r.count}
+              max={totalUsers || 1}
+              color={
+                r._id === "super_admin" ? "bg-red-500" :
+                r._id === "manager" ? "bg-yellow-500" :
+                r._id === "admin" ? "bg-blue-500" :
+                r._id === "writer" ? "bg-green-500" : "bg-zinc-500"
               }
             />
           ))}
@@ -392,6 +544,7 @@ export default function Analytics() {
   return (
     <Layout title="Analytics">
       {isRole("super_admin") && <SuperAdminAnalytics />}
+      {isRole("manager") && <ManagerAnalytics />}
       {isRole("admin")       && !isRole("super_admin") && <AdminAnalytics />}
       {isRole("writer")      && !isRole("admin") && !isRole("super_admin") && <WriterAnalytics />}
     </Layout>

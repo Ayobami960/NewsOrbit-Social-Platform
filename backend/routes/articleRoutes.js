@@ -9,6 +9,7 @@ const {
   getArticles,
   getArticle,
   getArticleById,
+  getArticleBySlug,
   getBreakingNews,
   deleteArticle,
   reactToArticle,
@@ -18,42 +19,40 @@ const {
 } = require("../controllers/article.controller");
 
 // ─── Multer ───────────────────────────────────────────────────────────────────
-const imageFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) cb(null, true);
-  else cb(new Error("Only image files are allowed!"), false);
-};
-
-const baseOptions = {
+const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter: imageFilter,
-};
-
-const uploadForCreate = multer(baseOptions).fields([
-  { name: "featuredImage", maxCount: 1 },
+  limits:  { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("Only image files are allowed!"), false);
+  },
+}).fields([
+  { name: "featuredImage", maxCount: 1  },
   { name: "gallery",       maxCount: 10 },
 ]);
 
-const uploadForUpdate = multer(baseOptions).fields([
-  { name: "featuredImage", maxCount: 1 },
-  { name: "gallery",       maxCount: 10 },
-]);
-// ─── Public static routes FIRST ──────────────────────────────────────────────
+// ─── 1. Exact static routes (no params) ──────────────────────────────────────
+router.get( "/",          optionalAuth, getArticles);
+router.post("/",          protect, upload, createArticle);
+
+// ─── 2. Named-prefix routes (won't collide with /:id wildcards) ──────────────
 router.get("/breaking",   getBreakingNews);
 router.get("/my-stats",   protect, restrictTo("super_admin", "admin", "writer"), getMyArticleStats);
-router.get("/edit/:id",   protect, getArticleById);
 
-// ─── Public wildcard routes AFTER specific ones ───────────────────────────────
-router.get("/",           optionalAuth, getArticles);
-router.get("/:slug",      optionalAuth, getArticle);  // ← must be last GET
+// GET /articles/slug/:slug  — public reader view (by slug)
+router.get("/slug/:slug", optionalAuth, getArticle);
 
-// ─── Protected mutation routes ────────────────────────────────────────────────
+// GET /articles/edit/:id  — writer/admin edit view (by ObjectId, protected)
+router.get("/edit/:id",   protect, restrictTo("super_admin", "admin", "writer"), getArticleById);
+
+// ─── 3. Wildcard /:id routes (ObjectId — last among GETs) ────────────────────
 router.get("/:id/likers", protect, restrictTo("super_admin", "admin", "writer"), getArticleLikers);
-router.post("/",          protect, uploadForCreate, createArticle);
-router.patch("/:id",      protect, uploadForUpdate, updateArticle);
-router.delete("/:id",     protect, deleteArticle);
-router.post("/:id/react", protect, reactToArticle);
-router.post("/:id/like",  protect, likeArticle);
+router.get("/:id",        optionalAuth, getArticleBySlug);   // handles both id & slug fallback
 
-module.exports = router;
+// ─── 4. Mutation routes ───────────────────────────────────────────────────────
+router.patch( "/:id",      protect, upload, updateArticle);
+router.delete("/:id",      protect, deleteArticle);
+router.post(  "/:id/like", protect, likeArticle);
+router.post(  "/:id/react",protect, reactToArticle);
+
 module.exports = router;

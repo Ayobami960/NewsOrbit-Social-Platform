@@ -16,16 +16,16 @@ export default function HomePage() {
   const { data: featuredData, isLoading: featLoading } = useFeaturedArticles();
   const { data: latestData,   isLoading: latestLoading } = useArticles({ limit: 9, sort: "-publishedAt" });
   const { data: breakingData }  = useBreakingArticles();
-  const { data: blogsData }     = useBlogs({ limit: 4 });
-  const { data: categories }    = useCategories();
-  const subscribeMut            = useSubscribeNewsletter();
+  const { data: blogsData } = useBlogs({ limit: 4 });
+  const { data: categories } = useCategories();
+  const subscribeMut = useSubscribeNewsletter();
 
   const [email, setEmail] = useState("");
 
   const featured = featuredData?.articles ?? [];
-  const latest   = latestData?.articles   ?? [];
+  const latest = latestData?.articles   ?? [];
   const breaking = breakingData?.articles ?? [];
-  const blogs    = blogsData?.blogs       ?? [];
+  const blogs = blogsData?.blogs ?? [];
 
   const hero    = featured[0];
   const sideTop = featured.slice(1, 3);

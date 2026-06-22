@@ -1,8 +1,12 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import type { User } from "@/types";
+import { useRouter } from "next/navigation";
+import type { User, Role } from "@/types";
 import { apiFetch, authFetch, setStoredToken, clearStoredToken, getStoredToken } from "@/lib/apiFetch";
+import { useToast } from "@/components/ui/toast";
+
+const ALLOWED_ROLES: Role[] = ["writer", "user"];
 
 interface AuthCtx {
   user: User | null;
@@ -16,15 +20,29 @@ interface AuthCtx {
 
 const Ctx = createContext<AuthCtx | null>(null);
 
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const { error } = useToast();
+
+  const handleDisallowedRole = (role: string) => {
+    error("Access denied", `Your account role (${role}) is not permitted here.`);
+    clearStoredToken();
+    setUser(null);
+    router.replace("/login");
+  };
 
   useEffect(() => {
     if (!getStoredToken()) { setLoading(false); return; }
     authFetch<{ user: User }>("/auth/me")
-      .then(({ data }) => setUser(data.user))
+      .then(({ data }) => {
+        if (!ALLOWED_ROLES.includes(data.user.role)) {
+          handleDisallowedRole(data.user.role);
+          return;
+        }
+        setUser(data.user);
+      })
       .catch(() => clearStoredToken())
       .finally(() => setLoading(false));
   }, []);
@@ -34,6 +52,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: "POST",
       body: { email, password },
     });
+
+    if (!ALLOWED_ROLES.includes(data.user.role)) {
+      throw new Error(`Access denied. Your account role (${data.user.role}) is not permitted here.`);
+    }
+
     setStoredToken(data.accessToken);
     setUser(data.user);
     return data.user;

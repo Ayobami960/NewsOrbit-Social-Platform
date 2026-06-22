@@ -1,31 +1,16 @@
 import type { ApiResponse } from "../types";
 
-const raw = import.meta.env.VITE_API_URL as string | undefined;
-
-const base =
-  typeof raw === "string"
-    ? raw.replace(/\/+$/, "")
+export const base =
+  typeof (import.meta.env.VITE_API_URL as string | undefined) === "string"
+    ? (import.meta.env.VITE_API_URL as string).replace(/\/+$/, "")
     : "";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────────────────────
 
 interface ApiFetchOptions {
   getToken?: () => Promise<string | null> | string | null;
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
-  /**
-   * Pass a plain object  → serialised as JSON   (Content-Type: application/json)
-   * Pass a FormData      → sent as multipart     (Content-Type set by browser)
-   */
   body?: Record<string, unknown> | FormData | string;
-  /** Extra headers — merged on top of defaults. Caller can override Content-Type. */
   headers?: Record<string, string>;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Core fetch
-// ─────────────────────────────────────────────────────────────────────────────
 
 async function apiFetchInner<T>(
   path: string,
@@ -33,37 +18,16 @@ async function apiFetchInner<T>(
   token: string | null
 ): Promise<ApiResponse<T>> {
   const { method = "GET", body, headers: extraHeaders = {} } = opts;
-
   const isFormData = body instanceof FormData;
 
-  // Build headers
   const headers: Record<string, string> = {};
-
-  // Content-Type: let browser handle FormData (it adds the boundary),
-  // default to JSON for everything else, but let the caller override.
-  if (!isFormData) {
-    headers["Content-Type"] = "application/json";
-  }
-
-  // Merge caller-supplied headers AFTER defaults so they can override
+  if (!isFormData) headers["Content-Type"] = "application/json";
   Object.assign(headers, extraHeaders);
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  // Auth
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  // Serialise body
   let serialisedBody: BodyInit | undefined;
   if (body !== undefined) {
-    if (isFormData) {
-      serialisedBody = body;
-    } else if (typeof body === "string") {
-      // Already serialised (e.g. JSON.stringify called by caller)
-      serialisedBody = body;
-    } else {
-      serialisedBody = JSON.stringify(body);
-    }
+    serialisedBody = isFormData ? body : typeof body === "string" ? body : JSON.stringify(body);
   }
 
   let response: Response;
@@ -79,7 +43,6 @@ async function apiFetchInner<T>(
     throw new Error("Network error. Please try again.");
   }
 
-  // Parse JSON safely
   const contentType = response.headers.get("content-type");
   let data: ApiResponse<T>;
   try {
@@ -93,34 +56,22 @@ async function apiFetchInner<T>(
     throw new Error("Failed to parse server response.");
   }
 
- if (!response.ok) {
-  // Create a safe copy of the body for debugging, removing passwords
-  let safeBody: any = "Redacted for security";
-  
-  if (body && !(body instanceof FormData)) {
-    try {
-      const parsed = typeof body === "string" ? JSON.parse(body) : body;
-      if (parsed.password) {
-        safeBody = { ...parsed, password: "********" }; // 🔐 Hide the password!
-      } else {
-        safeBody = parsed;
-      }
-    } catch {
-      safeBody = "Unparsable Body";
+  if (!response.ok) {
+    let safeBody: any = "Redacted for security";
+    if (body && !(body instanceof FormData)) {
+      try {
+        const parsed = typeof body === "string" ? JSON.parse(body) : body;
+        safeBody = parsed.password ? { ...parsed, password: "********" } : parsed;
+      } catch { safeBody = "Unparsable Body"; }
     }
+    console.error("API ERROR:", {
+      url: `${base}${path}`, method, status: response.status,
+      requestBody: safeBody,
+      error: typeof data?.message === "string" ? data.message : response.statusText,
+    });
+    const message = typeof data?.message === "string" ? data.message : response.statusText;
+    throw new Error(message || "Request failed");
   }
-
-  console.error("API ERROR:", {
-    url: `${base}${path}`,
-    method,
-    status: response.status,
-    requestBody: safeBody, // Logs email, but hides password
-    error: typeof data?.message === "string" ? data.message : response.statusText,
-  });
-
-  const message = typeof data?.message === "string" ? data.message : response.statusText;
-  throw new Error(message || "Request failed");
-}
 
   return data;
 }
@@ -130,25 +81,16 @@ export async function apiFetch<T = unknown>(
   opts: ApiFetchOptions = {}
 ): Promise<ApiResponse<T>> {
   const token = opts.getToken ? await opts.getToken() : null;
-
   try {
     return await apiFetchInner<T>(path, opts, token);
   } catch (err) {
-    // BUG FIX: on 401, attempt a silent token refresh and retry ONCE.
-    // Previously the request just failed; now we recover transparently.
     if (err instanceof Error && err.message.toLowerCase().includes("unauthorized")) {
       const freshToken = await silentRefresh();
-      if (freshToken) {
-        return apiFetchInner<T>(path, opts, freshToken);
-      }
+      if (freshToken) return apiFetchInner<T>(path, opts, freshToken);
     }
     throw err;
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Token storage
-// ─────────────────────────────────────────────────────────────────────────────
 
 let _refreshing: Promise<string | null> | null = null;
 
@@ -164,12 +106,7 @@ export function clearStoredToken(): void {
   localStorage.removeItem("accessToken");
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Silent refresh
-// ─────────────────────────────────────────────────────────────────────────────
-
 async function silentRefresh(): Promise<string | null> {
-  // Deduplicate: if a refresh is already in flight, wait for it
   if (!_refreshing) {
     _refreshing = (async () => {
       try {
@@ -177,22 +114,10 @@ async function silentRefresh(): Promise<string | null> {
           method: "POST",
           credentials: "include",
         });
-
-        if (!response.ok) {
-          clearStoredToken();
-          return null;
-        }
-
-        const data = (await response.json()) as ApiResponse<{
-          accessToken: string;
-        }>;
-
+        if (!response.ok) { clearStoredToken(); return null; }
+        const data = (await response.json()) as ApiResponse<{ accessToken: string }>;
         const token = data?.data?.accessToken;
-        if (!token) {
-          clearStoredToken();
-          return null;
-        }
-
+        if (!token) { clearStoredToken(); return null; }
         setStoredToken(token);
         return token;
       } catch (error) {
@@ -200,29 +125,16 @@ async function silentRefresh(): Promise<string | null> {
         clearStoredToken();
         return null;
       }
-    })().finally(() => {
-      _refreshing = null;
-    });
+    })().finally(() => { _refreshing = null; });
   }
-
   return _refreshing;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Token getter (used by authFetch)
-// ─────────────────────────────────────────────────────────────────────────────
 
 export async function getToken(): Promise<string | null> {
   const stored = getStoredToken();
   if (stored) return stored;
-
-  // No stored token — try a silent refresh
   return silentRefresh();
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// authFetch — pre-wired with token getter, use this everywhere in the app
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function authFetch<T = unknown>(
   path: string,

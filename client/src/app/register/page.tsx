@@ -5,11 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Radio, Eye, EyeOff } from "lucide-react";
-import { toast } from "react-toastify";
+import { useToast } from "@/components/ui/toast";
+ import { ApiError } from "@/lib/apiFetch";
+
 
 export default function RegisterPage() {
   const { register } = useAuth();
   const router = useRouter();
+  const { error } = useToast();
 
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [showPw, setShowPw] = useState(false);
@@ -18,25 +21,33 @@ export default function RegisterPage() {
   const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    if (form.password !== form.confirmPassword) {
-      toast.error("Passwords do not match."); return;
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (form.password !== form.confirmPassword) {
+    error("Passwords don't match", "Please try again.");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    await register(form.name, form.email, form.password, form.confirmPassword);
+    router.push(`/verify-email?email=${encodeURIComponent(form.email)}`);
+  } catch (err: any) {
+    if (err instanceof ApiError && err.errors.length > 0) {
+      // Show each field violation as its own toast
+      err.errors.forEach(({ field, message: msg }) => {
+        const label = field.charAt(0).toUpperCase() + field.slice(1);
+        error(`Invalid ${label}`, msg);
+      });
+    } else {
+      error("Registration failed", err?.message ?? "Something went wrong.");
     }
-    if (form.password.length < 8) {
-      toast.error("Password must be at least 8 characters."); return;
-    }
-    setLoading(true);
-    try {
-      await register(form.name, form.email, form.password, form.confirmPassword);
-      // Redirect to verify-email page, passing the email so the page can pre-fill it
-      router.push(`/verify-email?email=${encodeURIComponent(form.email)}`);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Registration failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-(--color-bg) px-4 py-12">
@@ -47,11 +58,11 @@ export default function RegisterPage() {
               <Radio size={18} className="text-white" />
             </div>
             <span className="font-display font-bold text-2xl text-ink-900">
-              Osun<span className="text-ember-600">Gist</span>
+              News<span className="text-ember-600">Orbit</span>
             </span>
           </Link>
           <h1 className="font-display text-xl font-bold text-ink-900 mb-1">Create account</h1>
-          <p className="text-sm text-ink-500 font-sans">Join the OsunGist community</p>
+          <p className="text-sm text-ink-500 font-sans">Join the NewsOrbit community</p>
         </div>
 
         <div className="bg-white border border-(--color-border) rounded-2xl p-6 shadow-sm">

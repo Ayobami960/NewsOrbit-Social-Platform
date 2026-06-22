@@ -30,11 +30,11 @@ router.get("/mine", protect, getMyBlogs);
 router.get("/", optionalAuth, getBlogs);
 
 // ── Public: fetch by slug ─────────────────────────────────
-router.get("/slug/:slug", optionalAuth, getBlogBySlug);      // ✅ distinct prefix
+router.get("/slug/:slug", optionalAuth, getBlogBySlug); 
 
 // ── Authenticated: fetch by ID (owner/admin edit view) ────
 router.get("/:id", protect, getBlogById);
-router.delete("/:id", protect, deleteBlog);
+router.delete("/:id", protect, restrictTo("super_admin", "manager", "user"), deleteBlog);
 router.post("/:id/like", protect, likeBlog);
 router.get("/:id/likers", protect, restrictTo("super_admin", "admin", "writer", "user"), getBlogLikers);
 
@@ -52,5 +52,5 @@ router.patch(
   updateBlog
 );
 
-module.exports = router;
+
 module.exports = router;

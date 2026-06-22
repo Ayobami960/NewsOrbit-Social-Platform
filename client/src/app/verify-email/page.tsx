@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Radio, MailCheck, RefreshCw } from "lucide-react";
-import { toast } from "react-toastify";
+import { useToast } from "@/components/ui/toast";
 import { apiFetch } from "@/lib/apiFetch";
 
 const CODE_LENGTH = 6;
@@ -71,6 +71,7 @@ function VerifyAccountForm() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const emailParam   = searchParams.get("email") ?? "";
+  const { error, success } = useToast();
 
   const [email, setEmail]         = useState(emailParam);
   const [digits, setDigits]       = useState<string[]>(Array(CODE_LENGTH).fill(""));
@@ -114,39 +115,41 @@ function VerifyAccountForm() {
 
   const code = digits.join("");
 
-  const handleVerify = useCallback(async (e?: any) => {
-    e?.preventDefault();
-    if (!email)                    { toast.error("Email is missing. Please go back and register again."); return; }
-    if (code.length < CODE_LENGTH) { toast.error("Please enter the full 6-digit code."); return; }
-    setLoading(true);
-    try {
-      await apiFetch("/auth/verify-email", { method: "POST", body: { email, code } });
-      toast.success("Account verified!");
-      router.push("/login");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Verification failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, [email, code, router]);
+   const handleVerify = useCallback(async (e?: any) => {
+      e?.preventDefault();
+      if (!email)                    { error("Email is missing. Please go back and register again."); return; }
+      if (code.length < CODE_LENGTH) { error("Please enter the full 6-digit code."); return; }
+      setLoading(true);
+      try {
+        await apiFetch("/auth/verify-email", { method: "POST", body: { email, code } });
+        success("Account verified!", "You can now sign in.");
+        router.push("/login");
+      } catch (err) {
+        error("Verification failed", err instanceof Error ? err.message : "Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }, [email, code, router]);
+  
+    const handleResend = async () => {
+      if (!email)       { error("Email is missing."); return; }
+      if (cooldown > 0) return;
+      setResending(true);
+      try {
+        await apiFetch("/auth/resend-verify", { method: "POST", body: { email } });
+        success("Code sent!", "A new code has been sent to your email.");
+        setCooldown(RESEND_COOLDOWN);
+        setDigits(Array(CODE_LENGTH).fill(""));
+        inputRefs.current[0]?.focus();
+      } catch (err) {
+       error("Resend failed", err instanceof Error ? err.message : "Could not resend code. Try again.");
+      } finally {
+        setResending(false);
+      }
+    };
 
-  const handleResend = async () => {
-    if (!email)       { toast.error("Email is missing."); return; }
-    if (cooldown > 0) return;
-    setResending(true);
-    try {
-      await apiFetch("/auth/resend-verify", { method: "POST", body: { email } });
-      toast.success("A new code has been sent to your email.");
-      setCooldown(RESEND_COOLDOWN);
-      setDigits(Array(CODE_LENGTH).fill(""));
-      inputRefs.current[0]?.focus();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not resend code. Try again.");
-    } finally {
-      setResending(false);
-    }
-  };
-
+  
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-(--color-bg) px-4 py-12">
       <div className="w-full max-w-sm">
@@ -158,7 +161,7 @@ function VerifyAccountForm() {
               <Radio size={18} className="text-white" />
             </div>
             <span className="font-display font-bold text-2xl text-ink-900">
-              Osun<span className="text-ember-600">Gist</span>
+              News<span className="text-ember-600">Orbit</span>
             </span>
           </Link>
 

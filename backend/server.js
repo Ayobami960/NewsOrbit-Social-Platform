@@ -6,6 +6,7 @@ const morgan = require("morgan");
 const compression = require("compression");
 const cookieParser = require("cookie-parser");
 const http = require("http");
+const { initSocket } = require("./config/socket");
 
 const env = require("./lib/env");
 const connectDB = require("./config/db");
@@ -29,7 +30,17 @@ const { errorHandler, notFound } = require("./middlewares/errorHandler");
 const app = express();
 const server = http.createServer(app);
 
+// Wire socket.io AFTER app and server are created
+initSocket(server);
+
 app.set("trust proxy", 1);
+
+// Express auto-generates ETags for every response by default, which lets
+// the browser conditionally request with If-None-Match and get back a
+// 304 Not Modified — serving its own stale cached body even after the
+// underlying data (e.g. chat inbox) has changed. This API is fully
+// dynamic, so disable that behavior entirely.
+app.set("etag", false);
 
 // ─────────────────────────────────────────────
 // CORS — allow all origins
@@ -57,6 +68,19 @@ app.use(cookieParser());
 app.use(compression());
 app.use(mongoSanitiseMiddleware);
 app.use(hppMiddleware);
+
+// ─────────────────────────────────────────────
+// No-cache for all API responses
+// ─────────────────────────────────────────────
+// Belt-and-suspenders alongside etag:false above — explicitly tells the
+// browser (and any intermediary proxy/CDN) never to cache or revalidate
+// these responses, so admins always see live data, not a stale snapshot.
+app.use("/api/v1", (req, res, next) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
+  next();
+});
 
 // ─────────────────────────────────────────────
 // Logging (dev only)

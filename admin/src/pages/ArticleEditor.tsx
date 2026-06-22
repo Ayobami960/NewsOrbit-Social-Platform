@@ -550,7 +550,7 @@ export default function ArticleEditor() {
       <div className="flex flex-col md:flex-row gap-5 items-start">
 
         {/* ── LEFT: Editor ──────────────────────────────────────────────── */}
-        <div className="flex-1 min-w-0 space-y-4">
+        <div className="flex-1 w-full min-w-0 space-y-4">
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
             <div className="px-6 pt-5 pb-3">
               <textarea

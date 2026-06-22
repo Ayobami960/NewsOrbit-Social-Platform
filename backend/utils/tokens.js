@@ -1,5 +1,5 @@
 
-const jwt    = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const env = require("../lib/env");
 
