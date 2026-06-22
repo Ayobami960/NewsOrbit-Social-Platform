@@ -32,6 +32,8 @@ const env = {
   SMTP_USER: process.env.SMTP_USER,
   SMTP_PASS: process.env.SMTP_PASS,
   EMAIL_FROM: process.env.EMAIL_FROM,
+  SMTP_FROM: process.env.SMTP_FROM,           // ✅ added
+  SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL, // ✅ added
 
   // Resend
   RESEND_API_KEY: process.env.RESEND_API_KEY,
@@ -66,12 +68,13 @@ const requiredKeys = [
   "IMAGEKIT_PUBLIC_KEY",
   "IMAGEKIT_PRIVATE_KEY",
   "IMAGEKIT_URL_ENDPOINT",
+  "SUPER_ADMIN_EMAIL", // ✅ added — needed for admin bootstrapping
 ];
 
 for (const key of requiredKeys) {
   if (!env[key]) {
     console.error(`❌ Missing required environment variable: ${key}`);
-    process.exit(1); // Stop app if critical env is missing
+    process.exit(1);
   }
 }
 
@@ -79,6 +82,9 @@ for (const key of requiredKeys) {
 if (env.NODE_ENV === "production") {
   if (!env.JWT_SECRET || env.JWT_SECRET.length < 32) {
     console.warn("⚠️  JWT_SECRET should be at least 32 characters in production!");
+  }
+  if (env.RESEND_API_KEY?.startsWith("re_YOUR")) {
+    console.warn("⚠️  RESEND_API_KEY looks like a placeholder — emails won't send!");
   }
 }
 

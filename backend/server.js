@@ -31,7 +31,9 @@ const app = express();
 const server = http.createServer(app);
 
 // Wire socket.io AFTER app and server are created
-initSocket(server);
+if (!env.VERCEL) {
+  initSocket(server);
+}
 
 app.set("trust proxy", 1);
 
@@ -45,7 +47,7 @@ app.set("etag", false);
 // ─────────────────────────────────────────────
 // CORS — allow all origins
 // ─────────────────────────────────────────────
-app.options("/{*path}", cors({ origin: true, credentials: true }));
+app.options("*", cors({ origin: true, credentials: true }));
 app.use(cors({ origin: true, credentials: true }));
 
 // ─────────────────────────────────────────────
@@ -100,6 +102,7 @@ app.get("/", (_req, res) =>
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() })
 );
 
+app.use("/api", require("./routes/schedulerRoute"));
 app.use("/api/v1/uploads", require("./routes/uploadRoutes"));
 app.use("/api/v1", router);
 
