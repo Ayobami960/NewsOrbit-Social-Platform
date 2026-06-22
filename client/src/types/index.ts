@@ -220,7 +220,8 @@ export interface Comment {
 
 export type NotificationType =
   | "new_article" | "new_blog" | "new_comment"
-  | "new_follower" | "comment_reply" | "breaking_news" | "newsletter";
+  | "new_follower" | "comment_reply" | "breaking_news" | "newsletter"
+  | "blog_approved" | "blog_rejected" | "new_contact" | "contact_reply";
 
 export interface Notification {
   _id: string;
@@ -231,6 +232,7 @@ export interface Notification {
   body?: string;
   link?: string;
   article?: { _id: string; title: string; slug: string };
+  blog?: { _id: string; title: string; slug: string };
   isRead: boolean;
   readAt?: string;
   createdAt: string;

@@ -5,6 +5,7 @@ const { generateUniqueSlug } = require("../utils/slug");
 const { sanitiseRichText, stripHtml } = require("../utils/sanitise");
 const { sanitiseFilename } = require("../middlewares/upload");
 const { log } = require("../models/ActivityLog");
+const { notifyFollowersNewBlog } = require("../utils/notification");
 const {
   sendSuccess, sendCreated,
   sendNotFound, sendForbidden, sendError,
@@ -158,6 +159,9 @@ exports.createBlog = async (req, res, next) => {
       user: req.user._id, action: "blog_create",
       resource: blog._id.toString(), resourceType: "Blog", ip: req.ip,
     });
+
+    const authorData = await User.findById(req.user._id).select("name avatar");
+    notifyFollowersNewBlog(blog, authorData).catch(() => {});
 
     return sendCreated(res, { blog }, "Blog published successfully.");
   } catch (err) { next(err); }

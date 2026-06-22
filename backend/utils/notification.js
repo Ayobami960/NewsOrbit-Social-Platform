@@ -29,6 +29,34 @@ const notifyFollowersNewArticle = async (article, author) => {
   }
 };
 
+const notifyFollowersNewBlog = async (blog, author) => {
+  try {
+    const Follow = require("../models/Follow");
+    const follows = await Follow.find({ following: author._id }).select("follower").lean();
+    const ids = follows.map((f) => f.follower);
+    if (!ids.length) return;
+
+    await Notification.insertMany(
+      ids.map((uid) => ({
+        recipient: uid, sender: author._id, type: "new_blog",
+        title: `${author.name} published a new post`,
+        body: blog.title, link: `/blogs/${blog.slug}`,
+        blog: blog._id,
+      })),
+      { ordered: false }
+    );
+
+    await notifyFollowers(ids, {
+      title: `${author.name} posted`,
+      body: blog.title,
+      icon: blog.featuredImage?.url || "/icon-192.png",
+      url: `/blogs/${blog.slug}`,
+    });
+  } catch (err) {
+    console.error("notifyFollowersNewBlog:", err.message);
+  }
+};
+
 const notifyArticleAuthorComment = async (article, comment, commenter) => {
   try {
     if (article.author.toString() === commenter._id.toString()) return;
@@ -58,7 +86,7 @@ const notifyNewFollower = async (followedUserId, follower) => {
     await Notification.create({
       recipient: followedUserId, sender: follower._id, type: "new_follower",
       title: `${follower.name} started following you`,
-      link: `/profile/${follower._id}`,
+      link: `/profile/user/${follower._id}`,
     });
   } catch (err) { console.error("notifyNewFollower:", err.message); }
 };
@@ -76,6 +104,7 @@ const broadcastBreakingNews = async (article) => {
 
 module.exports = {
   notifyFollowersNewArticle,
+  notifyFollowersNewBlog,
   notifyArticleAuthorComment,
   notifyCommentReply,
   notifyNewFollower,

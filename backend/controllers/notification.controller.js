@@ -11,7 +11,9 @@ exports.getMyNotifications = async (req, res, next) => {
     const skip = (+page-1)*+limit;
     const [notifications, total, unreadCount] = await Promise.all([
       Notification.find(filter).sort("-createdAt").skip(skip).limit(+limit)
-        .populate("sender","name avatar").populate("article","title slug"),
+        .populate("sender","name avatar")
+        .populate("article","title slug")
+        .populate("blog","title slug"),
       Notification.countDocuments(filter),
       Notification.countDocuments({ recipient:req.user._id, isRead:false }),
     ]);

@@ -1,6 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, authFetch } from "../lib/apiFetch";
+import { authFetch } from "../lib/apiFetch";
 import { queryKeys } from "../lib/queryKeys";
 import type {
   User,

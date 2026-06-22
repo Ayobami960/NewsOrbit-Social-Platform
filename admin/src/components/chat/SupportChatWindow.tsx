@@ -93,7 +93,7 @@ export default function SupportChatWindow({
     setMessages([]); setLoading(true); setPage(1);
 
     (async () => {
-      const [joinResult, historyRes] = await Promise.all([
+      const [, historyRes] = await Promise.all([
         onJoin(convoId),
         authFetch<{ messages: ChatMessage[]; pagination: { pages: number } }>(
           `/chat/inbox/${convoId}/messages?page=1&limit=30`

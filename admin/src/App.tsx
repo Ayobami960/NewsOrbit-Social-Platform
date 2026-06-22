@@ -19,7 +19,9 @@ import Chat from "./pages/Chat";
 
 const ALL_ROLES: Role[] = ["super_admin", "admin", "writer", "manager"];
 const ALL_WRITER: Role[] = ["admin","writer"];
+const WRITER_ONLY: Role[] = ["writer"];
 const ADMIN_UP: Role[] = ["super_admin", "admin"];
+const SUPER_ADMIN_ONLY: Role[] = ["super_admin"];
 const SUPER_ADMIN: Role[] = ["super_admin", "manager"];
 
 export default function AppRouter() {
@@ -49,7 +51,7 @@ export default function AppRouter() {
       <Route path="/"  element={<ProtectedRoute roles={ALL_ROLES}><Dashboard /></ProtectedRoute>} />
       <Route path="/analytics" element={<ProtectedRoute roles={ALL_ROLES}><Analytics /></ProtectedRoute>} />
       <Route path="/articles" element={<ProtectedRoute roles={ALL_WRITER}><Articles /></ProtectedRoute>} />
-      <Route path="/New-articles" element={<ProtectedRoute roles={ALL_WRITER}><ArticleEditor /></ProtectedRoute>} />
+      <Route path="/New-articles" element={<ProtectedRoute roles={WRITER_ONLY}><ArticleEditor /></ProtectedRoute>} />
       <Route path="/articles/edit/:id" element={<ProtectedRoute roles={ALL_ROLES}><ArticleEditor /></ProtectedRoute>} />
 
       {/* ── Admin + Super Admin ──────────────────────────────────────────── */}
@@ -61,7 +63,7 @@ export default function AppRouter() {
       <Route path="/comments" element={<ProtectedRoute roles={SUPER_ADMIN}><Comments /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute roles={SUPER_ADMIN}><Message /></ProtectedRoute>} />
       <Route path="/newsletter" element={<ProtectedRoute roles={ALL_WRITER}><Newsletter /></ProtectedRoute>} />
-      <Route path="/push" element={<ProtectedRoute roles={ALL_WRITER}><Push /></ProtectedRoute>} />
+      <Route path="/push" element={<ProtectedRoute roles={SUPER_ADMIN_ONLY}><Push /></ProtectedRoute>} />
       <Route path="/chat" element={<ProtectedRoute roles={SUPER_ADMIN}><Chat /></ProtectedRoute>} />
 
       {/* <Route path="/settings"   element={<ProtectedRoute roles={ADMIN_UP}><Settings /></ProtectedRoute>} /> */}

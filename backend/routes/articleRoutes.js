@@ -33,7 +33,7 @@ const upload = multer({
 
 // ─── 1. Exact static routes (no params) ──────────────────────────────────────
 router.get( "/",          optionalAuth, getArticles);
-router.post("/",          protect, upload, createArticle);
+router.post("/",          protect, restrictTo("writer"), upload, createArticle);
 
 // ─── 2. Named-prefix routes (won't collide with /:id wildcards) ──────────────
 router.get("/breaking",   getBreakingNews);

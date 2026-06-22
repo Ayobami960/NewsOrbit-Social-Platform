@@ -24,7 +24,7 @@ router.get ("/articles/:slug",    optionalAuth, articleCtrl.getArticle);
 router.post(
   "/articles",
   protect,
-  restrictTo("super_admin", "admin", "writer"),
+  restrictTo("writer"),
   uploadArticleMedia,
   validate(createArticle),
   articleCtrl.createArticle
@@ -37,20 +37,20 @@ router.patch(
   validate(updateArticle),
   articleCtrl.updateArticle
 );
-router.delete("/articles/:id",    protect, restrictTo("super_admin", "admin"), articleCtrl.deleteArticle);
+router.delete("/articles/:id", protect, restrictTo("super_admin", "admin"), articleCtrl.deleteArticle);
 router.post  ("/articles/:id/react", protect, articleCtrl.reactToArticle);
 
 // ════════════════════════════════════════════════════════════════════════════
 //  COMMENTS  (nested under articles)
 // ════════════════════════════════════════════════════════════════════════════
-router.get   ("/articles/:articleId/comments",        optionalAuth, commentCtrl.getComments);
-router.post  ("/articles/:articleId/comments",        protect,      commentCtrl.createComment);
+router.get   ("/articles/:articleId/comments", optionalAuth, commentCtrl.getComments);
+router.post  ("/articles/:articleId/comments", protect,      commentCtrl.createComment);
 
 // Standalone comment operations
-router.patch ("/comments/:id",                        protect,      commentCtrl.updateComment);
-router.delete("/comments/:id",                        protect,      commentCtrl.deleteComment);
-router.post  ("/comments/:id/like",                   protect,      commentCtrl.likeComment);
-router.post  ("/comments/:id/report",                 protect,      commentCtrl.reportComment);
+router.patch ("/comments/:id", protect, commentCtrl.updateComment);
+router.delete("/comments/:id", protect, commentCtrl.deleteComment);
+router.post  ("/comments/:id/like", protect, commentCtrl.likeComment);
+router.post  ("/comments/:id/report", protect, commentCtrl.reportComment);
 router.patch ("/comments/:id/moderate",
   protect, restrictTo("admin", "super_admin"),
   commentCtrl.moderateComment
@@ -80,7 +80,7 @@ router.get ("/push/vapid-public-key",     pushCtrl.getPublicKey);
 router.post("/push/subscribe",            optionalAuth, pushCtrl.subscribe);
 router.delete("/push/unsubscribe",        pushCtrl.unsubscribe);
 router.post("/push/broadcast",
-  protect, restrictTo("admin", "super_admin"),
+  protect, restrictTo("super_admin"),
   pushCtrl.broadcast
 );
 

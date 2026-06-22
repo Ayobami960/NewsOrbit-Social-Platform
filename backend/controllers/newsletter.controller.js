@@ -3,7 +3,7 @@
 const Newsletter = require("../models/Newsletter");
 const { sendEmail, sendNewsletter, templates } = require("../utils/email");
 const { broadcastPush } = require("../utils/webpush");
-const { sendSuccess, sendCreated, sendError, sendNotFound } = require("../utils/apiResponse");
+const { sendSuccess, sendCreated, sendError, sendNotFound, sendForbidden } = require("../utils/apiResponse");
 
 exports.subscribe = async (req, res, next) => {
   try {
@@ -49,6 +49,9 @@ exports.sendBroadcast = async (req, res, next) => {
   try {
     const { subject, html, pushTitle, pushBody, articleUrl } = req.body;
     if (!subject || !html) return sendError(res, "subject and html required.", 400);
+    if ((pushTitle || pushBody) && req.user?.role !== "super_admin") {
+      return sendForbidden(res, "Only super admins can send push notifications.");
+    }
     const subs   = await Newsletter.find({ isActive:true }).select("email").lean();
     const emails = subs.map(s=>s.email);
     if (!emails.length) return sendError(res, "No active subscribers.", 400);

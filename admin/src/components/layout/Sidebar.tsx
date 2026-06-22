@@ -23,7 +23,7 @@ const NAV: SidebarNavEntry[] = [
     { section: true, label: "Audience" },
     { to: "/users", label: "Users & Roles", icon: Users, roles: ["super_admin", "admin"] },
     { to: "/newsletter", label: "Newsletter", icon: Mail, roles: ["admin", "writer"] },
-    { to: "/push", label: "Push Notify", icon: Bell, roles: ["admin", "writer"] },
+    { to: "/push", label: "Push Notify", icon: Bell, roles: ["super_admin"] },
 
     { to: "/messages", label: "Messages", icon: Mail, roles: ["super_admin", "manager"] },
     { to: "/chat", label: "ChatBox", icon: MessageCircle, roles: ["super_admin", "manager"] },

@@ -30,6 +30,18 @@ interface UseImageUploadOptions {
   onError?:   (error: string) => void;
 }
 
+interface UseImageUploadResult {
+  preview: string | null;
+  uploading: boolean;
+  error: string | null;
+  uploadedImage: UploadedImage | null;
+  upload: (file: File) => Promise<UploadedImage | null>;
+  remove: () => void;
+  reset: () => void;
+}
+
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useImageUpload({
@@ -37,7 +49,7 @@ export function useImageUpload({
   maxSizeMB = 10,
   onSuccess,
   onError,
-}: UseImageUploadOptions = {}) {
+}: UseImageUploadOptions = {}): UseImageUploadResult {
   const [uploading,     setUploading]     = useState(false);
   const [error,         setError]         = useState<string | null>(null);
   const [preview,       setPreview]       = useState<string | null>(null);
@@ -45,19 +57,22 @@ export function useImageUpload({
   const { error: showError, success: showSuccess } = useToast();
 
   const MAX_BYTES      = maxSizeMB * 1024 * 1024;
-  const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
   const upload = useCallback(async (file: File): Promise<UploadedImage | null> => {
 
     // ── Validate ──────────────────────────────────────────────────────────────
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      const msg = "Only JPEG, PNG, WeshowError("Invalid file type", msg);
+      const msg = "Only JPEG, PNG, WebP, and GIF images are allowed.";
+      setError(msg);
+      onError?.(msg);
+      showError("Invalid file type", msg);
       return null;
     }
     if (file.size > MAX_BYTES) {
       const msg = `Image must be smaller than ${maxSizeMB} MB.`;
-      setError(msg); onError?.(msg); showError("File too large", axSizeMB} MB.`;
-      setError(msg); onError?.(msg); toast.error(msg);
+      setError(msg);
+      onError?.(msg);
+      showError("File too large", msg);
       return null;
     }
 
@@ -162,7 +177,7 @@ export function useImageUpload({
     } finally {
       setUploading(false);
     }
-  }, [folder, maxSizeMB, onSuccess, onError]);
+  }, [MAX_BYTES, folder, maxSizeMB, onSuccess, onError, showError, showSuccess]);
 
   const remove = useCallback(() => {
     setPreview(null);

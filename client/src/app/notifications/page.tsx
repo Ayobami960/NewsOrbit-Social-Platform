@@ -7,7 +7,7 @@ import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications, useMarkNotificationRead, useMarkAllRead } from "@/hooks/useData";
 import { timeAgo, cn } from "@/lib/utils";
-import { Bell, BellOff, CheckCheck, Newspaper, Users, MessageCircle, Radio } from "lucide-react";
+import { Bell, BellOff, CheckCheck, Newspaper, Users, MessageCircle, Radio, FileCheck, FileX, Mail } from "lucide-react";
 import type { Notification, NotificationType } from "@/types";
 import { useEffect } from "react";
 
@@ -19,6 +19,10 @@ const ICON_MAP: Record<NotificationType, React.ElementType> = {
   comment_reply: MessageCircle,
   breaking_news: Radio,
   newsletter: Bell,
+  blog_approved: FileCheck,
+  blog_rejected: FileX,
+  new_contact: Mail,
+  contact_reply: Mail,
 };
 
 const COLOR_MAP: Record<NotificationType, string> = {
@@ -29,13 +33,17 @@ const COLOR_MAP: Record<NotificationType, string> = {
   comment_reply: "bg-purple-600/10 text-purple-600",
   breaking_news: "bg-red-600/10 text-red-600",
   newsletter: "bg-ink-600/10 text-ink-600",
+  blog_approved: "bg-green-600/10 text-green-600",
+  blog_rejected: "bg-red-600/10 text-red-600",
+  new_contact: "bg-blue-600/10 text-blue-600",
+  contact_reply: "bg-blue-600/10 text-blue-600",
 };
 
 export default function NotificationsPage() {
   const { user, loading: authLoading } = useAuth();
   const router  = useRouter();
 
-  const { data, isLoading }    = useNotifications();
+  const { data, isLoading }    = useNotifications(Boolean(user));
   const markRead  = useMarkNotificationRead();
   const markAllRead   = useMarkAllRead();
 

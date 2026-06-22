@@ -337,6 +337,10 @@ const getArticleLikers = async (req, res, next) => {
 // ====================== CREATE ARTICLE ======================
 const createArticle = async (req, res, next) => {
   try {
+    if (req.user.role !== "writer") {
+      return sendError(res, "Only writers can create articles.", 403);
+    }
+
     const { error, value } = createArticleValidator.validate(req.body, { abortEarly: false });
     if (error) return sendError(res, error.details.map(e => e.message), 400);
 

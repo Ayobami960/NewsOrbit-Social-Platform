@@ -31,7 +31,7 @@ export default function Articles() {
   const isWriter = isRole("writer");
   const isAdmin = isRole("super_admin", "admin");
 
-  const canCreate = isWriter || isAdmin;
+  const canCreate = isWriter;
   const canDelete = isWriter || isAdmin;
 
   const runSearch = () => {

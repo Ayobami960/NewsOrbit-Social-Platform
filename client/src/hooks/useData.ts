@@ -545,7 +545,7 @@ export function useSubscribeNewsletter() {
 // NOTIFICATIONS
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function useNotifications() {
+export function useNotifications(enabled = true) {
   return useQuery({
     queryKey: queryKeys.notifications.list(),
     queryFn: () =>
@@ -554,6 +554,7 @@ export function useNotifications() {
         unreadCount: number;
       }>("/notifications").then((r) => r.data),
     staleTime: 30_000,
+    enabled,
   });
 }
 

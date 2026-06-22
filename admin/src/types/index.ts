@@ -2,7 +2,7 @@
 // ENUMS & UNIONS
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type Role = "super_admin" | "manager" | "admin" | "writer";
+export type Role = "super_admin" | "manager" | "admin" | "writer" | "user";
 
 
 export type ArticleStatus = "draft" | "scheduled" | "published" | "archived";

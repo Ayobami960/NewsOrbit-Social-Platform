@@ -11,7 +11,7 @@ import { Radio, Search, Bell, X, Menu, ChevronDown, LogOut, User, Settings } fro
 export default function Navbar() {
   const { user, logout, isLoggedIn } = useAuth();
   const { data: categories = [] } = useCategories();
-  const { data: notifData } = useNotifications();
+  const { data: notifData } = useNotifications(isLoggedIn);
   const router = useRouter();
   const pathname = usePathname();
 
