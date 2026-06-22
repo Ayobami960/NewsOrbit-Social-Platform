@@ -28,13 +28,13 @@ export default function Push() {
 
   return (
     <Layout title="Push Notifications">
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <StatCard label="Active Subscribers" value={1842} accent="bg-green-500" sub="Push-enabled devices" subColor="text-green-400" icon={Smartphone} />
         <StatCard label="Sent This Month" value={14}   accent="bg-blue-500" />
         <StatCard label="Expired Removed" value={38}   accent="bg-red-500"  sub="Auto-cleaned" />
       </div>
 
-      <div className="grid grid-cols-[1fr_360px] gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Compose */}
         <Card className="p-5">
           <SectionHead title="Send Push Broadcast" />

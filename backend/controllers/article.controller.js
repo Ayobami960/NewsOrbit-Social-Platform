@@ -230,7 +230,6 @@ const getArticleById = async (req, res, next) => {
   }
 };
 
-
 const getArticleBySlug = async (req, res, next) => {
   try {
     const idOrSlug = req.params.id;

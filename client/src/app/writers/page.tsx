@@ -40,7 +40,7 @@ export default function WritersPage() {
             </div>
             <h1 className="font-display text-4xl font-bold text-ink-900 mb-2">Our Writers</h1>
             <p className="text-ink-600 font-body max-w-md mx-auto">
-              Meet the journalists and storytellers bringing you NewOrbit's most important news.
+              Meet the journalists and storytellers bringing you NewsOrbit's most important news.
             </p>
           </div>
 

@@ -97,7 +97,7 @@ export function CookieConsent() {
                   Cookie preferences
                 </h2>
                 <p className="font-sans text-[11px] text-ink-400 mt-0.5">
-                  NewOrbit · NDPA {new Date().getFullYear()}
+                  NewsOrbit · NDPA {new Date().getFullYear()}
                 </p>
               </div>
             </div>
@@ -133,7 +133,7 @@ export function CookieConsent() {
               <div className="space-y-2.5 bg-ink-50 border border-(--color-border) rounded-xl p-3">
                 {([
                   { key: "essential", label: "Essential",  desc: "Required for the site to work. Always on.", locked: true  },
-                  { key: "analytics", label: "Analytics",  desc: "Help us understand how you use NewOrbit.",  locked: false },
+                  { key: "analytics", label: "Analytics",  desc: "Help us understand how you use NewsOrbit.",  locked: false },
                   { key: "marketing", label: "Marketing",  desc: "Used to show relevant content and offers.", locked: false },
                 ] as const).map(({ key, label, desc, locked }) => (
                   <div key={key} className="flex items-center justify-between gap-3">

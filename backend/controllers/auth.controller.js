@@ -458,7 +458,7 @@ exports.inviteSendCode = async (req, res, next) => {
 
     const otp = await issueInviteOtp(user);
 
-    const subject = "Your NewOrbit verification code";
+    const subject = "Your NewsOrbit verification code";
     const html    = `
       <p style="font-family:sans-serif;">Hi ${user.name},</p>
       <p style="font-family:sans-serif;">

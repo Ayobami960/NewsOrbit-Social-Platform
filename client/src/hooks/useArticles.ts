@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, authFetch, getStoredToken } from "@/lib/apiFetch";
+import { apiFetch, authFetch } from "@/lib/apiFetch";
 import { queryKeys } from "@/lib/queryKeys";
-import type { Article, ArticleFilters, ArticlesResponse } from "@/types";
+import type { ApiResponse, Article, ArticleFilters, ArticlesResponse } from "@/types";
 import { useToast } from "@/components/ui/toast";
 
 interface LikeResponse {
@@ -84,95 +84,85 @@ export function useLikeArticle() {
   const qc = useQueryClient();
   const { error: showError } = useToast();
 
-  return useMutation({
-    mutationFn: async (articleId: string) => {
-      const token = getStoredToken();
-      if (!token) throw new Error("Not authenticated");
-      const res = await authFetch<LikeResponse>(
-        `/articles/${articleId}/like`,
-        { method: "POST" }
-      );
-      return { articleId, likes: res.data.likes, isLiked: res.data.isLiked };
-    },
+  return useMutation<ApiResponse<LikeResponse>, Error, string>({
+    mutationFn: (id: string) =>
+      authFetch<LikeResponse>(`/articles/${id}/like`, { method: "POST" }),
 
-    onMutate: async (articleId: string) => {
-      await qc.cancelQueries({ queryKey: queryKeys.articles.all });
-
-      const snapshots = qc.getQueriesData<unknown>({
-        queryKey: queryKeys.articles.all,
+    onMutate: async (id: string) => {
+      await qc.cancelQueries({
+        predicate: (q) => JSON.stringify(q.queryKey).includes("article"),
       });
 
-      // Patch detail cache
-      qc.setQueriesData<{ article: Article }>(
-        { queryKey: queryKeys.articles.details() },
-        (cached) => {
-          if (!cached?.article || cached.article._id !== articleId) return cached;
-          const wasLiked = Boolean(cached.article.isLiked);
+      const snapshots = qc.getQueriesData<unknown>({
+        predicate: (q) => JSON.stringify(q.queryKey).includes("article"),
+      });
+
+      const patchArticle = (article: Article): Article => {
+        const wasLiked = Boolean(article.isLiked);
+        return {
+          ...article,
+          isLiked: !wasLiked,
+          likes: wasLiked ? Math.max(0, article.likes - 1) : article.likes + 1,
+        };
+      };
+
+      const patchLike = (cached: any): any => {
+        if (!cached || typeof cached !== "object") return cached;
+        if ("_id" in cached && cached._id === id) {
+          return patchArticle(cached);
+        }
+        if ("article" in cached && cached.article?._id === id) {
           return {
             ...cached,
-            article: {
-              ...cached.article,
-              isLiked: !wasLiked,
-              likes: wasLiked
-                ? Math.max(0, cached.article.likes - 1)
-                : cached.article.likes + 1,
-            },
+            article: patchArticle(cached.article),
           };
         }
-      );
-
-      // Patch list caches
-      qc.setQueriesData<ArticlesResponse>(
-        { queryKey: queryKeys.articles.lists() },
-        (cached) => {
-          if (!cached?.articles) return cached;
+        if ("articles" in cached && Array.isArray(cached.articles)) {
           return {
             ...cached,
-            articles: cached.articles.map((a) => {
-              if (a._id !== articleId) return a;
-              const wasLiked = Boolean(a.isLiked);
-              return {
-                ...a,
-                isLiked: !wasLiked,
-                likes: wasLiked ? Math.max(0, a.likes - 1) : a.likes + 1,
-              };
+            articles: cached.articles.map((b: Article) => {
+              if (b._id !== id) return b;
+              return patchArticle(b);
             }),
           };
         }
+        return cached;
+      };
+
+      qc.setQueriesData<unknown>(
+        { predicate: (q) => JSON.stringify(q.queryKey).includes("article") },
+        patchLike
       );
 
       return { snapshots };
     },
 
-    onSuccess: ({ articleId, likes, isLiked }) => {
-      // Reconcile detail cache with server truth
-      qc.setQueriesData<{ article: Article }>(
-        { queryKey: queryKeys.articles.details() },
-        (cached) => {
-          if (!cached?.article || cached.article._id !== articleId) return cached;
-          return { ...cached, article: { ...cached.article, likes, isLiked } };
-        }
-      );
-
-      // Reconcile list caches with server truth
-      qc.setQueriesData<ArticlesResponse>(
-        { queryKey: queryKeys.articles.lists() },
-        (cached) => {
-          if (!cached?.articles) return cached;
-          return {
-            ...cached,
-            articles: cached.articles.map((a) =>
-              a._id === articleId ? { ...a, likes, isLiked } : a
-            ),
-          };
+    onSuccess: (response, id) => {
+      const { likes, isLiked } = response.data;
+      qc.setQueriesData<unknown>(
+        { predicate: (q) => JSON.stringify(q.queryKey).includes("article") },
+        (cached: any) => {
+          if (!cached || typeof cached !== "object") return cached;
+          if ("_id" in cached && cached._id === id)
+            return { ...cached, likes, isLiked };
+          if ("article" in cached && cached.article?._id === id)
+            return { ...cached, article: { ...cached.article, likes, isLiked } };
+          if ("articles" in cached && Array.isArray(cached.articles))
+            return {
+              ...cached,
+              articles: cached.articles.map((b: Article) =>
+                b._id === id ? { ...b, likes, isLiked } : b
+              ),
+            };
+          return cached;
         }
       );
     },
 
-    onError: (_err, _articleId, context) => {
-      context?.snapshots?.forEach(([queryKey, data]: [readonly unknown[], unknown]) => {
-        qc.setQueryData(queryKey, data);
-      });
+    onError: (_err, _id, context) => {
+      (context as any)?.snapshots?.forEach(
+        ([key, data]: [readonly unknown[], unknown]) => qc.setQueryData(key, data)
+      );
       showError("Update failed", "Could not update like. Please try again.");
     },
   });

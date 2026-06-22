@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CategoryPill, BreakingBadge, EmptyState } from "@/components/shared";
-import { useArticle, useLikeArticle, useArticles } from "@/hooks/useArticles";
+import { useArticle, useArticles, useLikeArticle } from "@/hooks/useArticles";
 import {
   useArticleComments,
   usePostComment,
@@ -39,8 +39,6 @@ export default function ArticleDetailPage() {
   const { user, isLoggedIn } = useAuth();
   const { error, success } = useToast();
 
-  const likeInFlight = useRef(false);
-
   // ── Data ──────────────────────────────────────────────────────────────────
   const { data: article, isLoading } = useArticle(slug ?? "");
   const { data: commentData } = useArticleComments(article?._id ?? "");
@@ -60,11 +58,8 @@ export default function ArticleDetailPage() {
 
   const handleLike = () => {
     if (!isLoggedIn) { error("Sign in required", "Sign in to like articles."); return; }
-    if (likeInFlight.current) return;
-    likeInFlight.current = true;
-    likeMut.mutate(article!._id, {
-      onSettled: () => { likeInFlight.current = false; },
-    });
+    if (!article) return;
+    likeMut.mutate(article._id);
   };
 
   const handleShare = () => {
@@ -279,20 +274,14 @@ export default function ArticleDetailPage() {
               <div className="flex items-center gap-3 mt-6 py-4 border-t border-b border-(--color-border)">
                 <button
                   onClick={handleLike}
-                  disabled={likeMut.isPending}
-                  aria-label={article.isLiked ? "Unlike article" : "Like article"}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-xl border font-sans font-semibold text-sm transition-all disabled:opacity-60",
+                    "flex items-center gap-2 px-4 py-2 rounded-xl border font-sans font-semibold text-sm transition-all",
                     article.isLiked
                       ? "bg-ember-50 border-ember-200 text-ember-700"
                       : "border-(--color-border) text-ink-600 hover:border-ink-400"
                   )}
                 >
-                  <Heart
-                    size={15}
-                    fill={article.isLiked ? "currentColor" : "none"}
-                    className={article.isLiked ? "text-ember-600" : "text-ink-400"}
-                  />
+                  <Heart size={15} className={cn(article.isLiked ? "fill-ember-600 text-ember-600" : "")} />
                   {formatNumber(article.likes)}
                 </button>
 
@@ -787,7 +776,7 @@ function RelatedArticles({
   });
 
   const related = (data?.articles ?? [])
-    .filter((a) => a._id !== currentId)
+    .filter((a: any) => a._id !== currentId)
     .slice(0, 4);
 
   if (!related.length) return null;
@@ -800,7 +789,7 @@ function RelatedArticles({
         </p>
       </div>
       <div className="divide-y divide-(--color-border)">
-        {related.map((a) => (
+        {related.map((a: any) => (
           <Link
             key={a._id}
             href={`/articles/${a.slug}`}

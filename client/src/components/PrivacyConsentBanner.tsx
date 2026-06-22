@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ShieldCheck, X, Radio } from "lucide-react";
 
-const STORAGE_KEY = "newOrbit_privacy_accepted";
+const STORAGE_KEY = "NewsOrbit_privacy_accepted";
 
 export default function PrivacyConsentBanner() {
   const [visible, setVisible] = useState(false);
@@ -84,7 +84,7 @@ export default function PrivacyConsentBanner() {
                       <Radio size={9} className="text-white" />
                     </div>
                     <span className="font-sans text-[11px] font-semibold text-ink-400">
-                      NewOrbit
+                      NewsOrbit
                     </span>
                   </div>
                 </div>
@@ -102,7 +102,7 @@ export default function PrivacyConsentBanner() {
 
             {/* Body */}
             <p className="font-body text-[14px] text-ink-600 leading-[1.75] mb-5">
-              Before you explore NewOrbit — Osun State's digital newsroom — please take a moment to review our{" "}
+              Before you explore NewsOrbit — Osun State's digital newsroom — please take a moment to review our{" "}
               <Link
                 href="/privacy"
                 className="text-ember-600 font-semibold hover:underline underline-offset-2"
@@ -138,7 +138,7 @@ export default function PrivacyConsentBanner() {
                 className="flex-1 h-11 bg-ember-600 hover:bg-ember-700 active:scale-[0.98] text-white font-sans font-semibold text-sm rounded-xl transition-all duration-150 flex items-center justify-center gap-2"
               >
                 <ShieldCheck size={15} />
-                I understand — continue to NewOrbit
+                I understand — continue to NewsOrbit
               </button>
               <Link
                 href="/privacy"

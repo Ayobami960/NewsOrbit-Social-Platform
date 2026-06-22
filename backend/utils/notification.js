@@ -95,7 +95,7 @@ const broadcastBreakingNews = async (article) => {
   try {
     await broadcastPush({
       title: `🔴 BREAKING: ${article.title}`,
-      body: article.excerpt || "Read the latest breaking news on NewOrbit",
+      body: article.excerpt || "Read the latest breaking news on NewsOrbit",
       icon: article.featuredImage?.url || "/icon-192.png",
       url: `/articles/${article.slug}`,
     });

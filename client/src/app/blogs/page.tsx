@@ -8,13 +8,13 @@ import { useBlogs } from "@/hooks/useData";
 import { Search, BookOpen } from "lucide-react";
 
 export default function BlogsPage() {
-  const [page,     setPage]     = useState(1);
-  const [search,   setSearch]   = useState("");
+  const [page, setPage]     = useState(1);
+  const [search, setSearch]   = useState("");
   const [inputVal, setInputVal] = useState("");
 
   const { data, isLoading } = useBlogs({ page, limit: 12, search: search || undefined });
 
-  const blogs  = data?.blogs      ?? [];
+  const blogs = data?.blogs ?? [];
   const pagination = data?.pagination;
 
   return (

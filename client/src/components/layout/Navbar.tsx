@@ -89,7 +89,7 @@ export default function Navbar() {
                 <Radio size={16} className="text-white" />
               </div>
               <span className="font-display font-bold text-xl text-ink-900">
-                New<span className="text-ember-600">Orbit</span>
+                News<span className="text-ember-600">Orbit</span>
               </span>
             </Link>
 
