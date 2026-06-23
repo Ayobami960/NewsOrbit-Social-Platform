@@ -5,6 +5,11 @@ import { base, authFetch } from "@/lib/apiFetch";
 
 // Socket.io connects to the server root — strip /api/v1 from the REST base
 const SOCKET_URL = base.replace(/\/api\/v1\/?$/, "");
+const SOCKET_ACK_TIMEOUT_MS = 5000;
+
+function emptyPresence() {
+  return { isUserOnline: false, presenceMap: {} as Record<string, boolean> };
+}
 
 export interface ChatMessage {
   _id: string;
@@ -113,13 +118,23 @@ export function useChatSocket(token: string | null, handlers: Handlers = {}) {
   const joinConversation = useCallback(
     (conversationId: string): Promise<{ isUserOnline: boolean; presenceMap: Record<string, boolean> }> =>
       new Promise((resolve) => {
-        socketRef.current?.emit(
+        if (!socketRef.current?.connected) {
+          resolve(emptyPresence());
+          return;
+        }
+
+        const timeout = window.setTimeout(() => resolve(emptyPresence()), SOCKET_ACK_TIMEOUT_MS);
+
+        socketRef.current.emit(
           "join_conversation",
           { conversationId },
-          (res: any) => resolve({
-            isUserOnline: res?.isUserOnline ?? false,
-            presenceMap:  res?.presenceMap  ?? {},
-          })
+          (res: any) => {
+            window.clearTimeout(timeout);
+            resolve({
+              isUserOnline: res?.isUserOnline ?? false,
+              presenceMap:  res?.presenceMap  ?? {},
+            });
+          }
         );
       }),
     []
@@ -140,8 +155,17 @@ export function useChatSocket(token: string | null, handlers: Handlers = {}) {
   const sendMessage = useCallback(
     (conversationId: string, body: string): Promise<ChatMessage | null> =>
       new Promise((resolve) => {
-        socketRef.current?.emit("send_message", { conversationId, body }, (res: any) =>
-          resolve(res?.success ? res.message : null)
+        if (!socketRef.current?.connected) {
+          resolve(null);
+          return;
+        }
+
+        const timeout = window.setTimeout(() => resolve(null), SOCKET_ACK_TIMEOUT_MS);
+
+        socketRef.current.emit("send_message", { conversationId, body }, (res: any) => {
+          window.clearTimeout(timeout);
+          resolve(res?.success ? res.message : null);
+        }
         );
       }),
     []

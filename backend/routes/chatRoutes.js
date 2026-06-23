@@ -4,6 +4,7 @@ const { protect } = require("../middlewares/auth");
 const {
   getMyConversation,
   getMyMessages,
+  sendMyMessage,
   markMyRead,
   listInbox,
   getInboxMessages,
@@ -18,6 +19,7 @@ router.use(protect);
 // ── User routes ──────────────────────────────────────────────────────────────
 router.get("/my", getMyConversation); 
 router.get("/my/messages", getMyMessages);    
+router.post("/my/messages", sendMyMessage);
 router.patch("/my/read", markMyRead);       
 
 // ── Support (admin/super_admin) routes ───────────────────────────────────────

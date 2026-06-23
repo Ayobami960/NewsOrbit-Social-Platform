@@ -88,6 +88,63 @@ exports.getMyMessages = async (req, res) => {
 };
 
 /**
+ * POST /api/v1/chat/my/messages
+ * User: send a message over REST when Socket.IO is unavailable.
+ */
+exports.sendMyMessage = async (req, res) => {
+  if (isSupport(req.user.role)) {
+    return res.status(403).json({ success: false, message: "Use admin endpoint." });
+  }
+
+  const text = req.body?.body?.trim();
+  if (!text) return res.status(400).json({ success: false, message: "Message is required." });
+  if (text.length > 2000) return res.status(400).json({ success: false, message: "Message is too long." });
+
+  let convo = await Conversation.findOne({ user: req.user._id });
+  if (!convo) {
+    convo = await Conversation.create({
+      user: req.user._id,
+      participants: [req.user._id],
+      status: "open",
+      userUnread: 0,
+      supportUnread: 0,
+    });
+  }
+
+  if (convo.status === "closed") {
+    return res.status(400).json({ success: false, message: "Conversation is closed." });
+  }
+
+  const message = await Message.create({
+    conversation: convo._id,
+    sender: req.user._id,
+    senderType: "user",
+    body: text,
+  });
+
+  await message.populate("sender", "name avatar role");
+
+  convo.lastMessage = {
+    body: text,
+    sender: req.user._id,
+    senderName: req.user.name,
+    createdAt: message.createdAt,
+  };
+  if (!convo.status) convo.status = "open";
+  convo.supportUnread += 1;
+  await convo.save();
+
+  res.status(201).json({
+    success: true,
+    message: "Message sent.",
+    data: {
+      message,
+      conversationId: convo._id,
+    },
+  });
+};
+
+/**
  * PATCH /api/v1/chat/my/read
  * User: mark all support messages as read.
  */

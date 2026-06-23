@@ -131,16 +131,19 @@ export default function ChatPopupWrapper() {
     }
 
     setLoading(true);
-    const histRes = await authFetch<{ messages: ChatMessage[]; pagination: { pages: number } }>(
-      `/chat/my/messages?page=1&limit=30`
-    );
-    setMessages(histRes.data?.messages ?? []);
-    setHasMore((histRes.data?.pagination.pages ?? 1) > 1);
-    setPage(1);
-    setLoading(false);
+    try {
+      const histRes = await authFetch<{ messages: ChatMessage[]; pagination: { pages: number } }>(
+        `/chat/my/messages?page=1&limit=30`
+      );
+      setMessages(histRes.data?.messages ?? []);
+      setHasMore((histRes.data?.pagination.pages ?? 1) > 1);
+      setPage(1);
 
-    socket.markRead(safeCid);
-    authFetch("/chat/my/read", { method: "PATCH" });
+      socket.markRead(safeCid);
+      authFetch("/chat/my/read", { method: "PATCH" }).catch(() => {});
+    } finally {
+      setLoading(false);
+    }
   }, [currentUserId, conId, socket]);
 
   // ── Load more ─────────────────────────────────────────────────────────────
@@ -159,7 +162,16 @@ export default function ChatPopupWrapper() {
   // ── Send ──────────────────────────────────────────────────────────────────
   const handleSend = useCallback(async (body: string) => {
     if (!conId) return;
-    const msg = await socket.sendMessage(conId, body);
+    let msg = await socket.sendMessage(conId, body);
+
+    if (!msg) {
+      const res = await authFetch<{ message: ChatMessage }>("/chat/my/messages", {
+        method: "POST",
+        body: { body },
+      });
+      msg = res.data?.message ?? null;
+    }
+
     if (msg) {
       setMessages((prev) =>
         prev.some((m) => m._id === msg._id) ? prev : [...prev, msg]
