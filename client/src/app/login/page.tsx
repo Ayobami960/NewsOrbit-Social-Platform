@@ -126,7 +126,7 @@ export default function LoginPage() {
 
         <p className="text-center text-sm font-sans text-ink-500 mt-5">
           Don't have an account?{" "}
-          <Link href="/reorbiter" className="text-ember-600 hover:text-ember-700 font-semibold transition-colors">
+          <Link href="/register" className="text-ember-600 hover:text-ember-700 font-semibold transition-colors">
             Join free
           </Link>
         </p>
