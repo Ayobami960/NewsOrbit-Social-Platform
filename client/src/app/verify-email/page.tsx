@@ -170,11 +170,15 @@ function VerifyAccountForm() {
           </div>
 
           <h1 className="font-display text-xl font-bold text-ink-900 mb-1">Check your email</h1>
-          <p className="text-sm text-ink-500 font-sans">
-            We sent a 6-digit code to{" "}
-            {email ? <strong className="text-ink-700">{email}</strong> : "your email address"}
-            . Enter it below to activate your account.
-          </p>
+<p className="text-sm text-ink-500 font-sans">
+  We sent a 6-digit code to{" "}
+  {email ? <strong className="text-ink-700">{email}</strong> : "your email address"}
+  . Enter it below to activate your account.
+</p>
+<p className="text-sm text-ink-400 font-sans mt-1.5">
+  Don&apos;t see it? Check your{" "}
+  <strong className="text-ink-600">inbox and spam</strong> folder.
+</p>
         </div>
 
         {/* Card */}
