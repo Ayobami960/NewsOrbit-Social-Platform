@@ -16,6 +16,8 @@ export default function RegisterPage() {
 
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [showPw, setShowPw] = useState(false);
+  const [showPw1, setShowPw1] = useState(false);
+
   const [loading, setLoading] = useState(false);
 
   const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -96,7 +98,7 @@ const handleSubmit = async (e: any) => {
                   required
                   value={form.password}
                   onChange={update("password")}
-                  placeholder="Min 8 chars, 1 uppercase, 1 number, 1 special"
+                   placeholder="••••••••••••"
                   className="w-full px-3 py-2.5 pr-10 rounded-xl border border-(--color-border) bg-(--color-bg) text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all"
                 />
                 <button
@@ -109,19 +111,29 @@ const handleSubmit = async (e: any) => {
               </div>
             </div>
 
-            <div>
+              <div>
               <label className="block text-[11px] font-sans font-bold text-ink-500 uppercase tracking-widest mb-1.5">
-                Confirm Password
+                 Confirm Password
               </label>
-              <input
-                type="password"
+              <div className="relative">
+                <input
                 required
                 value={form.confirmPassword}
                 onChange={update("confirmPassword")}
-                placeholder="••••••••"
+                placeholder="••••••••••••"
                 className="w-full px-3 py-2.5 rounded-xl border border-(--color-border) bg-(--color-bg) text-ink-900 font-sans text-sm placeholder:text-ink-400 outline-none focus:border-ember-600 focus:ring-2 focus:ring-ember-600/20 transition-all"
-              />
+                type={showPw1 ? "text" : "password"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw1(s => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700 transition-colors"
+                >
+                  {showPw1 ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
             </div>
+
 
             <button
               type="submit"
